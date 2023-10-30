@@ -1,0 +1,45 @@
+cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
+
+set(SN_CORE_SOURCES
+    format.cpp)
+
+set(SN_CORE_HEADERS
+    exception.h
+    format.h
+    type_name.h
+    type_name_builtins.h)
+
+add_library(sn_core STATIC ${SN_CORE_SOURCES} ${SN_CORE_HEADERS})
+add_library(sn::core ALIAS sn_core)
+target_include_directories(sn_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+
+if(SN_FORMAT_LIB STREQUAL "std")
+    target_compile_definitions(sn_core PUBLIC SN_USE_STD_FORMAT=1)
+elseif(SN_FORMAT_LIB STREQUAL "fmt_bundled" OR SN_FORMAT_LIB STREQUAL "fmt_external")
+    target_compile_definitions(sn_core PUBLIC SN_USE_FMT_FORMAT=1)
+
+    if(SN_FORMAT_LIB STREQUAL "fmt_bundled")
+        FetchContent_Declare(fmt
+            GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
+            GIT_TAG "${SN_BUNDLED_FMT_TAG}"
+        )
+        FetchContent_MakeAvailable(fmt)
+    endif()
+
+    target_link_libraries(sn_core PUBLIC fmt::fmt)
+else()
+    message(FATAL_ERROR "Unsupported value '${SN_FORMAT_LIB}' for SN_FORMAT_LIB")
+endif()
+
+if(SN_TYPE_NAME_IMPL STREQUAL "typeid")
+    target_compile_definitions(sn_core PUBLIC SN_USE_TYPEID_TYPE_NAME=1)
+elseif(NOT SN_TYPE_NAME_IMPL STREQUAL "auto")
+    message(FATAL_ERROR "Unsupported value '${SN_TYPE_NAME_IMPL}' for SN_TYPE_NAME_IMPL")
+endif()
+
+if(SN_BUILD_TESTS)
+    set(TEST_SN_CORE_SOURCES type_name_ut.cpp)
+
+    add_executable(test_sn_core ${TEST_SN_CORE_SOURCES})
+    target_link_libraries(test_sn_core PUBLIC sn_core GTest::gtest GTest::gtest_main)
+endif()
