@@ -13,6 +13,8 @@
 #   include <fast_float/fast_float.h>
 #endif
 
+#include <sn/core/type_name.h>
+
 #include "string_exceptions.h"
 
 namespace sn::builtins {

@@ -20,11 +20,12 @@ set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fas
 include(FetchContent)
 
 if(SN_BUILD_TESTS)
-    FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG v1.14.0)
+    FetchContent_Declare(googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG v1.14.0)
     FetchContent_MakeAvailable(googletest)
+
+    add_custom_target(run_all_tests)
 endif()
 
 add_subdirectory(src)

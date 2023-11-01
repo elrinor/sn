@@ -6,7 +6,7 @@ namespace sn::builtins {
 
 // Support for std::string / std::string_view / const char *.
 
-inline bool try_to_string(std::string_view src, std::string *dst) noexcept {
+[[nodiscard]] inline bool try_to_string(std::string_view src, std::string *dst) noexcept {
     *dst = src;
     return true;
 }
@@ -15,7 +15,7 @@ inline void to_string(std::string_view src, std::string *dst) {
     *dst = src;
 }
 
-inline bool try_from_string(std::string_view src, std::string *dst) noexcept {
+[[nodiscard]] inline bool try_from_string(std::string_view src, std::string *dst) noexcept {
     *dst = src;
     return true;
 }

@@ -21,9 +21,8 @@ elseif(SN_FLOAT_LIB STREQUAL "fast_float_bundled" OR SN_FORMAT_LIB STREQUAL "fas
 
     if(SN_FLOAT_LIB STREQUAL "fast_float_bundled")
         FetchContent_Declare(fast_float
-            GIT_REPOSITORY "https://github.com/fastfloat/fast_float.git"
-            GIT_TAG "${SN_BUNDLED_FAST_FLOAT_TAG}"
-        )
+                GIT_REPOSITORY "https://github.com/fastfloat/fast_float.git"
+                GIT_TAG "${SN_BUNDLED_FAST_FLOAT_TAG}")
         FetchContent_MakeAvailable(fast_float)
     endif()
 
@@ -37,4 +36,10 @@ if(SN_BUILD_TESTS)
 
     add_executable(test_sn_string ${TEST_SN_STRING_SOURCES})
     target_link_libraries(test_sn_string PUBLIC sn_string GTest::gtest GTest::gtest_main)
+
+    add_custom_target(run_test_sn_string
+            test_sn_string
+            DEPENDS test_sn_string
+            USES_TERMINAL)
+    add_dependencies(run_all_tests run_test_sn_string)
 endif()

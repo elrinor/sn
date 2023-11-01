@@ -6,12 +6,17 @@ set(SN_CORE_SOURCES
 set(SN_CORE_HEADERS
     exception.h
     format.h
+    preprocessor.h
     type_name.h
     type_name_builtins.h)
 
 add_library(sn_core STATIC ${SN_CORE_SOURCES} ${SN_CORE_HEADERS})
 add_library(sn::core ALIAS sn_core)
 target_include_directories(sn_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(sn_core PUBLIC "/Zc:preprocessor")
+endif()
 
 if(SN_FORMAT_LIB STREQUAL "std")
     target_compile_definitions(sn_core PUBLIC SN_USE_STD_FORMAT=1)
@@ -20,9 +25,8 @@ elseif(SN_FORMAT_LIB STREQUAL "fmt_bundled" OR SN_FORMAT_LIB STREQUAL "fmt_exter
 
     if(SN_FORMAT_LIB STREQUAL "fmt_bundled")
         FetchContent_Declare(fmt
-            GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
-            GIT_TAG "${SN_BUNDLED_FMT_TAG}"
-        )
+                GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
+                GIT_TAG "${SN_BUNDLED_FMT_TAG}")
         FetchContent_MakeAvailable(fmt)
     endif()
 
@@ -42,4 +46,10 @@ if(SN_BUILD_TESTS)
 
     add_executable(test_sn_core ${TEST_SN_CORE_SOURCES})
     target_link_libraries(test_sn_core PUBLIC sn_core GTest::gtest GTest::gtest_main)
+
+    add_custom_target(run_test_sn_core
+            test_sn_core
+            DEPENDS test_sn_core
+            USES_TERMINAL)
+    add_dependencies(run_all_tests run_test_sn_core)
 endif()

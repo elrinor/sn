@@ -39,10 +39,24 @@ class Something {};
 template<class T>
 class Nothing {};
 
+struct Struct {};
+
+class some_class {};
+struct some_struct {};
+
+template<template<class...> class>
+class templated {};
+
 TEST(core, type_name_template) {
+    EXPECT_EQ(sn::type_name<Struct>(), "Struct");
     EXPECT_EQ(sn::type_name<Something>(), "Something");
     EXPECT_EQ(sn::type_name<Nothing<Something>>(), "Nothing<Something>");
     EXPECT_EQ(sn::type_name<Nothing<Nothing<Something>>>(), "Nothing<Nothing<Something>>");
+    EXPECT_EQ(sn::type_name<some_class *>(), "some_class*");
+    EXPECT_EQ(sn::type_name<some_struct &>(), "some_struct&");
+    EXPECT_EQ(sn::type_name<some_class **>(), "some_class**");
+    EXPECT_EQ(sn::type_name<some_struct &&>(), "some_struct&&");
+    EXPECT_EQ(sn::type_name<templated<std::vector>>(), "templated<std::vector>");
 }
 
 TEST(core, type_name_namespace) {
@@ -52,4 +66,6 @@ TEST(core, type_name_namespace) {
 TEST(core, type_name_string) {
     EXPECT_EQ(sn::type_name<std::string>(), "std::string");
     EXPECT_EQ(sn::type_name<std::string_view>(), "std::string_view");
+    EXPECT_EQ(sn::type_name<std::wstring>(), "std::wstring");
+    EXPECT_EQ(sn::type_name<std::wstring_view>(), "std::wstring_view");
 }

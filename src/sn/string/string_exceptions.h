@@ -2,8 +2,6 @@
 
 #include <system_error>
 
-#include <sn/core/type_name.h>
-
 namespace sn {
 
 [[noreturn]] void throw_to_string_error(std::string_view type_name);
