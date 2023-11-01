@@ -5,7 +5,7 @@
 namespace sn::detail {
 
 template<class T>
-bool do_try_to_string(const T &src, std::string *dst) noexcept {
+[[nodiscard]] bool do_try_to_string(const T &src, std::string *dst) noexcept {
     using sn::builtins::try_to_string;
     return try_to_string(src, dst);
 }
@@ -17,7 +17,7 @@ void do_to_string(const T &src, std::string *dst) {
 }
 
 template<class T>
-bool do_try_from_string(std::string_view src, T *dst) noexcept {
+[[nodiscard]] bool do_try_from_string(std::string_view src, T *dst) noexcept {
     using sn::builtins::try_from_string;
     return try_from_string(src, dst);
 }
@@ -34,7 +34,7 @@ namespace sn::niebloids {
 
 struct to_string {
     template<class T>
-    std::string operator()(const T &src) const {
+    [[nodiscard]] std::string operator()(const T &src) const {
         std::string result;
         sn::detail::do_to_string(src, &result);
         return result;
@@ -43,7 +43,7 @@ struct to_string {
 
 template<class T>
 struct from_string {
-    T operator()(std::string_view src) const {
+    [[nodiscard]] T operator()(std::string_view src) const {
         T result;
         sn::detail::do_from_string(src, &result);
         return result;
@@ -59,7 +59,7 @@ template<class T>
 inline constexpr sn::niebloids::from_string<T> from_string_v;
 
 template<class T>
-bool try_to_string(const T &src, std::string *dst) noexcept {
+[[nodiscard]] bool try_to_string(const T &src, std::string *dst) noexcept {
     return sn::detail::do_try_to_string(src, dst);
 }
 
@@ -69,14 +69,14 @@ void to_string(const T &src, std::string *dst) {
 }
 
 template<class T>
-std::string to_string(const T &src) {
+[[nodiscard]] std::string to_string(const T &src) {
     std::string result;
     sn::detail::do_to_string(src, &result);
     return result;
 }
 
 template<class T>
-bool try_from_string(std::string_view src, T *dst) noexcept {
+[[nodiscard]] bool try_from_string(std::string_view src, T *dst) noexcept {
     return sn::detail::do_try_from_string(src, dst);
 }
 
@@ -86,7 +86,7 @@ void from_string(std::string_view src, T *dst) {
 }
 
 template<class T>
-T from_string(std::string_view src) {
+[[nodiscard]] T from_string(std::string_view src) {
     T result;
     sn::detail::do_from_string(src, &result);
     return result;

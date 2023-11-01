@@ -36,7 +36,7 @@ struct static_string {
 };
 
 template <class T>
-constexpr auto type_name_static_string() noexcept {
+consteval auto type_name_static_string() noexcept {
 #   if SN_USE_CLANG_TYPE_NAME
     constexpr std::string_view prefix   = "[T = ";
     constexpr std::string_view suffix   = "]";
@@ -108,12 +108,12 @@ std::string_view type_name_impl() noexcept {
 namespace sn::builtins {
 
 template<class T>
-std::string_view type_name(std::type_identity<T>) noexcept {
+[[nodiscard]] std::string_view type_name(std::type_identity<T>) noexcept {
     return sn::detail::type_name_impl<T>();
 }
 
 #define SN_DEFINE_BUILTIN_TYPE_NAME(T, NAME)                                                                            \
-std::string_view type_name(std::type_identity<T>) noexcept {                                                            \
+[[nodiscard]] std::string_view type_name(std::type_identity<T>) noexcept {                                              \
     return NAME;                                                                                                        \
 }
 
