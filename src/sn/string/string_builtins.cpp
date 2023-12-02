@@ -104,7 +104,7 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
 
     const char *end = src.data() + src.size();
     errno = 0; // strto* do not change the setting of the errno on success.
-    T result = strto<T>(src.data(), &end, dst);
+    T result = strto<T>(src.data(), &end);
     if (result != 0 || errno == 0) {
         assert(end == src.data() + src.size());
         *dst = result;
@@ -122,7 +122,7 @@ inline bool from_string(std::string_view src, T *dst) {
     // Implementation pretty much a copy of try_from_string.
     const char *end = src.data() + src.size();
     errno = 0;
-    T result = strto<T>(src.data(), &end, dst);
+    T result = strto<T>(src.data(), &end);
     if (result != 0) {
         if (errno == ERANGE)
             throw_number_from_string_error(src, sn::type_name<T>(), std::errc::result_out_of_range);
