@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <string_view>
 
 #if SN_USE_TYPEID_TYPE_NAME
@@ -101,7 +102,7 @@ std::string_view type_name_impl() noexcept {
 }
 #endif
 
-} // sn::detail
+} // namespace sn::detail
 
 
 namespace sn::builtins {

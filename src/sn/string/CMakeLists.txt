@@ -13,6 +13,7 @@ set(SN_STRING_HEADERS
 add_library(sn_string STATIC ${SN_STRING_SOURCES} ${SN_STRING_HEADERS})
 add_library(sn::string ALIAS sn_string)
 target_link_libraries(sn_string PUBLIC sn_core)
+lint_target(sn_string)
 
 if(SN_FLOAT_LIB STREQUAL "strtof")
     target_compile_definitions(sn_string PUBLIC SN_USE_STRTOF=1)
@@ -36,6 +37,7 @@ if(SN_BUILD_TESTS)
 
     add_executable(test_sn_string ${TEST_SN_STRING_SOURCES})
     target_link_libraries(test_sn_string PUBLIC sn_string GTest::gtest GTest::gtest_main)
+    lint_target(test_sn_string)
 
     add_custom_target(run_test_sn_string
             test_sn_string

@@ -112,6 +112,10 @@ jobs:
           cmake -B build-release -S . -DCMAKE_BUILD_TYPE=Release
           cmake --build build-release -j4
 
+      - name: 'Lint'
+        run: |
+          cmake --build build-debug --target lint_all
+
       - name: 'Test Debug'
         run: |
           cmake --build build-debug --target run_all_tests

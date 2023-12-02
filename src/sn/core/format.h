@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utility>
+#include <string>
 
 #if SN_USE_FMT_FORMAT
 #   include <fmt/format.h>
@@ -22,4 +23,4 @@ std::string format(format_string<Args...> fmt, Args &&... args) {
     return SN_FORMAT_NAMESPACE::format(fmt, std::forward<Args>(args)...);
 }
 
-} // namespace sn
+} // namespace sn::detail

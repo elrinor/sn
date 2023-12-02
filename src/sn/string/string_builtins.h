@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include "string_fwd.h"
 
 namespace sn::builtins {

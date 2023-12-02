@@ -13,6 +13,7 @@ set(SN_CORE_HEADERS
 add_library(sn_core STATIC ${SN_CORE_SOURCES} ${SN_CORE_HEADERS})
 add_library(sn::core ALIAS sn_core)
 target_include_directories(sn_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+lint_target(sn_core)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(sn_core PUBLIC "/Zc:preprocessor")
@@ -48,6 +49,7 @@ if(SN_BUILD_TESTS)
 
     add_executable(test_sn_core ${TEST_SN_CORE_SOURCES})
     target_link_libraries(test_sn_core PUBLIC sn_core GTest::gtest GTest::gtest_main)
+    lint_target(test_sn_core)
 
     add_custom_target(run_test_sn_core
             test_sn_core

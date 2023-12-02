@@ -1,6 +1,6 @@
 #include "string_exceptions.h"
 
-#include <sn/core/exception.h>
+#include "sn/core/exception.h"
 
 namespace sn {
 

@@ -7,13 +7,12 @@
 #include <cassert>
 #include <charconv>
 
-#include <sn/core/format.h>
-
 #if SN_USE_FAST_FLOAT
 #   include <fast_float/fast_float.h>
 #endif
 
-#include <sn/core/type_name.h>
+#include "sn/core/format.h"
+#include "sn/core/type_name.h"
 
 #include "string_exceptions.h"
 
