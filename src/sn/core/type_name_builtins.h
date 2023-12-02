@@ -2,7 +2,9 @@
 
 #include <string_view>
 
-#if !SN_USE_TYPEID_TYPE_NAME
+#if SN_USE_TYPEID_TYPE_NAME
+#   include <typeinfo>
+#elif SN_USE_FUNCSIG_TYPE_NAME
 #   if defined(_MSC_VER)
 #       define SN_USE_MSVC_TYPE_NAME 1
 #   elif defined(__clang__)
@@ -12,13 +14,10 @@
 #   else
 #       define SN_USE_TYPEID_TYPE_NAME 1
 #   endif
-#endif
-
-#if SN_USE_TYPEID_TYPE_NAME
-#   include <typeinfo>
-#else
 #   include <array>
 #   include <type_traits>
+#else
+#   error "Type name implementation is not configured"
 #endif
 
 namespace sn::detail {
@@ -28,11 +27,11 @@ template<class T>
 std::string_view type_name_impl() noexcept {
     return typeid(T).name();
 }
-#else // SN_USE_TYPEID_TYPE_NAME
-template<size_t N>
+#elif SN_USE_FUNCSIG_TYPE_NAME
+template<std::size_t N>
 struct static_string {
     std::array<char, N> data = {{}};
-    size_t size = 0;
+    std::size_t size = 0;
 };
 
 template <class T>
@@ -70,7 +69,7 @@ consteval auto type_name_static_string() noexcept {
     };
 #endif
 
-    for (size_t i = 0; i < type_name.size(); i++) {
+    for (std::size_t i = 0; i < type_name.size(); i++) {
         if (type_name[i] == ' ')
             continue;
 
@@ -100,7 +99,7 @@ template <class T>
 std::string_view type_name_impl() noexcept {
     return {type_name_holder<T>::value.data.data(), type_name_holder<T>::value.size};
 }
-#endif // SN_USE_TYPEID_TYPE_NAME
+#endif
 
 } // sn::detail
 

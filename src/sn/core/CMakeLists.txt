@@ -37,7 +37,9 @@ endif()
 
 if(SN_TYPE_NAME_IMPL STREQUAL "typeid")
     target_compile_definitions(sn_core PUBLIC SN_USE_TYPEID_TYPE_NAME=1)
-elseif(NOT SN_TYPE_NAME_IMPL STREQUAL "auto")
+elseif(SN_TYPE_NAME_IMPL STREQUAL "funcsig")
+    target_compile_definitions(sn_core PUBLIC SN_USE_FUNCSIG_TYPE_NAME=1)
+else()
     message(FATAL_ERROR "Unsupported value '${SN_TYPE_NAME_IMPL}' for SN_TYPE_NAME_IMPL")
 endif()
 
