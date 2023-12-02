@@ -38,7 +38,8 @@ function build_test_one() {
         "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
         "-DSN_FORMAT_LIB=$FORMAT_LIB" \
         "-DSN_FLOAT_LIB=$FLOAT_LIB" \
-        "-DSN_TYPE_NAME_IMPL=$TYPE_NAME_IMPL"
+        "-DSN_TYPE_NAME_IMPL=$TYPE_NAME_IMPL" \
+        "-DSN_CHECK_STYLE=OFF"
     cmake --build "$BUILD_DIR" $THREADS_ARG
     cmake --build "$BUILD_DIR" --target run_all_tests
 }
