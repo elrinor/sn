@@ -115,7 +115,7 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
 }
 
 template<class T>
-inline bool from_string(std::string_view src, T *dst) {
+inline void from_string(std::string_view src, T *dst) {
     if (src.empty() || std::isspace(src[0]))
         throw_number_from_string_error(src, sn::type_name<T>(), std::errc::invalid_argument);
 
