@@ -102,24 +102,13 @@ jobs:
         run: |
           echo "ANDROID_NDK=${{steps.setup-ndk.outputs.ndk-path}}" >> $GITHUB_ENV          
 
-      - name: 'Build Debug'
+      # Re-linting on other platforms doesn't make sense, we don't have platform-specific source files.
+      - name: '[linux-x86_64] Lint'
+        if: matrix.platform == 'linux' && matrix.architecture == 'x86_64'
         run: |
-          cmake -B build-debug -S . -DCMAKE_BUILD_TYPE=Debug
-          cmake --build build-debug -j4
+          cmake -B build-lint -S . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build-lint --target lint_all
 
-      - name: 'Build Release'
+      - name: 'Build and test'
         run: |
-          cmake -B build-release -S . -DCMAKE_BUILD_TYPE=Release
-          cmake --build build-release -j4
-
-      - name: 'Lint'
-        run: |
-          cmake --build build-debug --target lint_all
-
-      - name: 'Test Debug'
-        run: |
-          cmake --build build-debug --target run_all_tests
-
-      - name: 'Test Release'
-        run: |
-          cmake --build build-release --target run_all_tests
+          scripts/build_test_all.sh -j4 "${{matrix.platform}}" "."

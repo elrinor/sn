@@ -6,13 +6,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
+#
 # External settings
+#
 set(SN_BUILD_TESTS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tests")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
 set(SN_FORMAT_LIB "fmt_bundled" CACHE STRING "Format library to use, 'std', 'fmt_bundled', or 'fmt_external'")
 set_property(CACHE SN_FORMAT_LIB PROPERTY STRINGS std fmt_bundled fmt_external)
-set(SN_FLOAT_LIB "fast_float_bundled" CACHE STRING "Float string functions to use, 'strtof', 'fast_float_bundled', or 'fast_float_external'")
-set_property(CACHE SN_FLOAT_LIB PROPERTY STRINGS strtof fast_float_bundled fast_float_external)
+set(SN_FLOAT_LIB "fast_float_bundled" CACHE STRING "Float string functions to use, 'strtof', 'from_chars', 'fast_float_bundled', or 'fast_float_external'")
+set_property(CACHE SN_FLOAT_LIB PROPERTY STRINGS strtof from_chars fast_float_bundled fast_float_external)
 set(SN_TYPE_NAME_IMPL "funcsig" CACHE STRING "Implementation of sn::type_name to use, 'typeid' or 'funcsig'")
 set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
 set(SN_BUNDLED_FMT_TAG "10.1.1" CACHE STRING "Git tag for the bundled fmt library")
@@ -22,6 +24,10 @@ set(SN_BUNDLED_CPPLINT_TAG "7b88b68187e3516540fab3caa900988d2179ed24" CACHE STRI
 
 include(FetchContent)
 
+
+#
+# Set up tests.
+#
 if(SN_BUILD_TESTS)
     FetchContent_Declare(googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
@@ -31,6 +37,10 @@ if(SN_BUILD_TESTS)
     add_custom_target(run_all_tests)
 endif()
 
+
+#
+# Set up linting.
+#
 if(SN_CHECK_STYLE)
     find_package(Python COMPONENTS Interpreter)
 
@@ -62,5 +72,32 @@ function(lint_target TARGET)
         add_dependencies(lint_all "lint_${TARGET}")
     endif()
 endfunction()
+
+
+#
+# Set up warnings-as-errors for all compilers. Only when building standalone.
+#
+if(PROJECT_IS_TOP_LEVEL)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        add_compile_options(-Werror=return-type) # Control reaches the end of non-void function. This is an error on MSVC.
+        add_compile_options(-Werror=unused-result) # Ignoring return value of function declared with 'nodiscard' attribute.
+        add_compile_options(-Werror=unused-value) # Expression result unused.
+        add_compile_options(-Werror=suggest-override) # 'func' overrides a member function but is not marked 'override'.
+    endif()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        add_compile_options(-Werror=return-local-addr) # Returning reference to temporary.
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        add_compile_options(-Werror=return-stack-address) # Returning reference to temporary.
+        add_compile_options(-Werror=unused-comparison) # Comparison result unused.
+        add_compile_options(-Werror=inconsistent-missing-override) # 'override' only used on some of the overridden functions.
+        add_compile_options(-Werror=invalid-noreturn) # function declared 'noreturn' should not return.
+        add_compile_options(-Werror=uninitialized) # variable 'x' is used uninitialized.
+        add_compile_options(-Werror=delete-abstract-non-virtual-dtor) # delete called on 'x' that is abstract but has non-virtual destructor.
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/we4834) # Discarding return value of function with 'nodiscard' attribute.
+        add_compile_options(/we4172) # Returning address of local variable or temporary.
+        add_compile_options(/we26433) # Function should be marked with 'override'.
+    endif()
+endif()
 
 add_subdirectory(src)

@@ -104,7 +104,7 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
 
     const char *end = src.data() + src.size();
     errno = 0; // strto* do not change the setting of the errno on success.
-    T result = strto<T>(src.data(), &end, dst);
+    T result = strto<T>(src.data(), &end);
     if (result != 0 || errno == 0) {
         assert(end == src.data() + src.size());
         *dst = result;
@@ -115,21 +115,22 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
 }
 
 template<class T>
-inline bool from_string(std::string_view src, T *dst) {
+inline void from_string(std::string_view src, T *dst) {
     if (src.empty() || std::isspace(src[0]))
         throw_number_from_string_error(src, sn::type_name<T>(), std::errc::invalid_argument);
 
     // Implementation pretty much a copy of try_from_string.
     const char *end = src.data() + src.size();
     errno = 0;
-    T result = strto<T>(src.data(), &end, dst);
-    if (result != 0) {
+    T result = strto<T>(src.data(), &end);
+    if (result == 0) {
         if (errno == ERANGE)
             throw_number_from_string_error(src, sn::type_name<T>(), std::errc::result_out_of_range);
         if (errno != 0)
             throw_number_from_string_error(src, sn::type_name<T>(), std::errc::invalid_argument);
     }
-    assert(end == src.data() + src.size());
+    if (end != src.data() + src.size()) // Tail non-number symbols => not a number.
+        throw_number_from_string_error(src, sn::type_name<T>(), std::errc::invalid_argument);
     *dst = result;
 }
 } // namespace detail_strtofd
@@ -166,6 +167,8 @@ inline void from_string(std::string_view src, T *dst) {
 
 #if SN_USE_STRTOF
 #   define SN_FLOAT_FROM_STRING_NAMESPACE detail_strtofd
+#elif SN_USE_FROM_CHARS
+#   define SN_FLOAT_FROM_STRING_NAMESPACE detail_from_chars
 #elif SN_USE_FAST_FLOAT
 #   define SN_FLOAT_FROM_STRING_NAMESPACE detail_fast_float
 #else
