@@ -167,6 +167,8 @@ inline void from_string(std::string_view src, T *dst) {
 
 #if SN_USE_STRTOF
 #   define SN_FLOAT_FROM_STRING_NAMESPACE detail_strtofd
+#elif SN_USE_FROM_CHARS
+#   define SN_FLOAT_FROM_STRING_NAMESPACE detail_from_chars
 #elif SN_USE_FAST_FLOAT
 #   define SN_FLOAT_FROM_STRING_NAMESPACE detail_fast_float
 #else

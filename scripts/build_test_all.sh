@@ -48,12 +48,17 @@ for BUILD_TYPE in "Debug" "Release"
 do
     build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-1" "fmt_bundled" "fast_float_bundled" "funcsig"
 
-    # Only msvc has <format>, unfortunately.
+    # Only MSVC has <format>, unfortunately.
     if [[ "$BUILD_PLATFORM" == "windows" ]]; then
         build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-2" "std" "fast_float_bundled" "funcsig"
     fi
 
     build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "fmt_bundled" "strtof" "funcsig"
+
+    # AppleClang doesn't have floating-point std::from_chars
+    if [[ "$BUILD_PLATFORM" != "darwin" ]]; then
+        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "fmt_bundled" "from_chars" "funcsig"
+    fi
 
     build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-4" "fmt_bundled" "fast_float_bundled" "typeid"
 done
