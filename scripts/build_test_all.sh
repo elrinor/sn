@@ -40,6 +40,7 @@ function build_test_one() {
         "-DSN_FLOAT_LIB=$FLOAT_LIB" \
         "-DSN_TYPE_NAME_IMPL=$TYPE_NAME_IMPL"
     cmake --build "$BUILD_DIR" $THREADS_ARG
+    cmake --build "$BUILD_DIR" --target run_all_tests
 }
 
 for BUILD_TYPE in "Debug" "Release"

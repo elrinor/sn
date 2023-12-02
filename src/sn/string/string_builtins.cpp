@@ -123,13 +123,14 @@ inline void from_string(std::string_view src, T *dst) {
     const char *end = src.data() + src.size();
     errno = 0;
     T result = strto<T>(src.data(), &end);
-    if (result != 0) {
+    if (result == 0) {
         if (errno == ERANGE)
             throw_number_from_string_error(src, sn::type_name<T>(), std::errc::result_out_of_range);
         if (errno != 0)
             throw_number_from_string_error(src, sn::type_name<T>(), std::errc::invalid_argument);
     }
-    assert(end == src.data() + src.size());
+    if (end != src.data() + src.size()) // Tail non-number symbols => not a number.
+        throw_number_from_string_error(src, sn::type_name<T>(), std::errc::invalid_argument);
     *dst = result;
 }
 } // namespace detail_strtofd
