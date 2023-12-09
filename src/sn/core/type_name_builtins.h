@@ -113,7 +113,7 @@ template<class T>
 }
 
 #define SN_DEFINE_BUILTIN_TYPE_NAME(T, NAME)                                                                            \
-[[nodiscard]] std::string_view type_name(std::type_identity<T>) noexcept {                                              \
+[[nodiscard]] inline std::string_view type_name(std::type_identity<T>) noexcept {                                       \
     return NAME;                                                                                                        \
 }
 
