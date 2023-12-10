@@ -23,7 +23,7 @@ SN_DEFINE_ENUM_REFLECTION(TestEnum, {
 
 SN_DEFINE_ENUM_STRING_FUNCTIONS(TestEnum, sn::case_sensitive)
 
-TEST(Enum, Sn) {
+TEST(enum, basic) {
     EXPECT_EQ(sn::to_string(VALUE_1), "aaa");
     EXPECT_EQ(sn::to_string(VALUE_3), "CCC");
     EXPECT_ANY_THROW((void) sn::to_string(UNSERIALIZABLE));
@@ -39,6 +39,42 @@ TEST(Enum, Sn) {
     EXPECT_ANY_THROW((void) sn::from_string<TestEnum>(" aaa"));
     EXPECT_ANY_THROW((void) sn::from_string<TestEnum>("aaa "));
     EXPECT_ANY_THROW((void) sn::from_string<TestEnum>(" aaa "));
+}
+
+
+//
+// Case-insensitive conversions.
+//
+
+enum class CiTestEnum {
+    CS_VALUE_1 = 1,
+    CS_VALUE_2 = 2,
+    CS_VALUE_3 = 3,
+    CS_VALUE_4 = 4,
+};
+using enum CiTestEnum;
+SN_DEFINE_ENUM_REFLECTION(CiTestEnum, {
+    {CS_VALUE_1, "AAA"},
+    {CS_VALUE_2, "bbb"},
+    {CS_VALUE_3, "Ccc"},
+    {CS_VALUE_4, "111_ab"},
+})
+SN_DEFINE_ENUM_STRING_FUNCTIONS(CiTestEnum, sn::case_insensitive)
+
+TEST(enum, case_insensitive) {
+    EXPECT_EQ(sn::to_string(CS_VALUE_1), "AAA");
+    EXPECT_EQ(sn::from_string<CiTestEnum>("AAA"), CS_VALUE_1);
+    EXPECT_EQ(sn::from_string<CiTestEnum>("AaA"), CS_VALUE_1);
+    EXPECT_EQ(sn::from_string<CiTestEnum>("aaa"), CS_VALUE_1);
+
+    EXPECT_EQ(sn::to_string(CS_VALUE_2), "bbb");
+    EXPECT_EQ(sn::from_string<CiTestEnum>("BBB"), CS_VALUE_2);
+
+    EXPECT_EQ(sn::to_string(CS_VALUE_3), "Ccc");
+    EXPECT_EQ(sn::from_string<CiTestEnum>("ccc"), CS_VALUE_3);
+
+    EXPECT_EQ(sn::to_string(CS_VALUE_4), "111_ab");
+    EXPECT_EQ(sn::from_string<CiTestEnum>("111_AB"), CS_VALUE_4);
 }
 
 
@@ -79,7 +115,7 @@ SN_DEFINE_ENUM_REFLECTION(Enum1, {{NSVALUE_1, "WUT"}})
 SN_DEFINE_ENUM_STRING_FUNCTIONS(Enum1, sn::case_sensitive)
 } // namespace ns2
 
-TEST(Enum, Namespaces) {
+TEST(enum, namespaces) {
     EXPECT_EQ(sn::to_string(ns1::NSVALUE_1), "100");
     EXPECT_EQ(sn::to_string(ns2::NSVALUE_2), "200");
     EXPECT_EQ(sn::to_string(ns2::NSVALUE_1), "100");
