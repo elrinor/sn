@@ -111,4 +111,4 @@ jobs:
 
       - name: 'Build and test'
         run: |
-          scripts/build_test_all.sh -j4 "${{matrix.platform}}" "."
+          scripts/build_test_all.sh -j4 "${{matrix.platform}}" "${{matrix.architecture}}" "."
