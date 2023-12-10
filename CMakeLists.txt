@@ -17,8 +17,12 @@ set(SN_FLOAT_LIB "fast_float_bundled" CACHE STRING "Float string functions to us
 set_property(CACHE SN_FLOAT_LIB PROPERTY STRINGS strtof from_chars fast_float_bundled fast_float_external)
 set(SN_TYPE_NAME_IMPL "funcsig" CACHE STRING "Implementation of sn::type_name to use, 'typeid' or 'funcsig'")
 set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
+set(SN_ENUM_HASH_LIB "std" CACHE STRING "Hash library to use for enum serialization hash maps, 'std', 'frozen_bundled', or 'frozen_external'")
+set_property(CACHE SN_ENUM_HASH_LIB PROPERTY STRINGS std frozen_bundled frozen_external)
+
 set(SN_BUNDLED_FMT_TAG "10.1.1" CACHE STRING "Git tag for the bundled fmt library")
 set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fast_float library")
+set(SN_BUNDLED_FROZEN_TAG "dd1f58c5f6c97fbf0832cc4e84676663839b913e" CACHE STRING "Git tag for the bundled frozen library")
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.14.0" CACHE STRING "Git tag for the bundled google test library")
 set(SN_BUNDLED_CPPLINT_TAG "7b88b68187e3516540fab3caa900988d2179ed24" CACHE STRING "Git tag for the bundled cpplint")
 
