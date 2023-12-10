@@ -97,7 +97,7 @@ struct type_name_holder {
 };
 
 template <class T>
-std::string_view type_name_impl() noexcept {
+constexpr std::string_view type_name_impl() noexcept {
     return {type_name_holder<T>::value.data.data(), type_name_holder<T>::value.size};
 }
 #endif
@@ -113,7 +113,7 @@ template<class T>
 }
 
 #define SN_DEFINE_BUILTIN_TYPE_NAME(T, NAME)                                                                            \
-[[nodiscard]] inline std::string_view type_name(std::type_identity<T>) noexcept {                                       \
+[[nodiscard]] constexpr std::string_view type_name(std::type_identity<T>) noexcept {                                    \
     return NAME;                                                                                                        \
 }
 
