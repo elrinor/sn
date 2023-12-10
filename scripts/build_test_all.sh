@@ -32,6 +32,7 @@ function build_test_one() {
 
     echo "================================================================================================"
 
+    # TODO(elric): this actually doesn't use android tools.
     cmake \
         -B "$BUILD_DIR" \
         -S "$REPO_DIR" \

@@ -10,8 +10,8 @@
 
 namespace sn::detail {
 
-// TODO(elric): #cpp20 use std::string_view instead of const char * here when we upgrade to gcc that's sane and doesn't
-//              choke here.
+// TODO(elric): #cpp20 use std::string_view instead of const char * here when we upgrade to gcc 12.3+ that's sane and
+//              doesn't choke here. See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=102921.
 template<class T>
 [[nodiscard]] constexpr std::initializer_list<std::pair<T, const char *>> do_reflect_enum() noexcept {
     return reflect_enum(std::type_identity<T>());
