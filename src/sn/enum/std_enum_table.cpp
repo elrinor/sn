@@ -19,7 +19,7 @@ struct small_buffer {
         if (size <= small.size()) {
             return small.data();
         } else {
-            big = sn::make_unique_for_overwrite<Char[]>(size);
+            big = sn::detail::std_make_unique_for_overwrite<Char[]>(size);
             return big.get();
         }
     }

@@ -15,11 +15,11 @@ enum class TestEnum {
 };
 using enum TestEnum;
 
-SN_DEFINE_ENUM_REFLECTION(TestEnum, {
+SN_DEFINE_ENUM_REFLECTION(TestEnum, ({
     { VALUE_1, "aaa" },
     { VALUE_2, "bbb" },
     { VALUE_3, "CCC" },
-})
+}))
 
 SN_DEFINE_ENUM_STRING_FUNCTIONS(TestEnum, sn::case_sensitive)
 
@@ -53,12 +53,12 @@ enum class CiTestEnum {
     CS_VALUE_4 = 4,
 };
 using enum CiTestEnum;
-SN_DEFINE_ENUM_REFLECTION(CiTestEnum, {
+SN_DEFINE_ENUM_REFLECTION(CiTestEnum, ({
     {CS_VALUE_1, "AAA"},
     {CS_VALUE_2, "bbb"},
     {CS_VALUE_3, "Ccc"},
     {CS_VALUE_4, "111_ab"},
-})
+}))
 SN_DEFINE_ENUM_STRING_FUNCTIONS(CiTestEnum, sn::case_insensitive)
 
 TEST(enum, case_insensitive) {
@@ -88,7 +88,7 @@ enum class Enum1 {
     NSVALUE_1 = 100,
 };
 using enum Enum1;
-SN_DEFINE_ENUM_REFLECTION(Enum1, {{NSVALUE_1, "100"}})
+SN_DEFINE_ENUM_REFLECTION(Enum1, ({{NSVALUE_1, "100"}}))
 SN_DEFINE_ENUM_STRING_FUNCTIONS(Enum1, sn::case_sensitive)
 } // namespace ns1
 
@@ -99,7 +99,7 @@ enum class Enum2 {
 using enum Enum2;
 
 using namespace ns1; // NOLINT: Intentional, we're testing that using-namespace doesn't interfere with anything.
-SN_DEFINE_ENUM_REFLECTION(Enum2, {{NSVALUE_2, "200"}})
+SN_DEFINE_ENUM_REFLECTION(Enum2, ({{NSVALUE_2, "200"}}))
 SN_DEFINE_ENUM_STRING_FUNCTIONS(Enum2, sn::case_sensitive)
 
 // This will compile, but please don't do this in your code. There are ways to make it fail to compile, e.g. by
@@ -109,7 +109,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(Enum2, sn::case_sensitive)
 //
 // However, this won't work out of the box b/c you'll be violating ODR. Need to pass a local tag type to
 // is_reflected_enum_v every time it's called to differentiate between call sites. So, a mess, and not really worth it.
-SN_DEFINE_ENUM_REFLECTION(Enum1, {{NSVALUE_1, "WUT"}})
+SN_DEFINE_ENUM_REFLECTION(Enum1, ({{NSVALUE_1, "WUT"}}))
 
 // This will compile & hook into ADL-found reflection, not the one above.
 SN_DEFINE_ENUM_STRING_FUNCTIONS(Enum1, sn::case_sensitive)
@@ -134,4 +134,66 @@ TEST(enum, namespaces) {
     EXPECT_EQ(enum1, ns2::NSVALUE_1);
     EXPECT_NO_THROW(ns2::to_string(ns2::NSVALUE_1, &string1));
     EXPECT_EQ(string1, "100");
+}
+
+
+//
+// Tagged enum string conversions.
+//
+
+struct glenum_1 {};
+
+SN_DEFINE_ENUM_REFLECTION(int, ({{1, "GL_1"}, {2, "GL_2"}}), glenum_1)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(int, sn::case_insensitive, glenum_1)
+
+struct glenum_2 {};
+
+SN_DEFINE_ENUM_REFLECTION(int, ({{100, "GL_100"}, {200, "GL_200"}}), glenum_2)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(int, sn::case_insensitive, glenum_2)
+
+TEST(enum, tagged) {
+    EXPECT_EQ(sn::to_string(1, glenum_1()), "GL_1");
+    EXPECT_EQ(sn::from_string<int>("GL_1", glenum_1()), 1);
+
+    std::string str;
+    int val = 0;
+    EXPECT_TRUE(sn::try_to_string(2, &str, glenum_1()));
+    EXPECT_EQ(str, "GL_2");
+    EXPECT_TRUE(sn::try_from_string(str, &val, glenum_1()));
+    EXPECT_EQ(val, 2);
+
+    sn::to_string(100, &str, glenum_2());
+    EXPECT_EQ(str, "GL_100");
+    sn::from_string(str, &val, glenum_2());
+    EXPECT_EQ(val, 100);
+
+    EXPECT_ANY_THROW((void) sn::to_string(3, glenum_1()));
+    EXPECT_ANY_THROW((void) sn::from_string<int>("GL_100", glenum_1()));
+}
+
+
+//
+// Test that enum T : char works, despite there being no sn::to_string overload for char.
+//
+
+enum CharEnum : char {
+    CHAR_1 = '1',
+    CHAR_2 = '2',
+    CHAR_UNK = '@'
+};
+
+SN_DEFINE_ENUM_REFLECTION(CharEnum, ({{CHAR_1, "CHAR_1"}, {CHAR_2, "CHAR_2"}}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(CharEnum, sn::case_insensitive)
+
+TEST(enum, char) {
+    EXPECT_EQ(sn::to_string(CHAR_1), "CHAR_1");
+    EXPECT_EQ(sn::from_string<CharEnum>("CHAR_2"), '2');
+
+    EXPECT_ANY_THROW((void) sn::to_string(CHAR_UNK));
+    try {
+        (void) sn::to_string(CHAR_UNK);
+    } catch (const std::exception &e) {
+        // 64 is the ascii code for '@'.
+        EXPECT_NE(std::string_view(e.what()).find("'64'"), std::string_view::npos) << e.what();
+    }
 }
