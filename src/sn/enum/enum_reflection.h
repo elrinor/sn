@@ -1,12 +1,8 @@
 #pragma once
 
 #include <initializer_list>
-#include <string_view>
-#include <utility>
-#include <type_traits>
-#include <concepts>
-
-#include "sn/core/preprocessor.h"
+#include <utility> // For std::pair.
+#include <type_traits> // For std::type_identity.
 
 namespace sn::detail {
 

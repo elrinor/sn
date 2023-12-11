@@ -17,7 +17,9 @@
 
 namespace sn::builtins {
 
+//
 // bool.
+//
 
 bool try_to_string(const bool &src, std::string *dst) noexcept {
     *dst = src ? "true" : "false";
@@ -45,7 +47,10 @@ void from_string(std::string_view src, bool *dst) {
         throw_from_string_error<bool>(src);
 }
 
-// other types.
+
+//
+// Arithmetic types.
+//
 
 namespace detail_to_string {
 template<class T>

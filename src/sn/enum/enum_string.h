@@ -11,7 +11,6 @@
 #   error "Enum hash library not configured"
 #endif
 
-#include "sn/core/preprocessor.h"
 #include "sn/string/string_exceptions.h"
 
 #include "enum_reflection.h"
@@ -33,13 +32,13 @@
         return _enum_table_container<ENUM>::value.try_to_string(src, dst);                                              \
     }                                                                                                                   \
                                                                                                                         \
-    bool try_from_string(std::string_view src, ENUM *dst) {                                                             \
-        return _enum_table_container<ENUM>::value.try_from_string(src, dst);                                            \
-    }                                                                                                                   \
-                                                                                                                        \
     void to_string(const ENUM &src, std::string *dst) {                                                                 \
         if (!_enum_table_container<ENUM>::value.try_to_string(src, dst))                                                \
             sn::throw_enum_to_string_error<ENUM>(src);                                                                  \
+    }                                                                                                                   \
+                                                                                                                        \
+    bool try_from_string(std::string_view src, ENUM *dst) {                                                             \
+        return _enum_table_container<ENUM>::value.try_from_string(src, dst);                                            \
     }                                                                                                                   \
                                                                                                                         \
     void from_string(std::string_view src, ENUM *dst) {                                                                 \
