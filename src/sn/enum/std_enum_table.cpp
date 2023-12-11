@@ -82,10 +82,6 @@ bool universal_std_enum_table::try_to_string(std::uint64_t src, std::string *dst
     return false;
 }
 
-bool universal_std_enum_table::try_to_string_view(std::uint64_t src, std::string_view *dst) const noexcept {
-    return do_try_to_string(src, dst, _string_by_enum);
-}
-
 bool universal_std_enum_table::try_from_string(std::string_view src, std::uint64_t *dst) const noexcept {
     assert(_mode == case_sensitive);
     return do_try_from_string<case_sensitive>(src, dst, _enum_by_string);

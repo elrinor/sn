@@ -21,7 +21,6 @@ public:
     }
 
     [[nodiscard]] bool try_to_string(std::uint64_t src, std::string *dst) const noexcept;
-    [[nodiscard]] bool try_to_string_view(std::uint64_t src, std::string_view *dst) const noexcept;
     [[nodiscard]] bool try_from_string(std::string_view src, std::uint64_t *dst) const noexcept;
     [[nodiscard]] bool try_from_string_ci(std::string_view src, std::uint64_t *dst) const noexcept;
 
@@ -48,10 +47,6 @@ public:
 
     [[nodiscard]] bool try_to_string(T src, std::string *dst) const noexcept {
         return _table.try_to_string(static_cast<std::uint64_t>(src), dst);
-    }
-
-    [[nodiscard]] bool try_to_string_view(T src, std::string_view *dst) const noexcept {
-        return _table.try_to_string_view(static_cast<std::uint64_t>(src), dst);
     }
 
     [[nodiscard]] bool try_from_string(std::string_view src, T *dst) const noexcept {

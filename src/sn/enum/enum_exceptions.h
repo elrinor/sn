@@ -13,7 +13,6 @@ namespace sn {
 
 template<class T>
 [[noreturn]] void throw_enum_to_string_error(const T &value) {
-    // TODO(elric): should be to_string_view here.
     throw_enum_to_string_error(sn::type_name<T>(), sn::to_string(sn::to_underlying(value)));
 }
 
