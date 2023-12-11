@@ -197,3 +197,37 @@ TEST(enum, char) {
         EXPECT_NE(std::string_view(e.what()).find("'64'"), std::string_view::npos) << e.what();
     }
 }
+
+
+//
+// Test compatibility conversion support.
+//
+
+enum class CompatEnum {
+    COMPAT_1,
+    COMPAT_2,
+};
+using enum CompatEnum;
+
+SN_DEFINE_ENUM_REFLECTION(CompatEnum, ({
+    {COMPAT_1, "COMPAT_1"},
+    {COMPAT_2, "COMPAT_2"},
+    {COMPAT_1, "OLD_1"},
+    {COMPAT_2, "OLD_2"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(CompatEnum, sn::case_insensitive)
+
+TEST(enum, compatibility) {
+    EXPECT_EQ(sn::to_string(COMPAT_1), "COMPAT_1");
+    EXPECT_EQ(sn::from_string<CompatEnum>("compat_1"), COMPAT_1);
+    EXPECT_EQ(sn::from_string<CompatEnum>("OLD_1"), COMPAT_1);
+    EXPECT_EQ(sn::from_string<CompatEnum>("old_1"), COMPAT_1);
+
+    EXPECT_EQ(sn::to_string(COMPAT_2), "COMPAT_2");
+    EXPECT_EQ(sn::from_string<CompatEnum>("compat_2"), COMPAT_2);
+    EXPECT_EQ(sn::from_string<CompatEnum>("OLD_2"), COMPAT_2);
+    EXPECT_EQ(sn::from_string<CompatEnum>("old_2"), COMPAT_2);
+}
+
+
+
