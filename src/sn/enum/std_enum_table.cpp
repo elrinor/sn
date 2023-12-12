@@ -6,6 +6,8 @@
 
 #include "sn/workaround/make_unique_for_overwrite.h"
 
+#include "ascii_functions.h"
+
 namespace sn::detail {
 
 static constexpr std::size_t default_small_buffer_size = 128;
@@ -29,23 +31,6 @@ struct small_buffer {
     }
 };
 
-template<class Char>
-static inline Char to_lower_ascii(Char c) {
-    return (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c;
-}
-
-template<class Char>
-static inline std::basic_string_view<Char> to_lower_ascii(std::basic_string_view<Char> src, Char *buffer) {
-    const Char *src_ptr = src.data();
-    const Char *src_end = src.data() + src.size();
-    Char *dst_ptr = buffer;
-
-    while (src_ptr < src_end)
-        *dst_ptr++ = to_lower_ascii(*src_ptr++);
-
-    return {buffer, src.size()};
-}
-
 template<class Char, class Map>
 static inline bool do_try_to_string(std::uint64_t src, std::basic_string_view<Char> *dst, const Map &map) noexcept {
     auto pos = map.find(src);
@@ -67,7 +52,7 @@ static inline bool do_try_from_string(std::basic_string_view<Char> src, std::uin
 
     if constexpr (mode == case_insensitive) {
         small_buffer<Char, default_small_buffer_size> buffer;
-        return run(to_lower_ascii(src, buffer.allocate(src.size())), dst);
+        return run(sn::detail::to_lower_ascii(src, buffer.allocate(src.size())), dst);
     } else {
         return run(src, dst);
     }
@@ -101,7 +86,7 @@ void universal_std_enum_table::insert(std::uint64_t value, std::string_view name
         _enum_by_string.emplace(name, value);
     } else {
         std::string lower_name(name.size(), '\0');
-        to_lower_ascii(name, lower_name.data());
+        sn::detail::to_lower_ascii(name, lower_name.data());
         assert(!_enum_by_string.contains(lower_name));
         _enum_by_string.emplace(std::move(lower_name), value);
     }
