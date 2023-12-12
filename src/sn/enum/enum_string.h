@@ -28,7 +28,7 @@
         static inline const auto value = sn::detail::std_enum_table<ENUM, CASE_SENSITIVITY>(sn::reflect_enum<ENUM __VA_OPT__(,) __VA_ARGS__>()); /* NOLINT */ \
     };                                                                                                                  \
                                                                                                                         \
-    bool try_to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) { /* NOLINT */                      \
+    [[nodiscard]] bool try_to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept { /* NOLINT */ \
         return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_to_string(src, dst); /* NOLINT */       \
     }                                                                                                                   \
                                                                                                                         \
@@ -37,7 +37,7 @@
             sn::throw_enum_to_string_error<ENUM>(src);                                                                  \
     }                                                                                                                   \
                                                                                                                         \
-    bool try_from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) { /* NOLINT */                      \
+    [[nodiscard]] bool try_from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) noexcept { /* NOLINT */ \
         return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_from_string(src, dst); /* NOLINT */     \
     }                                                                                                                   \
                                                                                                                         \

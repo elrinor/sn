@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <initializer_list>
+#include <array>
 #include <utility> // For std::pair.
 #include <functional> // For std::equal_to.
 #include <string>
@@ -14,8 +14,8 @@ namespace sn::detail {
 
 class universal_std_enum_table {
 public:
-    template<class T>
-    universal_std_enum_table(case_sensitivity mode, std::initializer_list<std::pair<T, const char *>> pairs) : _mode(mode) {
+    template<class T, std::size_t size>
+    universal_std_enum_table(case_sensitivity mode, const std::array<std::pair<T, std::string_view>, size> &pairs) : _mode(mode) {
         for (const auto &[value, name] : pairs)
             insert(static_cast<std::uint64_t>(value), name); // This static_cast sign-extends negative signed values, which is OK.
     }
@@ -43,7 +43,8 @@ class std_enum_table {
 public:
     std_enum_table() = default;
 
-    explicit std_enum_table(std::initializer_list<std::pair<T, const char *>> pairs) : _table(mode, pairs) {}
+    template<size_t size>
+    explicit std_enum_table(const std::array<std::pair<T, std::string_view>, size> &pairs) : _table(mode, pairs) {}
 
     [[nodiscard]] bool try_to_string(T src, std::string *dst) const noexcept {
         return _table.try_to_string(static_cast<std::uint64_t>(src), dst);

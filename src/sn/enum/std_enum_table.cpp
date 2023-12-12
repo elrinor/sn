@@ -10,7 +10,7 @@ namespace sn::detail {
 
 static constexpr std::size_t default_small_buffer_size = 128;
 
-template<class Char, size_t small_size>
+template<class Char, std::size_t small_size>
 struct small_buffer {
     std::array<Char, small_size> small;
     std::unique_ptr<Char[]> big;
