@@ -200,6 +200,31 @@ TEST(enum, char) {
 
 
 //
+// Same as above but for signed char.
+//
+
+enum SignedCharEnum : signed char {
+    SCHAR_1 = -1,
+    SCHAR_UNK = -100
+};
+
+SN_DEFINE_ENUM_REFLECTION(SignedCharEnum, ({{SCHAR_1, "SCHAR_1"}}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(SignedCharEnum, sn::case_sensitive)
+
+TEST(enum, signed_char) {
+    EXPECT_EQ(sn::to_string(SCHAR_1), "SCHAR_1");
+    EXPECT_EQ(sn::from_string<SignedCharEnum>("SCHAR_1"), -1);
+
+    EXPECT_ANY_THROW((void) sn::to_string(SCHAR_UNK));
+    try {
+        (void) sn::to_string(SCHAR_UNK);
+    } catch (const std::exception &e) {
+        EXPECT_NE(std::string_view(e.what()).find("'-100'"), std::string_view::npos) << e.what();
+    }
+}
+
+
+//
 // Test compatibility conversion support.
 //
 

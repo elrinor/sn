@@ -14,7 +14,8 @@
 #include "sn/string/string_exceptions.h"
 
 #include "enum_reflection.h"
-#include "enum_exceptions.h"
+
+#include "sn/string/string.h"
 
 // TODO(elric): #cpp23 the magic below with _enum_table_container isn't needed in c++23, can just create a static
 //              constexpr variable inside the function.
@@ -33,8 +34,7 @@
     }                                                                                                                   \
                                                                                                                         \
     void to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) { /* NOLINT */                          \
-        if (!_enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_to_string(src, dst)) /* NOLINT */         \
-            sn::throw_enum_to_string_error<ENUM>(src);                                                                  \
+        _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.to_string(src, dst); /* NOLINT */                  \
     }                                                                                                                   \
                                                                                                                         \
     [[nodiscard]] bool try_from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) noexcept { /* NOLINT */ \
@@ -42,6 +42,5 @@
     }                                                                                                                   \
                                                                                                                         \
     void from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) { /* NOLINT */                          \
-        if (!_enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_from_string(src, dst)) /* NOLINT */       \
-            sn::throw_enum_from_string_error<ENUM>(src);                                                                \
+        _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.from_string(src, dst); /* NOLINT */                \
     }
