@@ -5,6 +5,7 @@ set(SN_ENUM_SOURCES
     std_enum_table.cpp)
 
 set(SN_ENUM_HEADERS
+    ascii_functions.h
     enum_exceptions.h
     enum_fwd.h
     enum_reflection.h

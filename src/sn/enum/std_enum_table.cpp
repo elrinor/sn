@@ -5,12 +5,16 @@
 #include <memory>
 
 #include "sn/workaround/make_unique_for_overwrite.h"
+#include "sn/string/string.h"
+
+#include "ascii_functions.h"
+#include "enum_exceptions.h"
 
 namespace sn::detail {
 
 static constexpr std::size_t default_small_buffer_size = 128;
 
-template<class Char, size_t small_size>
+template<class Char, std::size_t small_size>
 struct small_buffer {
     std::array<Char, small_size> small;
     std::unique_ptr<Char[]> big;
@@ -19,7 +23,7 @@ struct small_buffer {
         if (size <= small.size()) {
             return small.data();
         } else {
-            big = sn::make_unique_for_overwrite<Char[]>(size);
+            big = sn::detail::std_make_unique_for_overwrite<Char[]>(size);
             return big.get();
         }
     }
@@ -29,85 +33,93 @@ struct small_buffer {
     }
 };
 
-template<class Char>
-static inline Char to_lower_ascii(Char c) {
-    return (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c;
+void universal_std_enum_table::to_string(std::uint64_t src, std::string *dst) const {
+    if (try_to_string(src, dst))
+        return;
+
+    if (_is_signed) {
+        // This static_cast relies on implementation-defined behavior, but it's symmetric to what we have in the
+        // constructor, so that's OK.
+        throw_enum_to_string_error(_type_name, sn::to_string(static_cast<std::int64_t>(src)));
+    } else {
+        throw_enum_to_string_error(_type_name, sn::to_string(src));
+    }
 }
 
-template<class Char>
-static inline std::basic_string_view<Char> to_lower_ascii(std::basic_string_view<Char> src, Char *buffer) {
-    const Char *src_ptr = src.data();
-    const Char *src_end = src.data() + src.size();
-    Char *dst_ptr = buffer;
+template<case_sensitivity mode>
+inline std::uint64_t universal_std_enum_table::do_from_string(std::string_view src) const {
+    assert(_mode == mode);
 
-    while (src_ptr < src_end)
-        *dst_ptr++ = to_lower_ascii(*src_ptr++);
+    auto run = [&] (std::string_view src) {
+        auto pos = _from_string_map.find(src);
+        if (pos == _from_string_map.end())
+            throw_enum_from_string_error(_type_name, src);
+        return pos->second;
+    };
 
-    return {buffer, src.size()};
+    if constexpr (mode == case_insensitive) {
+        small_buffer<char, default_small_buffer_size> buffer;
+        return run(sn::detail::to_lower_ascii(src, buffer.allocate(src.size())));
+    } else {
+        return run(src);
+    }
 }
 
-template<class Char, class Map>
-static inline bool do_try_to_string(std::uint64_t src, std::basic_string_view<Char> *dst, const Map &map) noexcept {
-    auto pos = map.find(src);
-    if (pos == map.end())
+std::uint64_t universal_std_enum_table::from_string(std::string_view src) const {
+    return do_from_string<case_sensitive>(src);
+}
+
+std::uint64_t universal_std_enum_table::from_string_ci(std::string_view src) const {
+    return do_from_string<case_insensitive>(src);
+}
+
+bool universal_std_enum_table::try_to_string(std::uint64_t src, std::string *dst) const noexcept {
+    auto pos = _to_string_map.find(src);
+    if (pos == _to_string_map.end())
         return false;
     *dst = pos->second;
     return true;
 }
 
-template<case_sensitivity mode, class Char, class Map>
-static inline bool do_try_from_string(std::basic_string_view<Char> src, std::uint64_t *dst, const Map &map) noexcept {
-    auto run = [&] (std::basic_string_view<Char> src, std::uint64_t *dst) {
-        auto pos = map.find(src);
-        if (pos == map.end())
-            return false;
-        *dst = pos->second;
-        return true;
+template<case_sensitivity mode>
+inline universal_std_enum_table::try_from_string_result universal_std_enum_table::do_try_from_string(std::string_view src) const noexcept {
+    assert(_mode == mode);
+
+    auto run = [&] (std::string_view src) -> universal_std_enum_table::try_from_string_result {
+        auto pos = _from_string_map.find(src);
+        if (pos == _from_string_map.end())
+            return {0, false};
+        return {pos->second, true};
     };
 
     if constexpr (mode == case_insensitive) {
-        small_buffer<Char, default_small_buffer_size> buffer;
-        return run(to_lower_ascii(src, buffer.allocate(src.size())), dst);
+        small_buffer<char, default_small_buffer_size> buffer;
+        return run(sn::detail::to_lower_ascii(src, buffer.allocate(src.size())));
     } else {
-        return run(src, dst);
+        return run(src);
     }
 }
 
-bool universal_std_enum_table::try_to_string(std::uint64_t src, std::string *dst) const noexcept {
-    std::string_view tmp;
-    if (do_try_to_string(src, &tmp, _string_by_enum)) {
-        *dst = tmp;
-        return true;
-    }
-    return false;
+universal_std_enum_table::try_from_string_result universal_std_enum_table::try_from_string(std::string_view src) const noexcept {
+    return do_try_from_string<case_sensitive>(src);
 }
 
-bool universal_std_enum_table::try_to_string_view(std::uint64_t src, std::string_view *dst) const noexcept {
-    return do_try_to_string(src, dst, _string_by_enum);
-}
-
-bool universal_std_enum_table::try_from_string(std::string_view src, std::uint64_t *dst) const noexcept {
-    assert(_mode == case_sensitive);
-    return do_try_from_string<case_sensitive>(src, dst, _enum_by_string);
-}
-
-bool universal_std_enum_table::try_from_string_ci(std::string_view src, std::uint64_t *dst) const noexcept {
-    assert(_mode == case_insensitive);
-    return do_try_from_string<case_insensitive>(src, dst, _enum_by_string);
+universal_std_enum_table::try_from_string_result universal_std_enum_table::try_from_string_ci(std::string_view src) const noexcept {
+    return do_try_from_string<case_insensitive>(src);
 }
 
 void universal_std_enum_table::insert(std::uint64_t value, std::string_view name) {
-    if (!_string_by_enum.contains(value))
-        _string_by_enum.emplace(value, name);
+    if (!_to_string_map.contains(value))
+        _to_string_map.emplace(value, name);
 
     if (_mode == case_sensitive) {
-        assert(!_enum_by_string.contains(name));
-        _enum_by_string.emplace(name, value);
+        assert(!_from_string_map.contains(name));
+        _from_string_map.emplace(name, value);
     } else {
         std::string lower_name(name.size(), '\0');
-        to_lower_ascii(name, lower_name.data());
-        assert(!_enum_by_string.contains(lower_name));
-        _enum_by_string.emplace(std::move(lower_name), value);
+        sn::detail::to_lower_ascii(name, lower_name.data());
+        assert(!_from_string_map.contains(lower_name));
+        _from_string_map.emplace(std::move(lower_name), value);
     }
 }
 
