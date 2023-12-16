@@ -33,10 +33,10 @@ template<class T, class... Tags>
     struct _enum_reflection_container;                                                                                  \
                                                                                                                         \
     template<>                                                                                                          \
-    struct _enum_reflection_container<T __VA_OPT__(,) __VA_ARGS__> { /* NOLINT */                                       \
+    struct _enum_reflection_container<T __VA_OPT__(,) __VA_ARGS__> {                                                    \
         static constexpr auto value = std::to_array<std::pair<T, std::string_view>>(SN_PP_REMOVE_PARENS(MAPPING));      \
     };                                                                                                                  \
                                                                                                                         \
-    [[nodiscard]] constexpr const auto &reflect_enum(std::type_identity<T> __VA_OPT__(,) __VA_ARGS__) noexcept { /* NOLINT */ \
-        return _enum_reflection_container<T __VA_OPT__(,) __VA_ARGS__>::value; /* NOLINT */                             \
+    [[nodiscard]] constexpr const auto &reflect_enum(std::type_identity<T> __VA_OPT__(,) __VA_ARGS__) noexcept {        \
+        return _enum_reflection_container<T __VA_OPT__(,) __VA_ARGS__>::value;                                          \
     }

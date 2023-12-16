@@ -24,7 +24,7 @@ set(SN_BUNDLED_FMT_TAG "10.1.1" CACHE STRING "Git tag for the bundled fmt librar
 set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fast_float library")
 set(SN_BUNDLED_FROZEN_TAG "dd1f58c5f6c97fbf0832cc4e84676663839b913e" CACHE STRING "Git tag for the bundled frozen library")
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.14.0" CACHE STRING "Git tag for the bundled google test library")
-set(SN_BUNDLED_CPPLINT_TAG "7b88b68187e3516540fab3caa900988d2179ed24" CACHE STRING "Git tag for the bundled cpplint")
+set(SN_BUNDLED_CPPLINT_TAG "b3fcac06919b83d3e9c8a3b6dc450eba02869092" CACHE STRING "Git tag for the bundled cpplint")
 
 include(FetchContent)
 
@@ -49,11 +49,11 @@ if(SN_CHECK_STYLE)
     find_package(Python COMPONENTS Interpreter)
 
     FetchContent_Declare(cpplint
-            GIT_REPOSITORY https://github.com/cpplint/cpplint.git
+            GIT_REPOSITORY https://github.com/elrinor/cpplint.git
             GIT_TAG "${SN_BUNDLED_CPPLINT_TAG}")
     FetchContent_MakeAvailable(cpplint)
 
-    set(SN_CPPLINT_SCRIPT "${cpplint_SOURCE_DIR}/cpplint.py")
+    set(SN_CPPLINT_SCRIPT "${cpplint_SOURCE_DIR}/cpplint.py" CACHE STRING "Path to cpplint script")
 
     add_custom_target(lint_all)
 endif()
