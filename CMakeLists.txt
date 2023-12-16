@@ -20,6 +20,8 @@ set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
 set(SN_ENUM_HASH_LIB "std" CACHE STRING "Hash library to use for enum serialization hash maps, 'std', 'frozen_bundled', or 'frozen_external'")
 set_property(CACHE SN_ENUM_HASH_LIB PROPERTY STRINGS std frozen_bundled frozen_external)
 
+set(SN_MAX_SMALL_BUFFER_SIZE 128 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase")
+
 set(SN_BUNDLED_FMT_TAG "10.1.1" CACHE STRING "Git tag for the bundled fmt library")
 set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fast_float library")
 set(SN_BUNDLED_FROZEN_TAG "dd1f58c5f6c97fbf0832cc4e84676663839b913e" CACHE STRING "Git tag for the bundled frozen library")

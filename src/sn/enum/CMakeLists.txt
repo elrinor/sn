@@ -14,6 +14,7 @@ set(SN_ENUM_HEADERS
 
 add_library(sn_enum STATIC ${SN_ENUM_SOURCES} ${SN_ENUM_HEADERS})
 add_library(sn::enum ALIAS sn_enum)
+target_compile_definitions(sn_enum PUBLIC SN_MAX_SMALL_BUFFER_SIZE=${SN_MAX_SMALL_BUFFER_SIZE})
 target_link_libraries(sn_enum PUBLIC sn_core sn_string sn_workaround)
 lint_target(sn_enum)
 

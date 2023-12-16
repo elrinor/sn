@@ -12,8 +12,6 @@
 
 namespace sn::detail {
 
-static constexpr std::size_t default_small_buffer_size = 128;
-
 template<class Char, std::size_t small_size>
 struct small_buffer {
     std::array<Char, small_size> small;
@@ -58,7 +56,7 @@ inline std::uint64_t universal_std_enum_table::do_from_string(std::string_view s
     };
 
     if constexpr (mode == case_insensitive) {
-        small_buffer<char, default_small_buffer_size> buffer;
+        small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer;
         return run(sn::detail::to_lower_ascii(src, buffer.allocate(src.size())));
     } else {
         return run(src);
@@ -93,7 +91,7 @@ inline universal_std_enum_table::try_from_string_result universal_std_enum_table
     };
 
     if constexpr (mode == case_insensitive) {
-        small_buffer<char, default_small_buffer_size> buffer;
+        small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer;
         return run(sn::detail::to_lower_ascii(src, buffer.allocate(src.size())));
     } else {
         return run(src);
