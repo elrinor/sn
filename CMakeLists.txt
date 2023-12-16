@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # External settings
 #
 set(SN_BUILD_TESTS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tests")
+set(SN_BUILD_BENCHMARKS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN benchmarks")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
 set(SN_FORMAT_LIB "fmt_bundled" CACHE STRING "Format library to use, 'std', 'fmt_bundled', or 'fmt_external'")
 set_property(CACHE SN_FORMAT_LIB PROPERTY STRINGS std fmt_bundled fmt_external)
@@ -26,9 +27,18 @@ set(SN_BUNDLED_FMT_TAG "10.1.1" CACHE STRING "Git tag for the bundled fmt librar
 set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fast_float library")
 set(SN_BUNDLED_FROZEN_TAG "dd1f58c5f6c97fbf0832cc4e84676663839b913e" CACHE STRING "Git tag for the bundled frozen library")
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.14.0" CACHE STRING "Git tag for the bundled google test library")
+set(SN_BUNDLED_GOOGLEBENCHMARK_TAG "v1.8.3" CACHE STRING "Git tag for the bundled google benchmark library")
 set(SN_BUNDLED_CPPLINT_TAG "b3fcac06919b83d3e9c8a3b6dc450eba02869092" CACHE STRING "Git tag for the bundled cpplint")
 
 include(FetchContent)
+
+
+#
+# Don't clutter target list when building as a root project
+#
+if(PROJECT_IS_TOP_LEVEL)
+    set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+endif()
 
 
 #
@@ -41,6 +51,23 @@ if(SN_BUILD_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     add_custom_target(run_all_tests)
+endif()
+
+
+#
+# Set up benchmarks.
+#
+if(SN_BUILD_BENCHMARKS)
+    set(BENCHMARK_ENABLE_TESTING OFF)
+    set(BENCHMARK_ENABLE_INSTALL OFF)
+    set(BENCHMARK_INSTALL_DOCS OFF)
+
+    FetchContent_Declare(googlebenchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG "${SN_BUNDLED_GOOGLEBENCHMARK_TAG}")
+    FetchContent_MakeAvailable(googlebenchmark)
+
+    add_custom_target(run_all_benchmarks)
 endif()
 
 
@@ -106,4 +133,8 @@ if(PROJECT_IS_TOP_LEVEL)
     endif()
 endif()
 
+
+#
+# Add sources.
+#
 add_subdirectory(src)

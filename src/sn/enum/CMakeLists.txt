@@ -49,3 +49,17 @@ if(SN_BUILD_TESTS)
         USES_TERMINAL)
     add_dependencies(run_all_tests run_test_sn_enum)
 endif()
+
+if(SN_BUILD_BENCHMARKS)
+    set(BENCHMARK_SN_ENUM_SOURCES enum_string_benchmark.cpp)
+
+    add_executable(benchmark_sn_enum ${BENCHMARK_SN_ENUM_SOURCES})
+    target_link_libraries(benchmark_sn_enum PUBLIC sn_enum benchmark::benchmark benchmark::benchmark_main)
+    lint_target(benchmark_sn_enum)
+
+    add_custom_target(run_benchmark_sn_enum
+        benchmark_sn_enum
+        DEPENDS benchmark_sn_enum
+        USES_TERMINAL)
+    add_dependencies(run_all_benchmarks run_benchmark_sn_enum)
+endif()

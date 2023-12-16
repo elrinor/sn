@@ -40,6 +40,11 @@ if [[ "$BUILD_PLATFORM" == "darwin" ]]; then
     if [[ "$BUILD_ARCH" == "arm64" ]]; then
         # This is a cross-compile, can't run tests.
         RUN_TESTS=false
+
+        # Don't try running the tests for regex impl, we're cross-compiling and they won't run.
+        ADDITIONAL_CMAKE_ARGS+=(
+            "-DHAVE_STD_REGEX=ON"
+        )
     fi
 elif [[ "$BUILD_PLATFORM" == "windows" ]]; then
     ADDITIONAL_CMAKE_ARGS+=(
@@ -108,6 +113,7 @@ function build_test_one() {
 
     if [[ "$RUN_TESTS" == "true" ]]; then
         cmake --build "$BUILD_DIR" --target run_all_tests
+        cmake --build "$BUILD_DIR" --target run_all_benchmarks
     fi
 }
 
