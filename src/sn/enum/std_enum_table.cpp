@@ -8,28 +8,10 @@
 #include "sn/string/string.h"
 
 #include "ascii_functions.h"
+#include "small_buffer.h"
 #include "enum_exceptions.h"
 
 namespace sn::detail {
-
-template<class Char, std::size_t small_size>
-struct small_buffer {
-    std::array<Char, small_size> small;
-    std::unique_ptr<Char[]> big;
-
-    [[nodiscard]] Char *allocate(std::size_t size) {
-        if (size <= small.size()) {
-            return small.data();
-        } else {
-            big = sn::detail::std_make_unique_for_overwrite<Char[]>(size);
-            return big.get();
-        }
-    }
-
-    [[nodiscard]] const Char *data() const {
-        return big ? big.get() : small.data();
-    }
-};
 
 void universal_std_enum_table::to_string(std::uint64_t src, std::string *dst) const {
     if (try_to_string(src, dst))
@@ -56,8 +38,8 @@ inline std::uint64_t universal_std_enum_table::do_from_string(std::string_view s
     };
 
     if constexpr (mode == case_insensitive) {
-        small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer;
-        return run(sn::detail::to_lower_ascii(src, buffer.allocate(src.size())));
+        small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer(src.size());
+        return run(sn::detail::to_lower_ascii(src, buffer.data()));
     } else {
         return run(src);
     }
@@ -91,8 +73,8 @@ inline universal_std_enum_table::try_from_string_result universal_std_enum_table
     };
 
     if constexpr (mode == case_insensitive) {
-        small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer;
-        return run(sn::detail::to_lower_ascii(src, buffer.allocate(src.size())));
+        small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer(src.size());
+        return run(sn::detail::to_lower_ascii(src, buffer.data()));
     } else {
         return run(src);
     }
