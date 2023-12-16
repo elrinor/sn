@@ -101,3 +101,5 @@ private:
 
 } // namespace sn::detail
 
+#define _SN_DEFINE_ENUM_STRING_TABLE(TABLE_NAME, ENUM, CASE_SENSITIVITY, REFLECTION_ARG)                                \
+    static inline const auto TABLE_NAME = sn::detail::std_enum_table<ENUM, CASE_SENSITIVITY>(REFLECTION_ARG);

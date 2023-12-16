@@ -10,6 +10,7 @@ set(SN_ENUM_HEADERS
     enum_fwd.h
     enum_reflection.h
     enum_string.h
+    frozen_enum_table.h
     std_enum_table.h)
 
 add_library(sn_enum STATIC ${SN_ENUM_SOURCES} ${SN_ENUM_HEADERS})
