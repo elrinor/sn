@@ -10,6 +10,7 @@ set(SN_ENUM_HEADERS
     enum_fwd.h
     enum_reflection.h
     enum_string.h
+    enum_table.h
     frozen_enum_table.h
     std_enum_table.h)
 
