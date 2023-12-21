@@ -1,16 +1,14 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_CORE_SOURCES
-    format.cpp)
-
-set(SN_CORE_HEADERS
     exception.h
+    format.cpp
     format.h
     preprocessor.h
     type_name.h
     type_name_builtins.h)
 
-add_library(sn_core STATIC ${SN_CORE_SOURCES} ${SN_CORE_HEADERS})
+add_library(sn_core STATIC ${SN_CORE_SOURCES})
 add_library(sn::core ALIAS sn_core)
 target_include_directories(sn_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 lint_target(sn_core)

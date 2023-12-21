@@ -1,20 +1,19 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_ENUM_SOURCES
-    enum_exceptions.cpp
-    std_enum_table.cpp)
-
-set(SN_ENUM_HEADERS
     ascii_functions.h
+    enum_exceptions.cpp
     enum_exceptions.h
     enum_fwd.h
     enum_reflection.h
     enum_string.h
     enum_table.h
     frozen_enum_table.h
+    small_buffer.h
+    std_enum_table.cpp
     std_enum_table.h)
 
-add_library(sn_enum STATIC ${SN_ENUM_SOURCES} ${SN_ENUM_HEADERS})
+add_library(sn_enum STATIC ${SN_ENUM_SOURCES})
 add_library(sn::enum ALIAS sn_enum)
 target_compile_definitions(sn_enum PUBLIC SN_MAX_SMALL_BUFFER_SIZE=${SN_MAX_SMALL_BUFFER_SIZE})
 target_link_libraries(sn_enum PUBLIC sn_core sn_string sn_workaround)
