@@ -45,6 +45,8 @@ endif()
 # Set up tests.
 #
 if(SN_BUILD_TESTS)
+    set(BUILD_GMOCK OFF) # We're not using gmock.
+
     FetchContent_Declare(googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
             GIT_TAG "${SN_BUNDLED_GOOGLETEST_TAG}")
