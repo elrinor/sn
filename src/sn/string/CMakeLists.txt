@@ -1,16 +1,14 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_STRING_SOURCES
-    string_builtins.cpp
-    string_exceptions.cpp)
-
-set(SN_STRING_HEADERS
     string.h
+    string_builtins.cpp
     string_builtins.h
+    string_exceptions.cpp
     string_exceptions.h
     string_fwd.h)
 
-add_library(sn_string STATIC ${SN_STRING_SOURCES} ${SN_STRING_HEADERS})
+add_library(sn_string STATIC ${SN_STRING_SOURCES})
 add_library(sn::string ALIAS sn_string)
 target_link_libraries(sn_string PUBLIC sn_core)
 lint_target(sn_string)

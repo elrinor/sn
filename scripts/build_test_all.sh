@@ -40,6 +40,11 @@ if [[ "$BUILD_PLATFORM" == "darwin" ]]; then
     if [[ "$BUILD_ARCH" == "arm64" ]]; then
         # This is a cross-compile, can't run tests.
         RUN_TESTS=false
+
+        # Don't try running the tests for regex impl, we're cross-compiling and they won't run.
+        ADDITIONAL_CMAKE_ARGS+=(
+            "-DHAVE_STD_REGEX=ON"
+        )
     fi
 elif [[ "$BUILD_PLATFORM" == "windows" ]]; then
     ADDITIONAL_CMAKE_ARGS+=(
@@ -90,6 +95,7 @@ function build_test_one() {
     local FORMAT_LIB="$3"
     local FLOAT_LIB="$4"
     local TYPE_NAME_IMPL="$5"
+    local ENUM_HASH_LIB="$6"
 
     echo "================================================================================================"
 
@@ -100,30 +106,34 @@ function build_test_one() {
         "-DSN_FORMAT_LIB=$FORMAT_LIB" \
         "-DSN_FLOAT_LIB=$FLOAT_LIB" \
         "-DSN_TYPE_NAME_IMPL=$TYPE_NAME_IMPL" \
+        "-DSN_ENUM_HASH_LIB=$ENUM_HASH_LIB" \
         "-DSN_CHECK_STYLE=OFF" \
         "${ADDITIONAL_CMAKE_ARGS[@]}"
     cmake --build "$BUILD_DIR" $THREADS_ARG
 
     if [[ "$RUN_TESTS" == "true" ]]; then
         cmake --build "$BUILD_DIR" --target run_all_tests
+        cmake --build "$BUILD_DIR" --target run_all_benchmarks
     fi
 }
 
 for BUILD_TYPE in "Debug" "Release"
 do
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-1" "fmt_bundled" "fast_float_bundled" "funcsig"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-1" "fmt_bundled" "fast_float_bundled" "funcsig" "std"
 
     # Only MSVC has <format>, unfortunately.
     if [[ "$BUILD_PLATFORM" == "windows" ]]; then
-        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-2" "std" "fast_float_bundled" "funcsig"
+        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-2" "std" "fast_float_bundled" "funcsig" "std"
     fi
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "fmt_bundled" "strtof" "funcsig"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "fmt_bundled" "strtof" "funcsig" "std"
 
     # AppleClang and Android clang don't have floating-point std::from_chars
     if [[ "$BUILD_PLATFORM" != "darwin" && "$BUILD_PLATFORM" != "android" ]]; then
-        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "fmt_bundled" "from_chars" "funcsig"
+        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-4" "fmt_bundled" "from_chars" "funcsig" "std"
     fi
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-4" "fmt_bundled" "fast_float_bundled" "typeid"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-5" "fmt_bundled" "fast_float_bundled" "typeid" "std"
+
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-6" "fmt_bundled" "fast_float_bundled" "funcsig" "frozen_bundled"
 done

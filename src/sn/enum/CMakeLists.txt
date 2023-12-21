@@ -1,19 +1,21 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_ENUM_SOURCES
-    enum_exceptions.cpp
-    std_enum_table.cpp)
-
-set(SN_ENUM_HEADERS
     ascii_functions.h
+    enum_exceptions.cpp
     enum_exceptions.h
     enum_fwd.h
     enum_reflection.h
     enum_string.h
+    enum_table.h
+    frozen_enum_table.h
+    small_buffer.h
+    std_enum_table.cpp
     std_enum_table.h)
 
-add_library(sn_enum STATIC ${SN_ENUM_SOURCES} ${SN_ENUM_HEADERS})
+add_library(sn_enum STATIC ${SN_ENUM_SOURCES})
 add_library(sn::enum ALIAS sn_enum)
+target_compile_definitions(sn_enum PUBLIC SN_MAX_SMALL_BUFFER_SIZE=${SN_MAX_SMALL_BUFFER_SIZE})
 target_link_libraries(sn_enum PUBLIC sn_core sn_string sn_workaround)
 lint_target(sn_enum)
 
@@ -35,7 +37,11 @@ else()
 endif()
 
 if(SN_BUILD_TESTS)
-    set(TEST_SN_ENUM_SOURCES enum_string_ut.cpp)
+    set(TEST_SN_ENUM_SOURCES
+        enum_string_multi_ut.h
+        enum_string_multi_first_ut.cpp
+        enum_string_multi_second_ut.cpp
+        enum_string_ut.cpp)
 
     add_executable(test_sn_enum ${TEST_SN_ENUM_SOURCES})
     target_link_libraries(test_sn_enum PUBLIC sn_enum GTest::gtest GTest::gtest_main)
@@ -46,4 +52,18 @@ if(SN_BUILD_TESTS)
         DEPENDS test_sn_enum
         USES_TERMINAL)
     add_dependencies(run_all_tests run_test_sn_enum)
+endif()
+
+if(SN_BUILD_BENCHMARKS)
+    set(BENCHMARK_SN_ENUM_SOURCES enum_string_benchmark.cpp)
+
+    add_executable(benchmark_sn_enum ${BENCHMARK_SN_ENUM_SOURCES})
+    target_link_libraries(benchmark_sn_enum PUBLIC sn_enum benchmark::benchmark benchmark::benchmark_main)
+    lint_target(benchmark_sn_enum)
+
+    add_custom_target(run_benchmark_sn_enum
+        benchmark_sn_enum
+        DEPENDS benchmark_sn_enum
+        USES_TERMINAL)
+    add_dependencies(run_all_benchmarks run_benchmark_sn_enum)
 endif()

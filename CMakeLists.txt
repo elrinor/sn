@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # External settings
 #
 set(SN_BUILD_TESTS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tests")
+set(SN_BUILD_BENCHMARKS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN benchmarks")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
 set(SN_FORMAT_LIB "fmt_bundled" CACHE STRING "Format library to use, 'std', 'fmt_bundled', or 'fmt_external'")
 set_property(CACHE SN_FORMAT_LIB PROPERTY STRINGS std fmt_bundled fmt_external)
@@ -20,19 +21,32 @@ set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
 set(SN_ENUM_HASH_LIB "std" CACHE STRING "Hash library to use for enum serialization hash maps, 'std', 'frozen_bundled', or 'frozen_external'")
 set_property(CACHE SN_ENUM_HASH_LIB PROPERTY STRINGS std frozen_bundled frozen_external)
 
+set(SN_MAX_SMALL_BUFFER_SIZE 128 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase")
+
 set(SN_BUNDLED_FMT_TAG "10.1.1" CACHE STRING "Git tag for the bundled fmt library")
 set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fast_float library")
 set(SN_BUNDLED_FROZEN_TAG "dd1f58c5f6c97fbf0832cc4e84676663839b913e" CACHE STRING "Git tag for the bundled frozen library")
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.14.0" CACHE STRING "Git tag for the bundled google test library")
-set(SN_BUNDLED_CPPLINT_TAG "7b88b68187e3516540fab3caa900988d2179ed24" CACHE STRING "Git tag for the bundled cpplint")
+set(SN_BUNDLED_GOOGLEBENCHMARK_TAG "v1.8.3" CACHE STRING "Git tag for the bundled google benchmark library")
+set(SN_BUNDLED_CPPLINT_TAG "b3fcac06919b83d3e9c8a3b6dc450eba02869092" CACHE STRING "Git tag for the bundled cpplint")
 
 include(FetchContent)
+
+
+#
+# Don't clutter target list when building as a root project
+#
+if(PROJECT_IS_TOP_LEVEL)
+    set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+endif()
 
 
 #
 # Set up tests.
 #
 if(SN_BUILD_TESTS)
+    set(BUILD_GMOCK OFF) # We're not using gmock.
+
     FetchContent_Declare(googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
             GIT_TAG "${SN_BUNDLED_GOOGLETEST_TAG}")
@@ -43,17 +57,34 @@ endif()
 
 
 #
+# Set up benchmarks.
+#
+if(SN_BUILD_BENCHMARKS)
+    set(BENCHMARK_ENABLE_TESTING OFF)
+    set(BENCHMARK_ENABLE_INSTALL OFF)
+    set(BENCHMARK_INSTALL_DOCS OFF)
+
+    FetchContent_Declare(googlebenchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG "${SN_BUNDLED_GOOGLEBENCHMARK_TAG}")
+    FetchContent_MakeAvailable(googlebenchmark)
+
+    add_custom_target(run_all_benchmarks)
+endif()
+
+
+#
 # Set up linting.
 #
 if(SN_CHECK_STYLE)
     find_package(Python COMPONENTS Interpreter)
 
     FetchContent_Declare(cpplint
-            GIT_REPOSITORY https://github.com/cpplint/cpplint.git
+            GIT_REPOSITORY https://github.com/elrinor/cpplint.git
             GIT_TAG "${SN_BUNDLED_CPPLINT_TAG}")
     FetchContent_MakeAvailable(cpplint)
 
-    set(SN_CPPLINT_SCRIPT "${cpplint_SOURCE_DIR}/cpplint.py")
+    set(SN_CPPLINT_SCRIPT "${cpplint_SOURCE_DIR}/cpplint.py" CACHE STRING "Path to cpplint script")
 
     add_custom_target(lint_all)
 endif()
@@ -104,4 +135,8 @@ if(PROJECT_IS_TOP_LEVEL)
     endif()
 endif()
 
+
+#
+# Add sources.
+#
 add_subdirectory(src)
