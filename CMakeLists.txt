@@ -18,7 +18,7 @@ set(SN_FLOAT_LIB "fast_float_bundled" CACHE STRING "Float string functions to us
 set_property(CACHE SN_FLOAT_LIB PROPERTY STRINGS strtof from_chars fast_float_bundled fast_float_external)
 set(SN_TYPE_NAME_IMPL "funcsig" CACHE STRING "Implementation of sn::type_name to use, 'typeid' or 'funcsig'")
 set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
-set(SN_ENUM_HASH_LIB "std" CACHE STRING "Hash library to use for enum serialization hash maps, 'std', 'frozen_bundled', or 'frozen_external'")
+set(SN_ENUM_HASH_LIB "frozen_bundled" CACHE STRING "Hash library to use for enum serialization hash maps, 'std', 'frozen_bundled', or 'frozen_external'")
 set_property(CACHE SN_ENUM_HASH_LIB PROPERTY STRINGS std frozen_bundled frozen_external)
 
 set(SN_MAX_SMALL_BUFFER_SIZE 128 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase")
