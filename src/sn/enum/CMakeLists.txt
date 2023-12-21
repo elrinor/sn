@@ -37,7 +37,11 @@ else()
 endif()
 
 if(SN_BUILD_TESTS)
-    set(TEST_SN_ENUM_SOURCES enum_string_ut.cpp)
+    set(TEST_SN_ENUM_SOURCES
+        enum_string_multi_ut.h
+        enum_string_multi_first_ut.cpp
+        enum_string_multi_second_ut.cpp
+        enum_string_ut.cpp)
 
     add_executable(test_sn_enum ${TEST_SN_ENUM_SOURCES})
     target_link_libraries(test_sn_enum PUBLIC sn_enum GTest::gtest GTest::gtest_main)

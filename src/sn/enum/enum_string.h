@@ -18,7 +18,7 @@
 // TODO(elric): #cpp23 the magic below with _enum_table_container isn't needed in c++23, can just create a static
 //              constexpr variable inside a function.
 
-#define SN_DEFINE_ENUM_STRING_FUNCTIONS(ENUM, CASE_SENSITIVITY, ... /* TAGS */)                                         \
+#define _SN_DEFINE_ENUM_STRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, ATTRIBUTES, ... /* TAGS */)                          \
     template<class...>                                                                                                  \
     struct _enum_table_container;                                                                                       \
                                                                                                                         \
@@ -28,18 +28,27 @@
         _SN_DEFINE_ENUM_STRING_TABLE(value, ENUM, CASE_SENSITIVITY, reflection)                                         \
     };                                                                                                                  \
                                                                                                                         \
-    [[nodiscard]] bool try_to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept {            \
+    [[nodiscard]] ATTRIBUTES bool try_to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept { \
         return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_to_string(src, dst);                    \
     }                                                                                                                   \
                                                                                                                         \
-    void to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) {                                       \
+    ATTRIBUTES void to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) {                            \
         _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.to_string(src, dst);                               \
     }                                                                                                                   \
                                                                                                                         \
-    [[nodiscard]] bool try_from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) noexcept {            \
+    [[nodiscard]] ATTRIBUTES bool try_from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) noexcept { \
         return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_from_string(src, dst);                  \
     }                                                                                                                   \
                                                                                                                         \
-    void from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) {                                       \
+    ATTRIBUTES void from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) {                            \
         _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.from_string(src, dst);                             \
     }
+
+#define SN_DEFINE_ENUM_STRING_FUNCTIONS(ENUM, CASE_SENSITIVITY, ... /* TAGS */)                                         \
+    _SN_DEFINE_ENUM_STRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, [[]] __VA_OPT__(,) __VA_ARGS__)
+
+#define SN_DEFINE_INLINE_ENUM_STRING_FUNCTIONS(ENUM, CASE_SENSITIVITY, ... /* TAGS */)                                  \
+    _SN_DEFINE_ENUM_STRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, inline __VA_OPT__(,) __VA_ARGS__)
+
+#define SN_DEFINE_STATIC_ENUM_STRING_FUNCTIONS(ENUM, CASE_SENSITIVITY, ... /* TAGS */)                                  \
+    _SN_DEFINE_ENUM_STRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, static __VA_OPT__(,) __VA_ARGS__)
