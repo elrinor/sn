@@ -1,6 +1,7 @@
 #pragma once
 
 #include <system_error>
+#include <string_view>
 
 #include "sn/core/type_name.h"
 
