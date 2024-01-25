@@ -21,12 +21,12 @@ namespace sn::builtins {
 // bool.
 //
 
-bool try_to_string(const bool &src, std::string *dst) noexcept {
+bool try_to_string(const bool &src, std::string *dst, tn::detail::explicit_type) noexcept {
     *dst = src ? "true" : "false";
     return true;
 }
 
-bool try_from_string(std::string_view src, bool *dst) noexcept {
+bool try_from_string(std::string_view src, bool *dst, tn::detail::explicit_type) noexcept {
     if (src == "true" || src == "1") {
         *dst = true;
         return true;
@@ -38,12 +38,12 @@ bool try_from_string(std::string_view src, bool *dst) noexcept {
     }
 }
 
-void to_string(const bool &src, std::string *dst) {
-    (void) try_to_string(src, dst); // Always succeeds.
+void to_string(const bool &src, std::string *dst, tn::detail::explicit_type) {
+    (void) try_to_string(src, dst, tn::detail::explicit_type()); // Always succeeds.
 }
 
-void from_string(std::string_view src, bool *dst) {
-    if (!try_from_string(src, dst))
+void from_string(std::string_view src, bool *dst, tn::detail::explicit_type) {
+    if (!try_from_string(src, dst, tn::detail::explicit_type()))
         throw_from_string_error<bool>(src);
 }
 

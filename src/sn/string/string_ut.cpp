@@ -2,6 +2,40 @@
 
 #include "string.h"
 
+template<class T>
+void run_pointer_tests() {
+    // This one is checking that to_string with non-char pointers doesn't compile. We have to call directly into
+    // sn::builtins because the entrypoint in namespace sn is unconstrained.
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(U"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(u"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(u8"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(L"123", &s); });
+
+    // Same for from_string, albeit this one is more of a sanity check as the first arg is always std::string_view.
+    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(U"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u8"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(L"123", &s); });
+
+    // And we also do some sanity checks for non-char pointers.
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<void *>(nullptr), &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<int *>(nullptr), &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<const void *>(nullptr), &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<const int *>(nullptr), &s); });
+}
+
+TEST(string, string) {
+    run_pointer_tests<std::string>();
+
+    // Char strings work.
+    EXPECT_EQ(sn::to_string("123"), "123");
+    EXPECT_EQ(sn::to_string(std::string("123")), "123");
+    EXPECT_EQ(sn::to_string(std::string_view("123")), "123");
+    EXPECT_EQ(sn::from_string<std::string>("123"), "123");
+    EXPECT_EQ(sn::from_string<std::string>(std::string("123")), "123");
+    EXPECT_EQ(sn::from_string<std::string>(std::string_view("123")), "123");
+}
+
 TEST(string, boolean) {
     EXPECT_EQ(sn::from_string<bool>(sn::to_string(true)), true);
     EXPECT_EQ(sn::from_string<bool>(sn::to_string(false)), false);
