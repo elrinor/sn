@@ -6,8 +6,7 @@ set(SN_STRING_SOURCES
     string_builtins.h
     string_exceptions.cpp
     string_exceptions.h
-    string_fwd.h
-    string_tags.h)
+    string_fwd.h)
 
 add_library(sn_string STATIC ${SN_STRING_SOURCES})
 add_library(sn::string ALIAS sn_string)

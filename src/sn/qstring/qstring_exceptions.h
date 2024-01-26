@@ -3,7 +3,7 @@
 #include <system_error>
 #include <string_view>
 
-#include <QtCore/QStringView>
+#include <QtCore/QStringView> // NOLINT.
 
 #include "sn/core/type_name.h"
 

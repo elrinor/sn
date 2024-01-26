@@ -11,7 +11,7 @@ void run_pointer_tests() {
     EXPECT_FALSE(requires(T s) { sn::builtins::to_string(u8"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::to_string(L"123", &s); });
 
-    // Same for from_string, albeit this one is more of a sanity check as the first arg is always std::string_view.
+    // Same for from_string, albeit this one is more of a sanity check as the first arg is always a std::string_view.
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(U"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u8"123", &s); });
