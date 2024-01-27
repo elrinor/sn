@@ -12,6 +12,7 @@ include(FetchContent)
 # External settings
 #
 set(SN_BUILD_TESTS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tests")
+set(SN_BUILD_TOOLS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tools")
 set(SN_BUILD_BENCHMARKS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN benchmarks")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
 
@@ -157,3 +158,4 @@ endif()
 # Add sources.
 #
 add_subdirectory(src)
+add_subdirectory(tools)
