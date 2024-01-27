@@ -38,6 +38,7 @@ endif()
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_ENUM_SOURCES
+        ascii_functions_ut.cpp
         enum_string_multi_ut.h
         enum_string_multi_first_ut.cpp
         enum_string_multi_second_ut.cpp
