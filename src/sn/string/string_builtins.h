@@ -34,28 +34,11 @@ inline void from_string(std::string_view src, std::string *dst) {
 
 
 //
-// Support for arithmetic types.
-//
-// No support for char / unsigned char / signed char here, as it's not clear what the default behavior should be.
-//
-
-SN_DECLARE_STRING_FUNCTIONS(bool, tn::detail::explicit_type_tag)
-SN_DECLARE_STRING_FUNCTIONS(short)
-SN_DECLARE_STRING_FUNCTIONS(unsigned short)
-SN_DECLARE_STRING_FUNCTIONS(int)
-SN_DECLARE_STRING_FUNCTIONS(unsigned int)
-SN_DECLARE_STRING_FUNCTIONS(long)
-SN_DECLARE_STRING_FUNCTIONS(unsigned long)
-SN_DECLARE_STRING_FUNCTIONS(long long)
-SN_DECLARE_STRING_FUNCTIONS(unsigned long long)
-SN_DECLARE_STRING_FUNCTIONS(float)
-SN_DECLARE_STRING_FUNCTIONS(double)
-
-
-//
 // Support for bool, ignoring builtin conversions. If we don't ignore them, then bool overload becomes a catch-all
 // for all pointer types.
 //
+
+SN_DECLARE_STRING_FUNCTIONS(bool, tn::detail::explicit_type_tag)
 
 template<std::same_as<bool> T>
 [[nodiscard]] bool try_to_string(const T &src, std::string *dst) noexcept {
@@ -76,5 +59,23 @@ template<std::same_as<bool> T>
 void from_string(std::string_view src, T *dst) {
     from_string(src, dst, tn::detail::explicit_type);
 }
+
+
+//
+// Support for arithmetic types.
+//
+// No support for char / unsigned char / signed char here, as it's not clear what the default behavior should be.
+//
+
+SN_DECLARE_STRING_FUNCTIONS(short)
+SN_DECLARE_STRING_FUNCTIONS(unsigned short)
+SN_DECLARE_STRING_FUNCTIONS(int)
+SN_DECLARE_STRING_FUNCTIONS(unsigned int)
+SN_DECLARE_STRING_FUNCTIONS(long)
+SN_DECLARE_STRING_FUNCTIONS(unsigned long)
+SN_DECLARE_STRING_FUNCTIONS(long long)
+SN_DECLARE_STRING_FUNCTIONS(unsigned long long)
+SN_DECLARE_STRING_FUNCTIONS(float)
+SN_DECLARE_STRING_FUNCTIONS(double)
 
 } // namespace sn::builtins

@@ -163,7 +163,7 @@ inline void from_string(std::string_view src, T *dst) {
 } // namespace detail_fast_float
 #endif // SN_USE_FAST_FLOAT
 
-#define MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(TYPE, FROM_STRING_NAMESPACE)                                            \
+#define SN_DEFINE_PROXY_STRING_FUNCTIONS(TYPE, FROM_STRING_NAMESPACE)                                            \
     bool try_to_string(const TYPE &src, std::string *dst) noexcept { return detail_to_string::try_to_string(src, dst); } \
     bool try_from_string(std::string_view src, TYPE *dst) noexcept { return FROM_STRING_NAMESPACE::try_from_string(src, dst); }  \
     void to_string(const TYPE &src, std::string *dst) { detail_to_string::to_string(src, dst); }                        \
@@ -179,15 +179,15 @@ inline void from_string(std::string_view src, T *dst) {
 #   error "Floating point string conversion library not configured"
 #endif
 
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(short, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(unsigned short, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(int, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(unsigned int, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(long, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(unsigned long, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(long long, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(unsigned long long, detail_from_chars)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
-MM_DEFINE_PROXY_SERIALIZATION_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(short, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned short, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(int, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned int, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(long, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned long, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(long long, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned long long, detail_from_chars)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
+SN_DEFINE_PROXY_STRING_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
 
 } // namespace sn::builtins
