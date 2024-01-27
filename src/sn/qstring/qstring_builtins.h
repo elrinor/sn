@@ -49,16 +49,11 @@ void to_qstring(const T &src, QString *dst) {
 
 
 //
-// Support for arithmetic types.
-//
-
-SN_DECLARE_QSTRING_FUNCTIONS(bool, tn::detail::explicit_type_tag)
-
-
-//
 // Support for bool, ignoring builtin conversions. If we don't ignore them, then bool overload becomes a catch-all
 // for all pointer types.
 //
+
+SN_DECLARE_QSTRING_FUNCTIONS(bool, tn::detail::explicit_type_tag)
 
 template<std::same_as<bool> T>
 [[nodiscard]] bool try_to_qstring(const T &src, QString *dst) noexcept {
@@ -80,5 +75,22 @@ void from_qstring(QStringView src, T *dst) {
     from_qstring(src, dst, tn::detail::explicit_type);
 }
 
+
+//
+// Support for arithmetic types.
+//
+// No support for char / unsigned char / signed char here, as it's not clear what the default behavior should be.
+//
+
+SN_DECLARE_QSTRING_FUNCTIONS(short)
+SN_DECLARE_QSTRING_FUNCTIONS(unsigned short)
+SN_DECLARE_QSTRING_FUNCTIONS(int)
+SN_DECLARE_QSTRING_FUNCTIONS(unsigned int)
+SN_DECLARE_QSTRING_FUNCTIONS(long)
+SN_DECLARE_QSTRING_FUNCTIONS(unsigned long)
+SN_DECLARE_QSTRING_FUNCTIONS(long long)
+SN_DECLARE_QSTRING_FUNCTIONS(unsigned long long)
+SN_DECLARE_QSTRING_FUNCTIONS(float)
+SN_DECLARE_QSTRING_FUNCTIONS(double)
 
 } // namespace sn::builtins

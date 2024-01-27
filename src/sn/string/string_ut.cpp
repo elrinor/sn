@@ -5,7 +5,7 @@
 #include "string.h"
 
 template<class T>
-void run_pointer_tests() {
+static void run_pointer_tests() {
     // This one is checking that to_string with non-char pointers doesn't compile. We have to call directly into
     // sn::builtins because the entrypoint in namespace sn is unconstrained.
     EXPECT_FALSE(requires(T s) { sn::builtins::to_string(U"123", &s); });
@@ -48,7 +48,7 @@ TEST(string, boolean) {
     EXPECT_ANY_THROW((void) sn::from_string<bool>(""));
 }
 
-std::string prepend_zeros(int zeros, std::string_view number_string) {
+static std::string prepend_zeros(int zeros, std::string_view number_string) {
     std::string result;
 
     if (number_string.starts_with('-')) {
@@ -62,7 +62,7 @@ std::string prepend_zeros(int zeros, std::string_view number_string) {
 }
 
 template<class T>
-void run_integer_tests() {
+static void run_integer_tests() {
     EXPECT_EQ(sn::to_string(static_cast<T>(0)), "0");
     EXPECT_EQ(sn::from_string<T>("0"), 0);
 

@@ -148,6 +148,8 @@ if(PROJECT_IS_TOP_LEVEL)
         add_compile_options(/we4172) # Returning address of local variable or temporary.
         add_compile_options(/we26433) # Function should be marked with 'override'.
     endif()
+
+    add_compile_definitions(QT_NO_CAST_FROM_ASCII) # Don't auto-cast from const char * to QString.
 endif()
 
 
