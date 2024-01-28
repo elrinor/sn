@@ -2,25 +2,25 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_CORE_SOURCES
     exception.h
-    format.cpp
     format.h
+    globals.h
     preprocessor.h
     type_name.h
     type_name_builtins.h)
 
-add_library(sn_core STATIC ${SN_CORE_SOURCES})
+add_library(sn_core INTERFACE ${SN_CORE_SOURCES})
 add_library(sn::core ALIAS sn_core)
-target_include_directories(sn_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+target_include_directories(sn_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 lint_target(sn_core)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(sn_core PUBLIC "/Zc:preprocessor")
+    target_compile_options(sn_core INTERFACE "/Zc:preprocessor")
 endif()
 
 if(SN_FORMAT_LIB STREQUAL "std")
-    target_compile_definitions(sn_core PUBLIC SN_USE_STD_FORMAT=1)
+    target_compile_definitions(sn_core INTERFACE SN_USE_STD_FORMAT=1)
 elseif(SN_FORMAT_LIB STREQUAL "fmt_bundled" OR SN_FORMAT_LIB STREQUAL "fmt_external")
-    target_compile_definitions(sn_core PUBLIC SN_USE_FMT_FORMAT=1)
+    target_compile_definitions(sn_core INTERFACE SN_USE_FMT_FORMAT=1)
 
     if(SN_FORMAT_LIB STREQUAL "fmt_bundled")
         FetchContent_Declare(fmt
@@ -29,15 +29,15 @@ elseif(SN_FORMAT_LIB STREQUAL "fmt_bundled" OR SN_FORMAT_LIB STREQUAL "fmt_exter
         FetchContent_MakeAvailable(fmt)
     endif()
 
-    target_link_libraries(sn_core PUBLIC fmt::fmt)
+    target_link_libraries(sn_core INTERFACE fmt::fmt)
 else()
     message(FATAL_ERROR "Unsupported value '${SN_FORMAT_LIB}' for SN_FORMAT_LIB")
 endif()
 
 if(SN_TYPE_NAME_IMPL STREQUAL "typeid")
-    target_compile_definitions(sn_core PUBLIC SN_USE_TYPEID_TYPE_NAME=1)
+    target_compile_definitions(sn_core INTERFACE SN_USE_TYPEID_TYPE_NAME=1)
 elseif(SN_TYPE_NAME_IMPL STREQUAL "funcsig")
-    target_compile_definitions(sn_core PUBLIC SN_USE_FUNCSIG_TYPE_NAME=1)
+    target_compile_definitions(sn_core INTERFACE SN_USE_FUNCSIG_TYPE_NAME=1)
 else()
     message(FATAL_ERROR "Unsupported value '${SN_TYPE_NAME_IMPL}' for SN_TYPE_NAME_IMPL")
 endif()

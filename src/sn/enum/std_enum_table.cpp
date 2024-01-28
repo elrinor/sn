@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "ascii_functions.h"
+#include "sn/detail/ascii/ascii_functions.h"
 
 namespace sn::detail {
 

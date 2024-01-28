@@ -6,5 +6,4 @@ set(SN_WORKAROUND_SOURCES
 
 add_library(sn_workaround INTERFACE ${SN_WORKAROUND_SOURCES})
 add_library(sn::workaround ALIAS sn_workaround)
-target_include_directories(sn_workaround INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 lint_target(sn_workaround)

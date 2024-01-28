@@ -1,27 +1,38 @@
 #pragma once
 
-#include <cassert>
-#include <array>
-#include <utility> // For std::forward, std::pair.
-#include <string>
+#include <cstdint>
+#include <concepts>
+#include <utility> // For std::pair.
 #include <string_view>
 
-#include "sn/core/type_name.h"
-#include "sn/string/string.h"
+#include "sn/core/globals.h"
 
-#include "ascii_functions.h"
 #include "small_buffer.h"
-#include "enum_exceptions.h"
-#include "enum_fwd.h"
+#include "enum_table_exceptions.h"
 
 namespace sn::detail {
 
-template<class T>
-constexpr bool is_signed_ex_v = std::is_signed_v<typename std::conditional_t<std::is_enum_v<T>, std::underlying_type<T>, std::type_identity<T>>::type>;
+template<class Traits>
+concept enum_table_traits = requires(typename Traits::string_type s, typename Traits::string_view_type sv, typename Traits::string_type::value_type c) {
+    // There should also be void Traits::assign(*, &s), but we can't express it easily.
+    { Traits::to_lower_size(sv) } -> std::same_as<std::size_t>;
+    { Traits::to_lower(sv, &c) } -> std::same_as<typename Traits::string_view_type>;
+    { Traits::to_std(sv) } -> std::convertible_to<std::string_view>;
+}; // NOLINT
 
-template<class Base>
+
+/**
+ * Type-erased enum table implementation. Uses `std::uint64_t` internally to store enum values.
+ *
+ * @tparam Traits                       Table traits.
+ * @tparam Base                         Base table. Needs to expose `to_string_map` and `from_string_map` fields.
+ */
+template<enum_table_traits Traits, class Base>
 struct universal_enum_table {
 public:
+    using string_type = typename Traits::string_type;
+    using string_view_type = typename Traits::string_view_type;
+
     // sn::type_name is not constexpr b/c it has typeid() as one of its backends. Thus, we cannot use type name as an
     // argument to a constexpr constructor. We can, however, use a pointer to a function doing what we need. This
     // won't be a performance problem b/c it's on the cold (exception-throwing) path.
@@ -35,7 +46,7 @@ public:
         _base(std::forward<Args>(args)...)
     {}
 
-    // We're not following our own API conventions here mainly for the sake of a better codegen.
+    // We're not following our own API conventions here mainly for the sake of better codegen.
     // Both x86_64 and arm64 ABIs return structs up to 16 bytes in registers, and it makes a lot of sense to use this here.
 
     struct try_from_string_result {
@@ -43,10 +54,10 @@ public:
         bool ok = false;
     };
 
-    void to_string(std::uint64_t src, std::string *dst) const {
+    void to_string(std::uint64_t src, string_type *dst) const {
         auto pos = _base.to_string_map.find(src);
         if (pos != _base.to_string_map.end()) {
-            dst->assign(pos->second.data(), pos->second.size());
+            Traits::assign(pos->second, dst);
         } else {
             if (_is_signed) {
                 // This static_cast relies on implementation-defined behavior, but it's symmetric to what we have in
@@ -59,28 +70,28 @@ public:
     }
 
     template<case_sensitivity mode>
-    [[nodiscard]] std::uint64_t from_string(std::string_view src) const {
+    [[nodiscard]] std::uint64_t from_string(string_view_type src) const {
         assert(_mode == mode);
 
-        auto run = [&] (std::string_view src) {
+        auto run = [&] (string_view_type src) {
             auto pos = _base.from_string_map.find(src);
             if (pos == _base.from_string_map.end())
-                throw_enum_from_string_error(_type_name(), src);
+                throw_enum_from_string_error(_type_name(), Traits::to_std(src));
             return pos->second;
         };
 
         if constexpr (mode == case_insensitive) {
-            small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer(src.size());
-            return run(sn::detail::to_lower_ascii(src, buffer.data()));
+            small_buffer<typename string_type::value_type, SN_MAX_SMALL_BUFFER_SIZE> buffer(Traits::to_lower_size(src));
+            return run(Traits::to_lower(src, buffer.data()));
         } else {
             return run(src);
         }
     }
 
-    [[nodiscard]] bool try_to_string(std::uint64_t src, std::string *dst) const noexcept {
+    [[nodiscard]] bool try_to_string(std::uint64_t src, string_type *dst) const noexcept {
         auto pos = _base.to_string_map.find(src);
         if (pos != _base.to_string_map.end()) {
-            dst->assign(pos->second.data(), pos->second.size());
+            Traits::assign(pos->second, dst);
             return true;
         } else {
             return false;
@@ -88,10 +99,10 @@ public:
     }
 
     template<case_sensitivity mode>
-    [[nodiscard]] try_from_string_result try_from_string(std::string_view src) const noexcept {
+    [[nodiscard]] try_from_string_result try_from_string(string_view_type src) const noexcept {
         assert(_mode == mode);
 
-        auto run = [&] (std::string_view src) -> try_from_string_result {
+        auto run = [&] (string_view_type src) -> try_from_string_result {
             auto pos = _base.from_string_map.find(src);
             if (pos != _base.from_string_map.end()) {
                 return {pos->second, true};
@@ -101,8 +112,8 @@ public:
         };
 
         if constexpr (mode == case_insensitive) {
-            small_buffer<char, SN_MAX_SMALL_BUFFER_SIZE> buffer(src.size());
-            return run(sn::detail::to_lower_ascii(src, buffer.data()));
+            small_buffer<typename string_type::value_type, SN_MAX_SMALL_BUFFER_SIZE> buffer(Traits::to_lower_size(src));
+            return run(Traits::to_lower(src, buffer.data()));
         } else {
             return run(src);
         }
@@ -115,35 +126,13 @@ private:
     bool _is_signed;
 };
 
-template<class T, case_sensitivity mode, class Base>
-class enum_table {
-public:
-    template<class... Args>
-    explicit constexpr enum_table(Args &&... args) : _table(mode, &sn::type_name<T>, is_signed_ex_v<T>, std::forward<Args>(args)...) {}
 
-    void to_string(T src, std::string *dst) const {
-        _table.to_string(static_cast<std::uint64_t>(src), dst);
-    }
-
-    void from_string(std::string_view src, T *dst) const {
-        *dst = static_cast<T>(_table.template from_string<mode>(src));
-    }
-
-    [[nodiscard]] bool try_to_string(T src, std::string *dst) const noexcept {
-        return _table.try_to_string(static_cast<std::uint64_t>(src), dst);
-    }
-
-    [[nodiscard]] bool try_from_string(std::string_view src, T *dst) const noexcept {
-        auto result = _table.template try_from_string<mode>(src);
-        if (result.ok)
-            *dst = static_cast<T>(result.value);
-        return result.ok;
-    }
-
-private:
-    universal_enum_table<Base> _table;
-};
-
+/**
+ * Type-erases an enum reflection array, producing an array that's suitable for usage with `universal_enum_table`.
+ *
+ * @param pairs                         Enum reflection array, as returned from `sn::reflect_enum`.
+ * @return                              Type-erased enum reflection array, with enum values converted to `std::uint64_t`.
+ */
 template<class T, std::size_t size>
 consteval auto type_erase_enum_reflection(const std::array<std::pair<T, std::string_view>, size> &pairs) {
     std::array<std::pair<std::uint64_t, std::string_view>, size> result = {{}};
@@ -153,4 +142,3 @@ consteval auto type_erase_enum_reflection(const std::array<std::pair<T, std::str
 }
 
 } // namespace sn::detail
-

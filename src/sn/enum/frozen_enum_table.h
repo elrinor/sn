@@ -11,8 +11,9 @@
 #include <frozen/unordered_map.h> // NOLINT
 #include <frozen/string.h> // NOLINT
 
-#include "ascii_functions.h"
-#include "enum_table.h"
+#include "sn/core/globals.h"
+#include "sn/detail/ascii/ascii_functions.h"
+#include "sn/detail/enum_table/enum_table.h"
 
 namespace sn::detail {
 
@@ -137,6 +138,27 @@ consteval auto make_from_string_storage(const to_string_array<size> &pairs) {
     }
 }
 
+struct frozen_enum_table_traits {
+    using string_type = std::string;
+    using string_view_type = std::string_view;
+
+    static void assign(const frozen::string &src, std::string *dst) {
+        dst->assign(src.data(), src.size());
+    }
+
+    static std::size_t to_lower_size(std::string_view s) {
+        return s.size();
+    }
+
+    static std::string_view to_lower(std::string_view s, char *buffer) {
+        return to_lower_ascii(s, buffer);
+    }
+
+    static std::string_view to_std(std::string_view s) {
+        return s;
+    }
+};
+
 template<case_sensitivity mode, std::size_t to_string_size, std::size_t from_string_size>
 struct frozen_enum_table_base {
     // TODO(elric): #cpp23 this one should be consteval, but requires P2564 to work, which is in C++23.
@@ -158,6 +180,6 @@ struct frozen_enum_table_base {
     static constexpr auto total_string_size = sn::detail::count_total_string_size(type_erased_pairs);                   \
     static constexpr auto from_string_storage = sn::detail::make_from_string_storage<CASE_SENSITIVITY, total_string_size>(type_erased_pairs); \
     static constexpr auto TABLE_NAME =                                                                                  \
-        sn::detail::enum_table<ENUM, CASE_SENSITIVITY, sn::detail::frozen_enum_table_base<CASE_SENSITIVITY, unique_key_count, total_key_count>>( \
+        sn::detail::enum_table<ENUM, CASE_SENSITIVITY, sn::detail::frozen_enum_table_traits, sn::detail::frozen_enum_table_base<CASE_SENSITIVITY, unique_key_count, total_key_count>>( \
             sn::detail::make_unique_to_string_array<unique_key_count>(type_erased_pairs),                               \
             from_string_storage.value());

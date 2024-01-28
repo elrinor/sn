@@ -1,28 +1,22 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_ENUM_SOURCES
-    ascii_functions.h
-    enum_exceptions.cpp
-    enum_exceptions.h
-    enum_fwd.h
     enum_reflection.h
     enum_string.h
-    enum_table.h
     frozen_enum_table.h
-    small_buffer.h
     std_enum_table.cpp
     std_enum_table.h)
 
 add_library(sn_enum STATIC ${SN_ENUM_SOURCES})
 add_library(sn::enum ALIAS sn_enum)
 target_compile_definitions(sn_enum PUBLIC SN_MAX_SMALL_BUFFER_SIZE=${SN_MAX_SMALL_BUFFER_SIZE})
-target_link_libraries(sn_enum PUBLIC sn_core sn_string sn_workaround)
+target_link_libraries(sn_enum PUBLIC sn_core sn_string sn_ascii sn_enum_table)
 lint_target(sn_enum)
 
 if(SN_ENUM_HASH_LIB STREQUAL "std")
-    target_compile_definitions(sn_core PUBLIC SN_USE_STD_ENUM_HASH=1)
+    target_compile_definitions(sn_core INTERFACE SN_USE_STD_ENUM_HASH=1)
 elseif(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled" OR SN_ENUM_HASH_LIB STREQUAL "frozen_external")
-    target_compile_definitions(sn_core PUBLIC SN_USE_FROZEN_ENUM_HASH=1)
+    target_compile_definitions(sn_core INTERFACE SN_USE_FROZEN_ENUM_HASH=1)
 
     if(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled")
         FetchContent_Declare(frozen
@@ -31,14 +25,13 @@ elseif(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled" OR SN_ENUM_HASH_LIB STREQUAL "
         FetchContent_MakeAvailable(frozen)
     endif()
 
-    target_link_libraries(sn_enum PUBLIC frozen::frozen)
+    target_link_libraries(sn_enum INTERFACE frozen::frozen)
 else()
     message(FATAL_ERROR "Unsupported value '${SN_ENUM_HASH_LIB}' for SN_ENUM_HASH_LIB")
 endif()
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_ENUM_SOURCES
-        ascii_functions_ut.cpp
         enum_string_multi_ut.h
         enum_string_multi_first_ut.cpp
         enum_string_multi_second_ut.cpp

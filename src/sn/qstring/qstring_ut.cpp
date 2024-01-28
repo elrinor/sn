@@ -117,7 +117,7 @@ static void run_integer_tests() {
     EXPECT_ANY_THROW((void) sn::from_qstring<T>(QStringLiteral("0-1")));
 }
 
-TEST(string, ints) {
+TEST(qstring, ints) {
     run_integer_tests<short>();
     run_integer_tests<unsigned short>();
     run_integer_tests<int>();
