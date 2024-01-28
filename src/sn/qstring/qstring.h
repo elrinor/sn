@@ -64,7 +64,7 @@ inline constexpr sn::niebloids::from_qstring<T> from_qstring_v;
 
 template<class T, class... Tags>
 [[nodiscard]] bool try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
-return sn::detail::do_try_to_qstring(src, dst, tags...);
+    return sn::detail::do_try_to_qstring(src, dst, tags...);
 }
 
 template<class T, class... Tags>
@@ -81,7 +81,7 @@ template<class T, class... Tags>
 
 template<class T, class... Tags>
 [[nodiscard]] bool try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
-return sn::detail::do_try_from_qstring(src, dst, tags...);
+    return sn::detail::do_try_from_qstring(src, dst, tags...);
 }
 
 template<class T, class... Tags>
