@@ -5,6 +5,7 @@
 
 #include "sn/core/preprocessor.h"
 #include "sn/string/string.h"
+#include "sn/detail/preprocessor/preprocessor.h"
 
 #if SN_USE_STD_ENUM_HASH
 #   include "std_enum_table.h"
@@ -19,15 +20,13 @@
 // TODO(elric): #cpp23 the magic below with _enum_table_container isn't needed in c++23, can just create a static
 //              constexpr variable inside a function.
 
-#define _SN_APPEND_PARENS(X) X()
-
 #define _SN_DEFINE_ENUM_STRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, TABLE_DEFINITION_MACRO, ATTRIBUTES, ... /* TAGS */)  \
     template<class...>                                                                                                  \
     struct _enum_table_container;                                                                                       \
                                                                                                                         \
     template<>                                                                                                          \
     struct _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__> {                                                      \
-        static constexpr auto reflection = sn::reflect_enum<ENUM>(__VA_OPT__(SN_PP_TUPLE_FOR_EACH(_SN_APPEND_PARENS, (__VA_ARGS__)))); \
+        static constexpr auto reflection = sn::reflect_enum<ENUM>(__VA_OPT__(SN_PP_TUPLE_FOR_EACH(_SN_PP_APPEND_PARENS, (__VA_ARGS__)))); \
         TABLE_DEFINITION_MACRO(value, ENUM, CASE_SENSITIVITY, reflection)                                               \
     };                                                                                                                  \
                                                                                                                         \

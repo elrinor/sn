@@ -68,7 +68,7 @@ return sn::detail::do_try_to_qstring(src, dst, tags...);
 }
 
 template<class T, class... Tags>
-void to_string(const T &src, QString *dst, Tags... tags) {
+void to_qstring(const T &src, QString *dst, Tags... tags) {
     sn::detail::do_to_qstring(src, dst, tags...);
 }
 
