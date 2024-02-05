@@ -103,8 +103,8 @@ inline double strto<double>(const char *str, const char **end) {
 
 template<class T>
 inline bool try_from_string(std::string_view src, T *dst) noexcept {
-    if (src.empty() || std::isspace(src[0]))
-        return false; // We behave the same as std::from_chars and don't skip whitespaces.
+    if (src.empty() || std::isspace(src[0]) || src[0] == '+')
+        return false; // We behave the same as std::from_chars and don't skip whitespaces and don't allow leading '+'.
 
     const char *end = src.data() + src.size();
     errno = 0; // strto* do not change the setting of the errno on success.
@@ -120,10 +120,10 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
 
 template<class T>
 inline void from_string(std::string_view src, T *dst) {
-    if (src.empty() || std::isspace(src[0]))
+    // Implementation is pretty much a copy of try_from_string.
+    if (src.empty() || std::isspace(src[0]) || src[0] == '+')
         throw_number_from_string_error<T>(src, std::errc::invalid_argument);
 
-    // Implementation pretty much a copy of try_from_string.
     const char *end = src.data() + src.size();
     errno = 0;
     T result = strto<T>(src.data(), &end);

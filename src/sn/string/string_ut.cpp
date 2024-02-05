@@ -114,6 +114,10 @@ static void run_integer_tests() {
     EXPECT_ANY_THROW((void) sn::from_string<T>(""));
     EXPECT_ANY_THROW((void) sn::from_string<T>(" 1"));
     EXPECT_ANY_THROW((void) sn::from_string<T>("1 "));
+    EXPECT_ANY_THROW((void) sn::from_string<T>(" 111"));
+    EXPECT_ANY_THROW((void) sn::from_string<T>("111 "));
+    EXPECT_ANY_THROW((void) sn::from_string<T>("\t111"));
+    EXPECT_ANY_THROW((void) sn::from_string<T>("111\t"));
     EXPECT_ANY_THROW((void) sn::from_string<T>("+1"));
     EXPECT_ANY_THROW((void) sn::from_string<T>("--1"));
     EXPECT_ANY_THROW((void) sn::from_string<T>("0x1"));
@@ -137,9 +141,26 @@ TEST(string, floats) {
     EXPECT_EQ(sn::from_string<float>(sn::to_string(1.5)), 1.5);
     EXPECT_EQ(sn::to_string(1.5), "1.5");
     EXPECT_EQ(sn::to_string(-1.5), "-1.5");
+    EXPECT_EQ(sn::from_string<float>("0.5"), 0.5);
+    EXPECT_EQ(sn::from_string<float>(".5"), 0.5);
+    EXPECT_EQ(sn::from_string<float>("0"), 0);
+    EXPECT_EQ(sn::from_string<float>("0.0"), 0);
+    EXPECT_EQ(sn::from_string<float>(prepend_zeros(100, "0.0")), 0);
+    EXPECT_EQ(sn::from_string<float>("1.0e2"), 100.0);
+    EXPECT_EQ(sn::from_string<float>("1.e2"), 100.0);
+    EXPECT_EQ(sn::from_string<float>(".1e2"), 10.0);
+    EXPECT_EQ(sn::from_string<float>(".1e+2"), 10.0);
+    EXPECT_EQ(sn::from_string<float>("5.0e-1"), 0.5);
+    EXPECT_EQ(sn::from_string<float>(".1e+2"), 10.0);
+    EXPECT_EQ(sn::from_string<float>("5.0e-1"), 0.5);
+    EXPECT_EQ(sn::from_string<float>(".1e+" + prepend_zeros(100, "2")), 10.0);
+    EXPECT_EQ(sn::from_string<float>("5.0e-" + prepend_zeros(100, "1")), 0.5);
 
+    EXPECT_ANY_THROW((void) sn::from_string<float>("+1.5"));
     EXPECT_ANY_THROW((void) sn::from_string<float>(" 1.5"));
     EXPECT_ANY_THROW((void) sn::from_string<float>("1.5 "));
+    EXPECT_ANY_THROW((void) sn::from_string<float>("\t10.0000"));
+    EXPECT_ANY_THROW((void) sn::from_string<float>("10.0000\t"));
 }
 
 namespace friendlyns {
