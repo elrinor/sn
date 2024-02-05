@@ -21,7 +21,7 @@ namespace sn::builtins {
 // bool.
 //
 
-bool try_to_string(const bool &src, std::string *dst) noexcept {
+bool try_to_string(bool src, std::string *dst) noexcept {
     *dst = src ? "true" : "false";
     return true;
 }
@@ -38,7 +38,7 @@ bool try_from_string(std::string_view src, bool *dst) noexcept {
     }
 }
 
-void to_string(const bool &src, std::string *dst) {
+void to_string(bool src, std::string *dst) {
     (void) try_to_string(src, dst); // Always succeeds.
 }
 
@@ -54,13 +54,13 @@ void from_string(std::string_view src, bool *dst) {
 
 namespace detail_to_string {
 template<class T>
-inline bool try_to_string(const T &src, std::string *dst) noexcept {
+inline bool try_to_string(T src, std::string *dst) noexcept {
     *dst = sn::detail::format("{}", src);
     return true;
 }
 
 template<class T>
-inline void to_string(const T &src, std::string *dst) {
+inline void to_string(T src, std::string *dst) {
     *dst = sn::detail::format("{}", src);
 }
 } // namespace detail_to_string
@@ -163,10 +163,10 @@ inline void from_string(std::string_view src, T *dst) {
 } // namespace detail_fast_float
 #endif // SN_USE_FAST_FLOAT
 
-#define SN_DEFINE_PROXY_STRING_FUNCTIONS(TYPE, FROM_STRING_NAMESPACE)                                            \
-    bool try_to_string(const TYPE &src, std::string *dst) noexcept { return detail_to_string::try_to_string(src, dst); } \
+#define SN_DEFINE_NUMERIC_STRING_FUNCTIONS(TYPE, FROM_STRING_NAMESPACE)                                                 \
+    bool try_to_string(TYPE src, std::string *dst) noexcept { return detail_to_string::try_to_string(src, dst); }       \
     bool try_from_string(std::string_view src, TYPE *dst) noexcept { return FROM_STRING_NAMESPACE::try_from_string(src, dst); }  \
-    void to_string(const TYPE &src, std::string *dst) { detail_to_string::to_string(src, dst); }                        \
+    void to_string(TYPE src, std::string *dst) { detail_to_string::to_string(src, dst); }                               \
     void from_string(std::string_view src, TYPE *dst) { FROM_STRING_NAMESPACE::from_string(src, dst); }
 
 #if SN_USE_STRTOF
@@ -179,15 +179,15 @@ inline void from_string(std::string_view src, T *dst) {
 #   error "Floating point string conversion library not configured"
 #endif
 
-SN_DEFINE_PROXY_STRING_FUNCTIONS(short, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned short, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(int, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned int, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(long, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned long, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(long long, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(unsigned long long, detail_from_chars)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
-SN_DEFINE_PROXY_STRING_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
 
 } // namespace sn::builtins

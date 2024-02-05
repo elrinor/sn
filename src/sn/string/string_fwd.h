@@ -56,15 +56,24 @@
 #define _SN_ENABLE_STRING_FUNCTIONS_I(TYPE, ATTRIBUTES, ... /* TAGS */)                                                 \
     ATTRIBUTES void is_string_supported_type(std::type_identity<TYPE> __VA_OPT__(,) __VA_ARGS__);
 
-#define _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, NORMAL_ATTRIBUTES, NODISCARD_ATTRIBUTES, ... /* TAGS */)                   \
+#define _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, TYPE_ARG, NORMAL_ATTRIBUTES, NODISCARD_ATTRIBUTES, ... /* TAGS */)         \
     _SN_ENABLE_STRING_FUNCTIONS_I(TYPE, NORMAL_ATTRIBUTES __VA_OPT__(,) __VA_ARGS__);                                   \
-    NODISCARD_ATTRIBUTES bool try_to_string(const TYPE &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept;      \
-    NORMAL_ATTRIBUTES void to_string(const TYPE &src, std::string *dst __VA_OPT__(,) __VA_ARGS__);                      \
+    NODISCARD_ATTRIBUTES bool try_to_string(TYPE_ARG src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept;         \
+    NORMAL_ATTRIBUTES void to_string(TYPE_ARG src, std::string *dst __VA_OPT__(,) __VA_ARGS__);                         \
     NODISCARD_ATTRIBUTES bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept;      \
     NORMAL_ATTRIBUTES void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
 
+/**
+ * @internal
+ *
+ * Same as `SN_DECLARE_STRING_FUNCTIONS`, but `to_string` and `try_to_string` take `TYPE` by value. This can result in
+ * better codegen on most architectures as the 1st arg can now be passed in registers.
+ */
+#define _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(TYPE, ... /* TAGS */)                                                     \
+    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, TYPE, [[]], [[nodiscard]] __VA_OPT__(,) __VA_ARGS__)
+
 #define SN_DECLARE_STRING_FUNCTIONS(TYPE, ... /* TAGS */)                                                               \
-    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, [[]], [[nodiscard]] __VA_OPT__(,) __VA_ARGS__)
+    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, const TYPE &, [[]], [[nodiscard]] __VA_OPT__(,) __VA_ARGS__)
 
 #define SN_DECLARE_FRIEND_STRING_FUNCTIONS(TYPE, ... /* TAGS */)                                                        \
-    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, friend, friend __VA_OPT__(,) __VA_ARGS__) // Can't have [[nodiscard]] on a friend function declaration...
+    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, const TYPE &, friend, friend __VA_OPT__(,) __VA_ARGS__) // Can't have [[nodiscard]] on a friend function declaration...
