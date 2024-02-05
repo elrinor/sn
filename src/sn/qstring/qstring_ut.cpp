@@ -128,6 +128,7 @@ TEST(qstring, ints) {
     run_integer_tests<unsigned long long>();
 }
 
+namespace qfriendlyns {
 struct qfriendly {
     qfriendly() = default;
     explicit qfriendly(int value) : value(value) {}
@@ -145,8 +146,9 @@ void to_qstring(const qfriendly &src, QString *dst) {
 void from_qstring(QStringView src, qfriendly *dst) {
     sn::from_qstring(src, &dst->value);
 }
+} // namespace qfriendlyns
 
 TEST(qstring, friend) {
-    EXPECT_EQ(sn::to_qstring(qfriendly(1)), QStringLiteral("1"));
-    EXPECT_EQ(sn::from_qstring<qfriendly>(QStringLiteral("1")), qfriendly(1));
+    EXPECT_EQ(sn::to_qstring(qfriendlyns::qfriendly(1)), QStringLiteral("1"));
+    EXPECT_EQ(sn::from_qstring<qfriendlyns::qfriendly>(QStringLiteral("1")), qfriendlyns::qfriendly(1));
 }

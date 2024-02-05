@@ -127,6 +127,7 @@ TEST(string, floats) {
     EXPECT_ANY_THROW((void) sn::from_string<float>("1.5 "));
 }
 
+namespace friendlyns {
 struct friendly {
     friendly() = default;
     explicit friendly(int value) : value(value) {}
@@ -144,8 +145,9 @@ void to_string(const friendly &src, std::string *dst) {
 void from_string(std::string_view src, friendly *dst) {
     sn::from_string(src, &dst->value);
 }
+} // namespace friendlyns
 
 TEST(string, friend) {
-    EXPECT_EQ(sn::to_string(friendly(1)), "1");
-    EXPECT_EQ(sn::from_string<friendly>("1"), friendly(1));
+    EXPECT_EQ(sn::to_string(friendlyns::friendly(1)), "1");
+    EXPECT_EQ(sn::from_string<friendlyns::friendly>("1"), friendlyns::friendly(1));
 }
