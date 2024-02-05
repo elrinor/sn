@@ -26,10 +26,10 @@ constexpr bool is_signed_ex_v = std::is_signed_v<typename std::conditional_t<std
  * Enum table to be used by different enum table implementations. All the actual work is done in the type-erased
  * `universal_enum_table`, this class is just a wrapper.
  *
- * \tparam T                            Enum type.
- * \tparam mode                         Case sensitivity mode.
- * \tparam Traits                       Table traits.
- * \tparam Base                         Base table to pass to `universal_enum_table`.
+ * @tparam T                            Enum type.
+ * @tparam mode                         Case sensitivity mode.
+ * @tparam Traits                       Table traits.
+ * @tparam Base                         Base table to pass to `universal_enum_table`.
  */
 template<class T, case_sensitivity mode, class Traits, class Base>
 class enum_table {
