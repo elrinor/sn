@@ -127,3 +127,26 @@ TEST(qstring, ints) {
     run_integer_tests<long long>();
     run_integer_tests<unsigned long long>();
 }
+
+struct qfriendly {
+    qfriendly() = default;
+    explicit qfriendly(int value) : value(value) {}
+    friend auto operator<=>(const qfriendly &, const qfriendly &) = default;
+
+    SN_DECLARE_FRIEND_QSTRING_FUNCTIONS(qfriendly)
+
+    int value = 0;
+};
+
+void to_qstring(const qfriendly &src, QString *dst) {
+    sn::to_qstring(src.value, dst);
+}
+
+void from_qstring(QStringView src, qfriendly *dst) {
+    sn::from_qstring(src, &dst->value);
+}
+
+TEST(qstring, friend) {
+    EXPECT_EQ(sn::to_qstring(qfriendly(1)), QStringLiteral("1"));
+    EXPECT_EQ(sn::from_qstring<qfriendly>(QStringLiteral("1")), qfriendly(1));
+}

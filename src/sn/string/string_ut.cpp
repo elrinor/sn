@@ -126,3 +126,26 @@ TEST(string, floats) {
     EXPECT_ANY_THROW((void) sn::from_string<float>(" 1.5"));
     EXPECT_ANY_THROW((void) sn::from_string<float>("1.5 "));
 }
+
+struct friendly {
+    friendly() = default;
+    explicit friendly(int value) : value(value) {}
+    friend auto operator<=>(const friendly &, const friendly &) = default;
+
+    SN_DECLARE_FRIEND_STRING_FUNCTIONS(friendly)
+
+    int value = 0;
+};
+
+void to_string(const friendly &src, std::string *dst) {
+    sn::to_string(src.value, dst);
+}
+
+void from_string(std::string_view src, friendly *dst) {
+    sn::from_string(src, &dst->value);
+}
+
+TEST(string, friend) {
+    EXPECT_EQ(sn::to_string(friendly(1)), "1");
+    EXPECT_EQ(sn::from_string<friendly>("1"), friendly(1));
+}
