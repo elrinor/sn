@@ -4,29 +4,34 @@
 #include <string_view>
 
 #include "string_builtins.h"
+#include "string_concepts.h"
 
 namespace sn::detail {
 
 template<class T, class... Tags>
 [[nodiscard]] bool do_try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
+    static_assert(stringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_STRING_FUNCTIONS?");
     using sn::builtins::try_to_string;
     return try_to_string(src, dst, tags...);
 }
 
 template<class T, class... Tags>
 void do_to_string(const T &src, std::string *dst, Tags... tags) {
+    static_assert(stringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_STRING_FUNCTIONS?");
     using sn::builtins::to_string;
     to_string(src, dst, tags...);
 }
 
 template<class T, class... Tags>
 [[nodiscard]] bool do_try_from_string(std::string_view src, T *dst, Tags... tags) noexcept {
+    static_assert(stringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_STRING_FUNCTIONS?");
     using sn::builtins::try_from_string;
     return try_from_string(src, dst, tags...);
 }
 
 template<class T, class... Tags>
 void do_from_string(std::string_view src, T *dst, Tags... tags) {
+    static_assert(stringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_STRING_FUNCTIONS?");
     using sn::builtins::from_string;
     from_string(src, dst, tags...);
 }

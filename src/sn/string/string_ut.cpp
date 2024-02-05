@@ -6,36 +6,51 @@
 
 template<class T>
 static void run_pointer_tests() {
-    // This one is checking that to_string with non-char pointers doesn't compile. We have to call directly into
-    // sn::builtins because the entrypoint in namespace sn is unconstrained.
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(U"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(u"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(u8"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(L"123", &s); });
+    // This one is checking that to_string with non-char pointers doesn't compile.
+    EXPECT_FALSE(sn::stringable<char32_t[4]>);
+    EXPECT_FALSE(sn::stringable<char16_t[4]>);
+    EXPECT_FALSE(sn::stringable<char8_t[4]>);
+    EXPECT_FALSE(sn::stringable<wchar_t[4]>);
+    EXPECT_FALSE(sn::stringable<const char32_t *>);
+    EXPECT_FALSE(sn::stringable<const char16_t *>);
+    EXPECT_FALSE(sn::stringable<const char8_t *>);
+    EXPECT_FALSE(sn::stringable<const wchar_t *>);
 
-    // Same for from_string, albeit this one is more of a sanity check as the first arg is always a std::string_view.
+    // Same checks for from_string, albeit this one is more of a sanity check as the first arg is always a std::string_view.
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(U"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u8"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(L"123", &s); });
 
     // And we also do some sanity checks for non-char pointers.
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<void *>(nullptr), &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<int *>(nullptr), &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<const void *>(nullptr), &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_string(static_cast<const int *>(nullptr), &s); });
+    EXPECT_FALSE(sn::stringable<void *>);
+    EXPECT_FALSE(sn::stringable<int *>);
+    EXPECT_FALSE(sn::stringable<const void *>);
+    EXPECT_FALSE(sn::stringable<const int *>);
+
+    // And check that char * is supported.
+    EXPECT_TRUE(sn::stringable<char[4]>);
+    EXPECT_TRUE(sn::stringable<const char *>);
 }
 
 TEST(string, string) {
     run_pointer_tests<std::string>();
 
     // Char strings work.
+    const char *str = "1234";
+    EXPECT_EQ(sn::to_string(str), "1234");
     EXPECT_EQ(sn::to_string("123"), "123");
     EXPECT_EQ(sn::to_string(std::string("123")), "123");
     EXPECT_EQ(sn::to_string(std::string_view("123")), "123");
     EXPECT_EQ(sn::from_string<std::string>("123"), "123");
     EXPECT_EQ(sn::from_string<std::string>(std::string("123")), "123");
     EXPECT_EQ(sn::from_string<std::string>(std::string_view("123")), "123");
+}
+
+TEST(string, char) {
+    EXPECT_FALSE(sn::stringable<char>);
+    EXPECT_FALSE(sn::stringable<unsigned char>);
+    EXPECT_FALSE(sn::stringable<signed char>);
 }
 
 TEST(string, boolean) {

@@ -4,6 +4,7 @@ set(SN_STRING_SOURCES
     string.h
     string_builtins.cpp
     string_builtins.h
+    string_concepts.h
     string_exceptions.cpp
     string_exceptions.h
     string_fwd.h)

@@ -4,22 +4,22 @@
 #include <string_view>
 #include <concepts>
 
-#include "sn/core/tags.h"
-
 #include "string_fwd.h"
 
 namespace sn::builtins {
 
 //
-// Support for std::string / std::string_view / const char *.
+// Support for std::string.
 //
 
-[[nodiscard]] inline bool try_to_string(std::string_view src, std::string *dst) noexcept {
+void is_string_supported_type(std::type_identity<std::string>);
+
+[[nodiscard]] inline bool try_to_string(const std::string &src, std::string *dst) noexcept {
     *dst = src;
     return true;
 }
 
-inline void to_string(std::string_view src, std::string *dst) {
+inline void to_string(const std::string &src, std::string *dst) {
     *dst = src;
 }
 
@@ -34,31 +34,66 @@ inline void from_string(std::string_view src, std::string *dst) {
 
 
 //
-// Support for bool, ignoring builtin conversions. If we don't ignore them, then bool overload becomes a catch-all
-// for all pointer types.
+// Support for std::string_view, to_string only.
 //
 
-SN_DECLARE_STRING_FUNCTIONS(bool, tn::detail::explicit_type_tag)
+void is_string_supported_type(std::type_identity<std::string_view>);
 
-template<std::same_as<bool> T>
-[[nodiscard]] bool try_to_string(const T &src, std::string *dst) noexcept {
-    return try_to_string(src, dst, tn::detail::explicit_type);
+[[nodiscard]] inline bool try_to_string(std::string_view src, std::string *dst) noexcept {
+    *dst = src;
+    return true;
 }
 
-template<std::same_as<bool> T>
-void to_string(const T &src, std::string *dst) {
-    to_string(src, dst, tn::detail::explicit_type);
+inline void to_string(std::string_view src, std::string *dst) {
+    *dst = src;
 }
 
-template<std::same_as<bool> T>
-[[nodiscard]] bool try_from_string(std::string_view src, T *dst) noexcept {
-    return try_from_string(src, dst, tn::detail::explicit_type);
+[[nodiscard]] inline bool try_from_string(std::string_view src, std::string_view *dst) noexcept = delete;
+inline void from_string(std::string_view src, std::string_view *dst) = delete;
+
+
+//
+// Support for char[N], to_string only.
+//
+
+template<std::size_t N>
+void is_string_supported_type(std::type_identity<char[N]>);
+
+template<std::size_t N>
+[[nodiscard]] inline bool try_to_string(const char (&src)[N], std::string *dst) noexcept {
+    *dst = src;
+    return true;
 }
 
-template<std::same_as<bool> T>
-void from_string(std::string_view src, T *dst) {
-    from_string(src, dst, tn::detail::explicit_type);
+template<std::size_t N>
+inline void to_string(const char (&src)[N], std::string *dst) {
+    *dst = src;
 }
+
+template<std::size_t N>
+[[nodiscard]] inline bool try_from_string(std::string_view src, const char (*dst)[N]) noexcept = delete;
+
+template<std::size_t N>
+inline void from_string(std::string_view src, const char (*dst)[N]) = delete;
+
+
+//
+// Support for const char *, to_string only.
+//
+
+void is_string_supported_type(std::type_identity<const char *>);
+
+[[nodiscard]] inline bool try_to_string(const char *src, std::string *dst) noexcept {
+    *dst = src;
+    return true;
+}
+
+inline void to_string(const char *src, std::string *dst) {
+    *dst = src;
+}
+
+[[nodiscard]] inline bool try_from_string(std::string_view src, const char **dst) noexcept = delete;
+inline void from_string(std::string_view src, const char **dst) = delete;
 
 
 //
@@ -67,6 +102,7 @@ void from_string(std::string_view src, T *dst) {
 // No support for char / unsigned char / signed char here, as it's not clear what the default behavior should be.
 //
 
+SN_DECLARE_STRING_FUNCTIONS(bool)
 SN_DECLARE_STRING_FUNCTIONS(short)
 SN_DECLARE_STRING_FUNCTIONS(unsigned short)
 SN_DECLARE_STRING_FUNCTIONS(int)
