@@ -53,15 +53,15 @@ void to_qstring(const T &src, QString *dst) {
 // for all pointer types.
 //
 
-SN_DECLARE_QSTRING_FUNCTIONS(bool, tn::detail::explicit_type_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(bool, tn::detail::explicit_type_tag)
 
 template<std::same_as<bool> T>
-[[nodiscard]] bool try_to_qstring(const T &src, QString *dst) noexcept {
+[[nodiscard]] bool try_to_qstring(T src, QString *dst) noexcept {
     return try_to_qstring(src, dst, tn::detail::explicit_type);
 }
 
 template<std::same_as<bool> T>
-void to_qstring(const T &src, QString *dst) {
+void to_qstring(T src, QString *dst) {
     to_qstring(src, dst, tn::detail::explicit_type);
 }
 
@@ -82,15 +82,15 @@ void from_qstring(QStringView src, T *dst) {
 // No support for char / unsigned char / signed char here, as it's not clear what the default behavior should be.
 //
 
-SN_DECLARE_QSTRING_FUNCTIONS(short)
-SN_DECLARE_QSTRING_FUNCTIONS(unsigned short)
-SN_DECLARE_QSTRING_FUNCTIONS(int)
-SN_DECLARE_QSTRING_FUNCTIONS(unsigned int)
-SN_DECLARE_QSTRING_FUNCTIONS(long)
-SN_DECLARE_QSTRING_FUNCTIONS(unsigned long)
-SN_DECLARE_QSTRING_FUNCTIONS(long long)
-SN_DECLARE_QSTRING_FUNCTIONS(unsigned long long)
-SN_DECLARE_QSTRING_FUNCTIONS(float)
-SN_DECLARE_QSTRING_FUNCTIONS(double)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(short)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned short)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(int)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned int)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long long)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long long)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(float)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(double)
 
 } // namespace sn::builtins

@@ -8,7 +8,7 @@ namespace sn::builtins {
 // bool.
 //
 
-bool try_to_qstring(const bool &src, QString *dst, tn::detail::explicit_type_tag) noexcept {
+bool try_to_qstring(bool src, QString *dst, tn::detail::explicit_type_tag) noexcept {
     *dst = src ? QStringLiteral("true") : QStringLiteral("false");
     return true;
 }
@@ -25,7 +25,7 @@ bool try_from_qstring(QStringView src, bool *dst, tn::detail::explicit_type_tag)
     }
 }
 
-void to_qstring(const bool &src, QString *dst, tn::detail::explicit_type_tag) {
+void to_qstring(bool src, QString *dst, tn::detail::explicit_type_tag) {
     (void) try_to_qstring(src, dst); // Always succeeds.
 }
 
@@ -61,13 +61,13 @@ SN_DEFINE_QSTRINGVIEW_TO(float, toFloat)
 SN_DEFINE_QSTRINGVIEW_TO(double, toDouble)
 
 template<class T>
-inline bool try_to_qstring(const T &src, QString *dst) noexcept {
+inline bool try_to_qstring(T src, QString *dst) noexcept {
     *dst = QString::number(src);
     return true;
 }
 
 template<class T>
-inline void to_qstring(const T &src, QString *dst) {
+inline void to_qstring(T src, QString *dst) {
     (void) try_to_qstring(src, dst);
 }
 
@@ -96,21 +96,21 @@ inline void from_qstring(QStringView src, T *dst) {
 
 } // namespace detail_qt
 
-#define SN_DEFINE_PROXY_QSTRING_FUNCTIONS(TYPE)                                                                         \
-bool try_to_qstring(const TYPE &src, QString *dst) noexcept { return detail_qt::try_to_qstring(src, dst); }              \
-bool try_from_qstring(QStringView src, TYPE *dst) noexcept { return detail_qt::try_from_qstring(src, dst); }             \
-void to_qstring(const TYPE &src, QString *dst) { detail_qt::to_qstring(src, dst); }                                      \
+#define SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(TYPE)                                                                       \
+bool try_to_qstring(TYPE src, QString *dst) noexcept { return detail_qt::try_to_qstring(src, dst); }                    \
+bool try_from_qstring(QStringView src, TYPE *dst) noexcept { return detail_qt::try_from_qstring(src, dst); }            \
+void to_qstring(TYPE src, QString *dst) { detail_qt::to_qstring(src, dst); }                                            \
 void from_qstring(QStringView src, TYPE *dst) { detail_qt::from_qstring(src, dst); }
 
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(short)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(unsigned short)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(int)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(unsigned int)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(long)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(unsigned long)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(long long)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(unsigned long long)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(float)
-SN_DEFINE_PROXY_QSTRING_FUNCTIONS(double)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(float)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(double)
 
 } // namespace sn::builtins
