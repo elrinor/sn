@@ -3,6 +3,7 @@
 #include <functional> // For std::identity.
 
 #include "sn/detail/test/integer_test_suite.h"
+#include "sn/detail/test/boolean_test_suite.h"
 
 #include "string.h"
 
@@ -75,13 +76,7 @@ TEST(string, char) {
 }
 
 TEST(string, boolean) {
-    EXPECT_EQ(sn::from_string<bool>(sn::to_string(true)), true);
-    EXPECT_EQ(sn::from_string<bool>(sn::to_string(false)), false);
-    EXPECT_EQ(sn::from_string<bool>("0"), false);
-    EXPECT_EQ(sn::from_string<bool>("1"), true);
-
-    EXPECT_ANY_THROW((void) sn::from_string<bool>("da"));
-    EXPECT_ANY_THROW((void) sn::from_string<bool>(""));
+    sn::detail::make_boolean_test_suite<std::string>(std::identity()).run(string_callback<bool>());
 }
 
 static std::string prepend_zeros(int zeros, std::string_view number_string) {

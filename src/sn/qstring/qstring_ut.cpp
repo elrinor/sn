@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <sn/detail/test/boolean_test_suite.h>
 
 #include "sn/detail/test/integer_test_suite.h"
 
@@ -20,6 +21,12 @@ struct qstring_callback {
 
     [[nodiscard]] T from(QStringView src) {
         return sn::from_qstring<T>(src);
+    }
+};
+
+struct qstringifier {
+    QString operator()(std::string_view s) const {
+        return QString::fromUtf8(s);
     }
 };
 
@@ -69,21 +76,12 @@ TEST(qstring, string) {
 }
 
 TEST(qstring, boolean) {
-    EXPECT_EQ(sn::from_qstring<bool>(sn::to_qstring(true)), true);
-    EXPECT_EQ(sn::from_qstring<bool>(sn::to_qstring(false)), false);
-    EXPECT_EQ(sn::from_qstring<bool>(QStringLiteral("0")), false);
-    EXPECT_EQ(sn::from_qstring<bool>(QStringLiteral("1")), true);
-
-    EXPECT_ANY_THROW((void) sn::from_qstring<bool>(QString::fromUtf8("da")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<bool>(QString()));
+    sn::detail::make_boolean_test_suite<QString>(qstringifier()).run(qstring_callback<bool>());
 }
 
 template<class T>
 static void run_integer_tests() {
-    auto stringifier = [] (std::string_view s) {
-        return QString::fromUtf8(s);
-    };
-    sn::detail::make_integer_test_suite<T, QString>(stringifier).run(qstring_callback<T>());
+    sn::detail::make_integer_test_suite<T, QString>(qstringifier()).run(qstring_callback<T>());
 }
 
 TEST(qstring, ints) {
