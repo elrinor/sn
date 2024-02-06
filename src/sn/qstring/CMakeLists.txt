@@ -18,7 +18,7 @@ if(SN_QT_LIB)
         set(TEST_SN_QSTRING_SOURCES qstring_ut.cpp)
 
         add_executable(test_sn_qstring ${TEST_SN_QSTRING_SOURCES})
-        target_link_libraries(test_sn_qstring PUBLIC sn_qstring GTest::gtest GTest::gtest_main)
+        target_link_libraries(test_sn_qstring PUBLIC sn_qstring sn_detail_test GTest::gtest GTest::gtest_main)
         lint_target(test_sn_qstring)
 
         add_custom_target(run_test_sn_qstring

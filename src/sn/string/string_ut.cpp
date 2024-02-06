@@ -1,8 +1,29 @@
 #include <gtest/gtest.h>
 
-#include <limits>
+#include <functional> // For std::identity.
+
+#include "sn/detail/test/integer_test_suite.h"
 
 #include "string.h"
+
+template<class T>
+struct string_callback {
+    [[nodiscard]] bool try_to(const T &src, std::string *dst) noexcept {
+        return sn::try_to_string(src, dst);
+    }
+
+    [[nodiscard]] std::string to(const T &src) {
+        return sn::to_string(src);
+    }
+
+    [[nodiscard]] bool try_from(std::string_view src, T *dst) noexcept {
+        return sn::try_from_string(src, dst);
+    }
+
+    [[nodiscard]] T from(std::string_view src) {
+        return sn::from_string<T>(src);
+    }
+};
 
 template<class T>
 static void run_pointer_tests() {
@@ -78,52 +99,7 @@ static std::string prepend_zeros(int zeros, std::string_view number_string) {
 
 template<class T>
 static void run_integer_tests() {
-    EXPECT_EQ(sn::to_string(static_cast<T>(0)), "0");
-    EXPECT_EQ(sn::from_string<T>("0"), 0);
-
-    EXPECT_EQ(sn::to_string(static_cast<T>(1)), "1");
-    EXPECT_EQ(sn::from_string<T>("1"), 1);
-
-    EXPECT_EQ(sn::to_string(static_cast<T>(100)), "100");
-    EXPECT_EQ(sn::from_string<T>("100"), 100);
-
-    EXPECT_EQ(sn::from_string<T>(sn::to_string(std::numeric_limits<T>::max())), std::numeric_limits<T>::max());
-    EXPECT_EQ(sn::from_string<T>(sn::to_string(std::numeric_limits<T>::min())), std::numeric_limits<T>::min());
-
-    EXPECT_EQ(sn::from_string<T>(prepend_zeros(1, sn::to_string(std::numeric_limits<T>::max()))), std::numeric_limits<T>::max());
-    EXPECT_EQ(sn::from_string<T>(prepend_zeros(1, sn::to_string(std::numeric_limits<T>::min()))), std::numeric_limits<T>::min());
-
-    EXPECT_EQ(sn::from_string<T>(prepend_zeros(100, sn::to_string(std::numeric_limits<T>::max()))), std::numeric_limits<T>::max());
-    EXPECT_EQ(sn::from_string<T>(prepend_zeros(100, sn::to_string(std::numeric_limits<T>::min()))), std::numeric_limits<T>::min());
-
-    if constexpr (sizeof(T) < sizeof(long long)) {
-        EXPECT_ANY_THROW((void) sn::from_string<T>(sn::to_string(static_cast<long long>(std::numeric_limits<T>::max()) + 1)));
-        EXPECT_ANY_THROW((void) sn::from_string<T>(sn::to_string(static_cast<long long>(std::numeric_limits<T>::min()) - 1)));
-    } else {
-        static_assert(sizeof(T) == 8);
-
-        if constexpr (std::is_unsigned_v<T>) {
-            EXPECT_ANY_THROW((void) sn::from_string<T>("-1"));
-            EXPECT_ANY_THROW((void) sn::from_string<T>("18446744073709551616")); // max unsigned long long +1
-        } else {
-            EXPECT_ANY_THROW((void) sn::from_string<T>("–9223372036854775809")); // min long long -1
-            EXPECT_ANY_THROW((void) sn::from_string<T>("9223372036854775808")); // max long long +1
-        }
-    }
-
-    EXPECT_ANY_THROW((void) sn::from_string<T>(""));
-    EXPECT_ANY_THROW((void) sn::from_string<T>(" 1"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("1 "));
-    EXPECT_ANY_THROW((void) sn::from_string<T>(" 111"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("111 "));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("\t111"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("111\t"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("+1"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("--1"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("0x1"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("0b1"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("0-0"));
-    EXPECT_ANY_THROW((void) sn::from_string<T>("0-1"));
+    sn::detail::make_integer_test_suite<T, std::string>(std::identity()).run(string_callback<T>());
 }
 
 TEST(string, ints) {

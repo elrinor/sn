@@ -75,13 +75,17 @@ template<class T>
 inline bool try_from_qstring(QStringView src, T *dst) noexcept {
     // Qt number handling doesn't match what we have in sn::from_string, and we want all our functions to work the same.
     // What's wrong with the Qt code:
-    // - Qt skips leading whitespaces.
+    // - Qt skips leading and trailing whitespaces.
     // - Qt handles '+' prefix.
     // - Qt handles 0x and 0b prefixes.
-    if (!src.empty() && !src[0].isDigit() && src[0] != QLatin1Char('-'))
+    if (src.empty())
         return false;
+    if (!src.front().isDigit() && src.front() != QLatin1Char('-'))
+        return false; // Handling leading whitespaces and '+' prefix.
+    if (!src.back().isDigit())
+        return false; // Handling trailing whitespaces.
     if (src.size() >= 2 && !src[1].isDigit())
-        return false;
+        return false; // Handling 0x and 0b prefixes.
 
     bool ok;
     *dst = qstringview_to<T>(src, &ok);
