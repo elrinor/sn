@@ -72,6 +72,8 @@ TEST(qstring, string) {
     run_pointer_tests<QString>();
 
     // char16_t strings work.
+    const char16_t *str = u"1234";
+    EXPECT_EQ(sn::to_qstring(str), QStringLiteral("1234"));
     EXPECT_EQ(sn::to_qstring(u"123"), QStringLiteral("123"));
     EXPECT_EQ(sn::to_qstring(QString::fromUtf16(u"123")), QStringLiteral("123"));
     EXPECT_EQ(sn::to_qstring(QStringView(u"123")), QStringLiteral("123"));

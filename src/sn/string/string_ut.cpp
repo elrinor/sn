@@ -80,19 +80,6 @@ TEST(string, boolean) {
     sn::detail::make_boolean_test_suite<std::string>(std::identity()).run(string_callback<bool>());
 }
 
-static std::string prepend_zeros(int zeros, std::string_view number_string) {
-    std::string result;
-
-    if (number_string.starts_with('-')) {
-        result = "-";
-        number_string = number_string.substr(1);
-    }
-
-    result += std::string(zeros, '0');
-    result += number_string;
-    return result;
-}
-
 template<class T>
 static void run_integer_tests() {
     sn::detail::make_integer_test_suite<T, std::string>(std::identity()).run(string_callback<T>());
