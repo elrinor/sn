@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
-#include <sn/detail/test/boolean_test_suite.h>
 
+#include "sn/detail/test/boolean_test_suite.h"
 #include "sn/detail/test/integer_test_suite.h"
+#include "sn/detail/test/float_test_suite.h"
 
 #include "qstring.h"
 
@@ -31,8 +32,12 @@ struct qstringifier {
 };
 
 // GTest integration. Note that the operator is static and won't escape this TS, but will be found via ADL.
+// We need both functions b/c operator<< is used in test case comments, and PrintTo is used for printing invalid values.
 static std::ostream &operator<<(std::ostream &os, const QString &s) {
     return os << s.toUtf8().toStdString();
+}
+static void PrintTo(const QString& s, std::ostream* os) {
+    *os << s.toUtf8().toStdString();
 }
 
 template<class T>
@@ -93,6 +98,16 @@ TEST(qstring, ints) {
     run_integer_tests<unsigned long>();
     run_integer_tests<long long>();
     run_integer_tests<unsigned long long>();
+}
+
+template<class T>
+static void run_float_tests() {
+    sn::detail::make_float_test_suite<T, QString>(qstringifier()).run(qstring_callback<T>());
+}
+
+TEST(qstring, floats) {
+    run_float_tests<float>();
+    run_float_tests<double>();
 }
 
 namespace qfriendlyns {

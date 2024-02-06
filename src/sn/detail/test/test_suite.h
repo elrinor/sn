@@ -12,9 +12,8 @@ struct test_suite {
     std::vector<T> throwing_to;
     std::vector<S> throwing_from;
 
-    std::vector<std::pair<T, S>> valid_to;
     std::vector<std::pair<S, T>> valid_from;
-    std::vector<std::pair<T, S>> valid_fromto;
+    std::vector<std::pair<S, T>> valid_fromto;
     std::vector<T> valid_roundtrip;
 
     template<class Callback>
@@ -32,23 +31,17 @@ struct test_suite {
             EXPECT_FALSE(callback.try_from(s, &tmpv)) << "with s = " << s;
         }
 
-        for (const auto &[v, s] : valid_to) {
-            EXPECT_EQ(callback.to(v), s);
-            EXPECT_TRUE(callback.try_to(v, &tmps)) << "with v = " << v;
-            EXPECT_EQ(tmps, s);
-        }
-
         for (const auto &[s, v] : valid_from) {
             EXPECT_EQ(callback.from(s), v);
             EXPECT_TRUE(callback.try_from(s, &tmpv)) << "with s = " << s;
             EXPECT_EQ(tmpv, v);
         }
 
-        for (const auto &[v, s] : valid_fromto) {
-            EXPECT_EQ(callback.to(v), s);
+        for (const auto &[s, v] : valid_fromto) {
+            EXPECT_EQ(callback.to(v), s) << "with v = " << v;
             EXPECT_TRUE(callback.try_to(v, &tmps)) << "with v = " << v;
             EXPECT_EQ(tmps, s);
-            EXPECT_EQ(callback.from(s), v);
+            EXPECT_EQ(callback.from(s), v) << "with s = " << s;
             EXPECT_TRUE(callback.try_from(s, &tmpv)) << "with s = " << s;
             EXPECT_EQ(tmpv, v);
         }

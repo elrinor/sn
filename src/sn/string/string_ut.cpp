@@ -4,6 +4,7 @@
 
 #include "sn/detail/test/integer_test_suite.h"
 #include "sn/detail/test/boolean_test_suite.h"
+#include "sn/detail/test/float_test_suite.h"
 
 #include "string.h"
 
@@ -108,30 +109,14 @@ TEST(string, ints) {
     run_integer_tests<unsigned long long>();
 }
 
-TEST(string, floats) {
-    EXPECT_EQ(sn::from_string<float>(sn::to_string(1.5)), 1.5);
-    EXPECT_EQ(sn::to_string(1.5), "1.5");
-    EXPECT_EQ(sn::to_string(-1.5), "-1.5");
-    EXPECT_EQ(sn::from_string<float>("0.5"), 0.5);
-    EXPECT_EQ(sn::from_string<float>(".5"), 0.5);
-    EXPECT_EQ(sn::from_string<float>("0"), 0);
-    EXPECT_EQ(sn::from_string<float>("0.0"), 0);
-    EXPECT_EQ(sn::from_string<float>(prepend_zeros(100, "0.0")), 0);
-    EXPECT_EQ(sn::from_string<float>("1.0e2"), 100.0);
-    EXPECT_EQ(sn::from_string<float>("1.e2"), 100.0);
-    EXPECT_EQ(sn::from_string<float>(".1e2"), 10.0);
-    EXPECT_EQ(sn::from_string<float>(".1e+2"), 10.0);
-    EXPECT_EQ(sn::from_string<float>("5.0e-1"), 0.5);
-    EXPECT_EQ(sn::from_string<float>(".1e+2"), 10.0);
-    EXPECT_EQ(sn::from_string<float>("5.0e-1"), 0.5);
-    EXPECT_EQ(sn::from_string<float>(".1e+" + prepend_zeros(100, "2")), 10.0);
-    EXPECT_EQ(sn::from_string<float>("5.0e-" + prepend_zeros(100, "1")), 0.5);
+template<class T>
+static void run_float_tests() {
+    sn::detail::make_float_test_suite<T, std::string>(std::identity()).run(string_callback<T>());
+}
 
-    EXPECT_ANY_THROW((void) sn::from_string<float>("+1.5"));
-    EXPECT_ANY_THROW((void) sn::from_string<float>(" 1.5"));
-    EXPECT_ANY_THROW((void) sn::from_string<float>("1.5 "));
-    EXPECT_ANY_THROW((void) sn::from_string<float>("\t10.0000"));
-    EXPECT_ANY_THROW((void) sn::from_string<float>("10.0000\t"));
+TEST(string, floats) {
+    run_float_tests<float>();
+    run_float_tests<double>();
 }
 
 namespace friendlyns {

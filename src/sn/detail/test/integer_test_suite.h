@@ -58,12 +58,12 @@ test_suite<T, S> make_integer_test_suite(Stringifier _) {
     }
 
     result.valid_fromto = {
-        {0, _("0")},
-        {1, _("1")},
-        {100, _("100")}
+        {_("0"), 0},
+        {_("1"), 1},
+        {_("100"), 100}
     };
     if constexpr (std::is_signed_v<T>)
-        result.valid_fromto.emplace_back(-1, _("-1"));
+        result.valid_fromto.emplace_back(_("-1"), -1);
 
     result.valid_from = {
         {_(prepend_zeros(1, sn::to_string(std::numeric_limits<T>::max()))), std::numeric_limits<T>::max()},

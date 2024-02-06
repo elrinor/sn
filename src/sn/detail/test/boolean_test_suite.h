@@ -19,8 +19,8 @@ test_suite<bool, S> make_boolean_test_suite(Stringifier _) {
     };
 
     result.valid_fromto = {
-        {true, _("true")},
-        {false, _("false")}
+        {_("true"), true},
+        {_("false"), false}
     };
 
     return result;

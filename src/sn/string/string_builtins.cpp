@@ -106,11 +106,11 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
     if (src.empty() || std::isspace(src[0]) || src[0] == '+')
         return false; // We behave the same as std::from_chars and don't skip whitespaces and don't allow leading '+'.
 
-    const char *end = src.data() + src.size();
-    errno = 0; // strto* do not change the setting of the errno on success.
+    const char *src_end = src.data() + src.size();
+    const char *end = src_end;
+    errno = 0; // strto* does not change errno on success.
     T result = strto<T>(src.data(), &end);
-    if (result != 0 || errno == 0) {
-        assert(end == src.data() + src.size());
+    if ((result != 0 || errno == 0) && end == src_end) {
         *dst = result;
         return true;
     } else {

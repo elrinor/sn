@@ -1,5 +1,7 @@
 #include "qstring_builtins.h"
 
+#include <cmath> // For std::signbit.
+
 #include "qstring_exceptions.h"
 
 namespace sn::builtins {
@@ -62,6 +64,14 @@ SN_DEFINE_QSTRINGVIEW_TO(double, toDouble)
 
 template<class T>
 inline bool try_to_qstring(T src, QString *dst) noexcept {
+    // Qt doesn't round-trip negative zero, while std functions do. We want to be consistent with std functions.
+    if constexpr (std::is_floating_point_v<T>) {
+        if (src == 0 && std::signbit(src)) {
+            *dst = QStringLiteral("-0");
+            return true;
+        }
+    }
+
     *dst = QString::number(src);
     return true;
 }
@@ -77,15 +87,23 @@ inline bool try_from_qstring(QStringView src, T *dst) noexcept {
     // What's wrong with the Qt code:
     // - Qt skips leading and trailing whitespaces.
     // - Qt handles '+' prefix.
-    // - Qt handles 0x and 0b prefixes.
+    // - Qt handles 0x and 0b prefixes for integers.
     if (src.empty())
         return false;
-    if (!src.front().isDigit() && src.front() != QLatin1Char('-'))
-        return false; // Handling leading whitespaces and '+' prefix.
-    if (!src.back().isDigit())
-        return false; // Handling trailing whitespaces.
-    if (src.size() >= 2 && !src[1].isDigit())
-        return false; // Handling 0x and 0b prefixes.
+
+    if constexpr (std::is_floating_point_v<T>) {
+        if (src.front().isSpace() || src.front() == QLatin1Char('+'))
+            return false; // Leading whitespaces / '+' prefix.
+        if (src.back().isSpace())
+            return false; // Trailing whitespaces.
+    } else {
+        if (src.front().isSpace() || src.front() == QLatin1Char('+'))
+            return false; // Leading whitespaces / '+' prefix.
+        if (src.back().isSpace())
+            return false; // Trailing whitespaces.
+        if (src.size() >= 2 && !src[1].isDigit())
+            return false; // 0x and 0b prefixes.
+    }
 
     bool ok;
     *dst = qstringview_to<T>(src, &ok);
