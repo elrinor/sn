@@ -2,8 +2,6 @@
 
 #include <concepts>
 
-#include "sn/core/tags.h"
-
 #include "qstring_fwd.h"
 
 namespace sn::builtins {
