@@ -96,49 +96,9 @@ inline void from_qstring(QStringView src, const char16_t **dst) = delete;
 
 
 //
-// Support for wchar_t[N], to_string only, Windows only.
+// Note: we could have implemented wchar_t * and wchar_t[N] support here for Windows builds, but it makes very little
+// sense. It's 2024 and wchar_t should rest in peace.
 //
-
-#ifdef _WIN32
-template<std::size_t N>
-void is_qstring_supported_type(std::type_identity<wchar_t[N]>);
-
-template<std::size_t N>
-[[nodiscard]] inline bool try_to_qstring(const wchar_t (&src)[N], QString *dst) noexcept {
-    *dst = QString::fromWCharArray(src);
-    return true;
-}
-
-template<std::size_t N>
-inline void to_qstring(const wchar_t (&src)[N], QString *dst) {
-    *dst = QString::fromWCharArray(src);
-}
-
-template<std::size_t N>
-[[nodiscard]] inline bool try_from_qstring(QStringView src, const wchar_t (*dst)[N]) noexcept = delete;
-template<std::size_t N>
-inline void from_qstring(QStringView src, const wchar_t (*dst)[N]) = delete;
-#endif
-
-
-//
-// Support for const wchar_t *, to_string only, Windows only.
-//
-#ifdef _WIN32
-void is_qstring_supported_type(std::type_identity<const wchar_t *>);
-
-[[nodiscard]] inline bool try_to_qstring(const wchar_t *src, QString *dst) noexcept {
-    *dst = QString::fromWCharArray(src);
-    return true;
-}
-
-inline void to_qstring(const wchar_t *src, QString *dst) {
-    *dst = QString::fromWCharArray(src);
-}
-
-[[nodiscard]] inline bool try_from_qstring(QStringView src, const wchar_t **dst) noexcept = delete;
-inline void from_qstring(QStringView src, const wchar_t **dst) = delete;
-#endif
 
 
 //

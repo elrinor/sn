@@ -53,12 +53,12 @@ static void run_pointer_tests() {
     EXPECT_FALSE(sn::qstringable<char8_t[4]>);
     EXPECT_TRUE(sn::qstringable<char16_t[4]>);
     EXPECT_FALSE(sn::qstringable<char32_t[4]>);
-    EXPECT_EQ(sn::qstringable<wchar_t[4]>, isWindows);
+    EXPECT_FALSE(sn::qstringable<wchar_t[4]>);
     EXPECT_FALSE(sn::qstringable<const char *>);
     EXPECT_FALSE(sn::qstringable<const char8_t *>);
     EXPECT_TRUE(sn::qstringable<const char16_t *>);
     EXPECT_FALSE(sn::qstringable<const char32_t *>);
-    EXPECT_EQ(sn::qstringable<const wchar_t *>, isWindows);
+    EXPECT_FALSE(sn::qstringable<const wchar_t *>);
 
     // Same checks for from_qstring, albeit this one is more of a sanity check as the first arg is always a QStringView.
     EXPECT_FALSE(requires(T s) { sn::builtins::from_qstring("123", &s); });
