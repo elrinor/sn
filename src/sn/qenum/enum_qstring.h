@@ -6,11 +6,14 @@
 #include "sn/core/preprocessor.h"
 #include "sn/enum/enum_reflection.h"
 #include "sn/qstring/qstring.h"
+#include "sn/qstring/qstring_fwd.h"
 #include "sn/detail/preprocessor/preprocessor.h"
 
 #include "std_qstring_enum_table.h"
 
 #define _SN_DEFINE_ENUM_QSTRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, TABLE_DEFINITION_MACRO, ATTRIBUTES, ... /* TAGS */) \
+    _SN_ENABLE_QSTRING_FUNCTIONS(ENUM, ATTRIBUTES __VA_OPT__(,) __VA_ARGS__)                                            \
+                                                                                                                        \
     template<class...>                                                                                                  \
     struct _enum_table_container;                                                                                       \
                                                                                                                         \

@@ -4,29 +4,34 @@
 #include <QtCore/QStringView>
 
 #include "qstring_builtins.h"
+#include "qstring_concepts.h"
 
 namespace sn::detail {
 
 template<class T, class... Tags>
 [[nodiscard]] bool do_try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
+    static_assert(qstringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_QSTRING_FUNCTIONS?");
     using sn::builtins::try_to_qstring;
     return try_to_qstring(src, dst, tags...);
 }
 
 template<class T, class... Tags>
 void do_to_qstring(const T &src, QString *dst, Tags... tags) {
+    static_assert(qstringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_QSTRING_FUNCTIONS?");
     using sn::builtins::to_qstring;
     to_qstring(src, dst, tags...);
 }
 
 template<class T, class... Tags>
 [[nodiscard]] bool do_try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
+    static_assert(qstringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_QSTRING_FUNCTIONS?");
     using sn::builtins::try_from_qstring;
     return try_from_qstring(src, dst, tags...);
 }
 
 template<class T, class... Tags>
 void do_from_qstring(QStringView src, T *dst, Tags... tags) {
+    static_assert(qstringable<T, Tags...>, "Type T is not supported, did you forget to invoke SN_DECLARE_QSTRING_FUNCTIONS?");
     using sn::builtins::from_qstring;
     from_qstring(src, dst, tags...);
 }

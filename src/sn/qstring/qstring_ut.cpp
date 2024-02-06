@@ -48,24 +48,32 @@ static void run_pointer_tests() {
     bool isWindows = false;
 #endif
 
-    // This one is checking that to_string with non-compatible pointers doesn't compile. We have to call directly into
-    // sn::builtins because the entrypoint in namespace sn is unconstrained.
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_qstring("123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_qstring(U"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_qstring(u8"123", &s); });
-    EXPECT_EQ(requires(T s) { sn::builtins::to_qstring(L"123", &s); }, isWindows);
+    // Check all char pointers & array types.
+    EXPECT_FALSE(sn::qstringable<char[4]>);
+    EXPECT_FALSE(sn::qstringable<char8_t[4]>);
+    EXPECT_TRUE(sn::qstringable<char16_t[4]>);
+    EXPECT_FALSE(sn::qstringable<char32_t[4]>);
+    EXPECT_EQ(sn::qstringable<wchar_t[4]>, isWindows);
+    EXPECT_FALSE(sn::qstringable<const char *>);
+    EXPECT_FALSE(sn::qstringable<const char8_t *>);
+    EXPECT_TRUE(sn::qstringable<const char16_t *>);
+    EXPECT_FALSE(sn::qstringable<const char32_t *>);
+    EXPECT_EQ(sn::qstringable<const wchar_t *>, isWindows);
 
-    // Same for from_string, albeit this one is more of a sanity check as the first arg is always a QStringView.
+    // Same checks for from_qstring, albeit this one is more of a sanity check as the first arg is always a QStringView.
     EXPECT_FALSE(requires(T s) { sn::builtins::from_qstring("123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::from_qstring(U"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_qstring(u8"123", &s); });
+    EXPECT_TRUE(requires(T s) { sn::builtins::from_qstring(u"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::from_qstring(U"123", &s); });
     EXPECT_EQ(requires(T s) { sn::builtins::from_qstring(L"123", &s); }, isWindows);
 
     // And we also do some sanity checks for non-char pointers.
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_qstring(static_cast<void *>(nullptr), &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_qstring(static_cast<int *>(nullptr), &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_qstring(static_cast<const void *>(nullptr), &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::to_qstring(static_cast<const int *>(nullptr), &s); });
+    EXPECT_FALSE(sn::qstringable<void *>);
+    EXPECT_FALSE(sn::qstringable<int *>);
+    EXPECT_FALSE(sn::qstringable<unsigned char *>);
+    EXPECT_FALSE(sn::qstringable<const void *>);
+    EXPECT_FALSE(sn::qstringable<const int *>);
+    EXPECT_FALSE(sn::qstringable<const unsigned char *>);
 }
 
 TEST(qstring, string) {
@@ -80,6 +88,13 @@ TEST(qstring, string) {
     EXPECT_EQ(sn::from_qstring<QString>(u"123"), QStringLiteral("123"));
     EXPECT_EQ(sn::from_qstring<QString>(QString::fromUtf16(u"123")), QStringLiteral("123"));
     EXPECT_EQ(sn::from_qstring<QString>(QStringView(u"123")), QStringLiteral("123"));
+}
+
+TEST(qstring, char) {
+    EXPECT_FALSE(sn::qstringable<char>);
+    EXPECT_FALSE(sn::qstringable<unsigned char>);
+    EXPECT_FALSE(sn::qstringable<signed char>);
+    EXPECT_FALSE(sn::qstringable<QChar>); // TODO(elric): do we want for this one to work?
 }
 
 TEST(qstring, boolean) {

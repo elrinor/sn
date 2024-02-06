@@ -29,31 +29,32 @@ struct string_callback {
 
 template<class T>
 static void run_pointer_tests() {
-    // This one is checking that to_string with non-char pointers doesn't compile.
-    EXPECT_FALSE(sn::stringable<char32_t[4]>);
-    EXPECT_FALSE(sn::stringable<char16_t[4]>);
+    // Check all char pointers & array types.
+    EXPECT_TRUE(sn::stringable<char[4]>);
     EXPECT_FALSE(sn::stringable<char8_t[4]>);
+    EXPECT_FALSE(sn::stringable<char16_t[4]>);
+    EXPECT_FALSE(sn::stringable<char32_t[4]>);
     EXPECT_FALSE(sn::stringable<wchar_t[4]>);
-    EXPECT_FALSE(sn::stringable<const char32_t *>);
-    EXPECT_FALSE(sn::stringable<const char16_t *>);
+    EXPECT_TRUE(sn::stringable<const char *>);
     EXPECT_FALSE(sn::stringable<const char8_t *>);
+    EXPECT_FALSE(sn::stringable<const char16_t *>);
+    EXPECT_FALSE(sn::stringable<const char32_t *>);
     EXPECT_FALSE(sn::stringable<const wchar_t *>);
 
     // Same checks for from_string, albeit this one is more of a sanity check as the first arg is always a std::string_view.
-    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(U"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u"123", &s); });
+    EXPECT_TRUE(requires(T s) { sn::builtins::from_string("123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u8"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u"123", &s); });
+    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(U"123", &s); });
     EXPECT_FALSE(requires(T s) { sn::builtins::from_string(L"123", &s); });
 
     // And we also do some sanity checks for non-char pointers.
     EXPECT_FALSE(sn::stringable<void *>);
     EXPECT_FALSE(sn::stringable<int *>);
+    EXPECT_FALSE(sn::stringable<unsigned char *>);
     EXPECT_FALSE(sn::stringable<const void *>);
     EXPECT_FALSE(sn::stringable<const int *>);
-
-    // And check that char * is supported.
-    EXPECT_TRUE(sn::stringable<char[4]>);
-    EXPECT_TRUE(sn::stringable<const char *>);
+    EXPECT_FALSE(sn::stringable<const unsigned char *>);
 }
 
 TEST(string, string) {

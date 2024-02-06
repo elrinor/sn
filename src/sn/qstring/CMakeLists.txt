@@ -5,6 +5,7 @@ if(SN_QT_LIB)
         qstring.h
         qstring_builtins.cpp
         qstring_builtins.h
+        qstring_concepts.h
         qstring_exceptions.cpp
         qstring_exceptions.h
         qstring_fwd.h)
