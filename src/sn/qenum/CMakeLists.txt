@@ -9,7 +9,7 @@ if(SN_QT_LIB)
 
     add_library(sn_qenum STATIC ${SN_QENUM_SOURCES})
     add_library(sn::qenum ALIAS sn_qenum)
-    target_link_libraries(sn_qenum PUBLIC sn_enum sn_ascii sn_enum_table Qt::Core)
+    target_link_libraries(sn_qenum PUBLIC sn_enum sn_detail_ascii sn_detail_enum_table Qt::Core)
     lint_target(sn_qenum)
 
     if(SN_BUILD_TESTS)

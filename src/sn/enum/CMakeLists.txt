@@ -10,7 +10,7 @@ set(SN_ENUM_SOURCES
 add_library(sn_enum STATIC ${SN_ENUM_SOURCES})
 add_library(sn::enum ALIAS sn_enum)
 target_compile_definitions(sn_enum PUBLIC SN_MAX_SMALL_BUFFER_SIZE=${SN_MAX_SMALL_BUFFER_SIZE})
-target_link_libraries(sn_enum PUBLIC sn_core sn_string sn_ascii sn_enum_table)
+target_link_libraries(sn_enum PUBLIC sn_core sn_string sn_detail_ascii sn_detail_enum_table)
 lint_target(sn_enum)
 
 if(SN_ENUM_HASH_LIB STREQUAL "std")
