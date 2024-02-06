@@ -40,24 +40,24 @@
  * 6. Introduce another function that would essentially mark a type as "supported", then check for it in string
  *    functions inside the `sn` namespace.
  *
- * #6 is what we're doing here. `_SN_ENABLE_STRING_FUNCTIONS_I` generates a function declaration that is ADL-picked by
+ * #6 is what we're doing here. `_SN_ENABLE_STRING_FUNCTIONS` generates a function declaration that is ADL-picked by
  * `sn::stringable`, which in turn is used to restrict the set of types usable with `sn` string functions.
  *
  * Drawbacks of this approach are:
  * 1. User can still ADL-invoke string functions (using `to_string` instead of `sn::to_string`) to bypass all the
  *    checks. Can't do anything about it w/o changing the extension point signatures.
- * 2. If the user isn't careful and uses `_SN_ENABLE_STRING_FUNCTIONS_I` without declaring all the string functions,
+ * 2. If the user isn't careful and uses `_SN_ENABLE_STRING_FUNCTIONS` without declaring all the string functions,
  *    then stuff can blow up. This is why it's private API.
  *
  * @param TYPE                          Type to enable string functions for.
  * @param ATTRIBUTES                    Function attributes to use.
  * @param ...                           Additional tags.
  */
-#define _SN_ENABLE_STRING_FUNCTIONS_I(TYPE, ATTRIBUTES, ... /* TAGS */)                                                 \
+#define _SN_ENABLE_STRING_FUNCTIONS(TYPE, ATTRIBUTES, ... /* TAGS */)                                                   \
     ATTRIBUTES void is_string_supported_type(std::type_identity<TYPE> __VA_OPT__(,) __VA_ARGS__);
 
 #define _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, TYPE_ARG, NORMAL_ATTRIBUTES, NODISCARD_ATTRIBUTES, ... /* TAGS */)         \
-    _SN_ENABLE_STRING_FUNCTIONS_I(TYPE, NORMAL_ATTRIBUTES __VA_OPT__(,) __VA_ARGS__);                                   \
+    _SN_ENABLE_STRING_FUNCTIONS(TYPE, NORMAL_ATTRIBUTES __VA_OPT__(,) __VA_ARGS__);                                     \
     NODISCARD_ATTRIBUTES bool try_to_string(TYPE_ARG src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept;         \
     NORMAL_ATTRIBUTES void to_string(TYPE_ARG src, std::string *dst __VA_OPT__(,) __VA_ARGS__);                         \
     NODISCARD_ATTRIBUTES bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept;      \

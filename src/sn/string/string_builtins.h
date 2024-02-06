@@ -72,7 +72,6 @@ inline void to_string(const char (&src)[N], std::string *dst) {
 
 template<std::size_t N>
 [[nodiscard]] inline bool try_from_string(std::string_view src, const char (*dst)[N]) noexcept = delete;
-
 template<std::size_t N>
 inline void from_string(std::string_view src, const char (*dst)[N]) = delete;
 

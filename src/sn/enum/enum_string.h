@@ -22,7 +22,7 @@
 //              constexpr variable inside a function.
 
 #define _SN_DEFINE_ENUM_STRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, TABLE_DEFINITION_MACRO, ATTRIBUTES, ... /* TAGS */)  \
-    _SN_ENABLE_STRING_FUNCTIONS_I(ENUM, ATTRIBUTES __VA_OPT__(,) __VA_ARGS__);                                          \
+    _SN_ENABLE_STRING_FUNCTIONS(ENUM, ATTRIBUTES __VA_OPT__(,) __VA_ARGS__);                                            \
                                                                                                                         \
     template<class...>                                                                                                  \
     struct _enum_table_container;                                                                                       \
