@@ -60,7 +60,8 @@ if(SN_BUILD_TESTS)
         enum_string_multi_first_ut.cpp
         enum_string_multi_second_ut.cpp
         enum_string_ut.cpp
-        string_ut.cpp)
+        string_ut.cpp
+        string_ut.h)
 
     add_executable(test_sn_string ${TEST_SN_STRING_SOURCES})
     target_link_libraries(test_sn_string PUBLIC sn_string sn_detail_test GTest::gtest GTest::gtest_main)

@@ -1,3 +1,5 @@
+#include "string_ut.h"
+
 #include <gtest/gtest.h>
 
 #include <functional> // For std::identity.
@@ -7,28 +9,6 @@
 #include "sn/detail/test/float_test_suite.h"
 
 #include "string.h"
-
-struct string_callback {
-    template<class T>
-    [[nodiscard]] bool try_to(const T &src, std::string *dst) noexcept {
-        return sn::try_to_string(src, dst);
-    }
-
-    template<class T>
-    [[nodiscard]] std::string to(const T &src) {
-        return sn::to_string(src);
-    }
-
-    template<class T>
-    [[nodiscard]] bool try_from(std::string_view src, T *dst) noexcept {
-        return sn::try_from_string(src, dst);
-    }
-
-    template<class T>
-    [[nodiscard]] T from(std::string_view src) {
-        return sn::from_string<T>(src);
-    }
-};
 
 template<class T>
 static void run_pointer_tests() {
@@ -81,12 +61,12 @@ TEST(string, char) {
 }
 
 TEST(string, boolean) {
-    sn::detail::make_boolean_test_suite<std::string>(std::identity()).run(string_callback());
+    sn::detail::make_boolean_test_suite<std::string>(std::identity()).run(sn::string_callback());
 }
 
 template<class T>
 static void run_integer_tests() {
-    sn::detail::make_integer_test_suite<T, std::string>(std::identity()).run(string_callback());
+    sn::detail::make_integer_test_suite<T, std::string>(std::identity()).run(sn::string_callback());
 }
 
 TEST(string, ints) {
@@ -102,7 +82,7 @@ TEST(string, ints) {
 
 template<class T>
 static void run_float_tests() {
-    sn::detail::make_float_test_suite<T, std::string>(std::identity()).run(string_callback());
+    sn::detail::make_float_test_suite<T, std::string>(std::identity()).run(sn::string_callback());
 }
 
 TEST(string, floats) {

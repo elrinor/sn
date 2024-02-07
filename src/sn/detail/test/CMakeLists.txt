@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 set(SN_DETAIL_TEST_SOURCES
     boolean_test_suite.h
     float_test_suite.h
+    enum_test_suite.h
     test_suite.h
     integer_test_suite.h)
 
