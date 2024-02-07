@@ -3,12 +3,12 @@
 #include <QtCore/QString>
 #include <QtCore/QStringView>
 
-#include "sn/core/preprocessor.h"
 #include "sn/core/enum_reflection.h"
-#include "sn/qstring/qstring.h"
-#include "sn/qstring/qstring_fwd.h"
+#include "sn/core/preprocessor.h"
 #include "sn/detail/preprocessor/preprocessor.h"
 
+#include "qstring.h"
+#include "qstring_fwd.h"
 #include "std_qstring_enum_table.h"
 
 #define _SN_DEFINE_ENUM_QSTRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, TABLE_DEFINITION_MACRO, ATTRIBUTES, ... /* TAGS */) \
