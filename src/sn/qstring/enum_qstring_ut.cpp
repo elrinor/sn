@@ -1,112 +1,82 @@
 #include <gtest/gtest.h>
 
+#include "sn/detail/test/enum_test_suite.h"
+
+#include "qstring_ut.h"
 #include "enum_qstring.h"
 
-//
-// Basic enum string conversions.
-//
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(basic_test_enum, sn::case_sensitive)
+} // namespace sn::detail
 
-enum class TestEnum {
-    VALUE_1 = 1,
-    VALUE_2 = 2,
-    VALUE_3 = 3,
-    UNSERIALIZABLE = 0x11111111
-};
-using enum TestEnum;
-
-SN_DEFINE_ENUM_REFLECTION(TestEnum, ({
-    { VALUE_1, "aaa" },
-    { VALUE_2, "bbb" },
-    { VALUE_3, "CCC" },
-}))
-
-SN_DEFINE_ENUM_QSTRING_FUNCTIONS(TestEnum, sn::case_sensitive)
-
-TEST(qenum, basic) {
-    EXPECT_EQ(sn::to_qstring(VALUE_1), QStringLiteral("aaa"));
-    EXPECT_EQ(sn::to_qstring(VALUE_3), QStringLiteral("CCC"));
-    EXPECT_ANY_THROW((void) sn::to_qstring(UNSERIALIZABLE));
-
-    EXPECT_EQ(sn::from_qstring<TestEnum>(QStringLiteral("aaa")), VALUE_1);
-    EXPECT_EQ(sn::from_qstring<TestEnum>(QStringLiteral("bbb")), VALUE_2);
-    EXPECT_EQ(sn::from_qstring<TestEnum>(QStringLiteral("CCC")), VALUE_3);
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral("AAA")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral("ccc")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral("1")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral("2")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral("3")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral(" aaa")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral("aaa ")));
-    EXPECT_ANY_THROW((void) sn::from_qstring<TestEnum>(QStringLiteral(" aaa ")));
+TEST(enum, basic) {
+    sn::detail::make_basic_enum_test_suite().run<QString>();
 }
 
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(ci_test_enum, sn::case_insensitive)
+} // namespace sn::detail
 
-//
-// Case-insensitive conversions.
-//
-
-enum class CiTestEnum {
-    CS_VALUE_1 = 1,
-    CS_VALUE_2 = 2,
-    CS_VALUE_3 = 3,
-    CS_VALUE_4 = 4,
-};
-using enum CiTestEnum;
-SN_DEFINE_ENUM_REFLECTION(CiTestEnum, ({
-    {CS_VALUE_1, "AAA"},
-    {CS_VALUE_2, "bbb"},
-    {CS_VALUE_3, "Ccc"},
-    {CS_VALUE_4, "111_ab"},
-}))
-SN_DEFINE_ENUM_QSTRING_FUNCTIONS(CiTestEnum, sn::case_insensitive)
-
-TEST(qenum, case_insensitive) {
-    EXPECT_EQ(sn::to_qstring(CS_VALUE_1), QStringLiteral("AAA"));
-    EXPECT_EQ(sn::from_qstring<CiTestEnum>(QStringLiteral("AAA")), CS_VALUE_1);
-    EXPECT_EQ(sn::from_qstring<CiTestEnum>(QStringLiteral("AaA")), CS_VALUE_1);
-    EXPECT_EQ(sn::from_qstring<CiTestEnum>(QStringLiteral("aaa")), CS_VALUE_1);
-
-    EXPECT_EQ(sn::to_qstring(CS_VALUE_2), QStringLiteral("bbb"));
-    EXPECT_EQ(sn::from_qstring<CiTestEnum>(QStringLiteral("BBB")), CS_VALUE_2);
-
-    EXPECT_EQ(sn::to_qstring(CS_VALUE_3), QStringLiteral("Ccc"));
-    EXPECT_EQ(sn::from_qstring<CiTestEnum>(QStringLiteral("ccc")), CS_VALUE_3);
-
-    EXPECT_EQ(sn::to_qstring(CS_VALUE_4), QStringLiteral("111_ab"));
-    EXPECT_EQ(sn::from_qstring<CiTestEnum>(QStringLiteral("111_AB")), CS_VALUE_4);
+TEST(enum, case_insensitive) {
+    sn::detail::make_ci_enum_test_suite().run<QString>();
 }
 
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(compat_ci_test_enum, sn::case_insensitive)
+} // namespace sn::detail
 
-//
-// Tagged enum string conversions.
-//
+TEST(enum, compatibility) {
+    sn::detail::make_compat_ci_enum_test_suite().run<QString>();
+}
 
-struct glenum_1 {};
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(int, sn::case_insensitive, gl1_test_tag)
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(int, sn::case_insensitive, gl2_test_tag)
+} // namespace sn::detail
 
-SN_DEFINE_ENUM_REFLECTION(int, ({{1, "GL_1"}, {2, "GL_2"}}), glenum_1)
-SN_DEFINE_ENUM_QSTRING_FUNCTIONS(int, sn::case_insensitive, glenum_1)
+TEST(enum, tagged) {
+    sn::detail::make_tagged_enum_test_suite_1().run<QString>();
+    sn::detail::make_tagged_enum_test_suite_2().run<QString>();
+}
 
-struct glenum_2 {};
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(char_test_enum, sn::case_insensitive)
+} // namespace sn::detail
 
-SN_DEFINE_ENUM_REFLECTION(int, ({{100, "GL_100"}, {200, "GL_200"}}), glenum_2)
-SN_DEFINE_ENUM_QSTRING_FUNCTIONS(int, sn::case_insensitive, glenum_2)
+TEST(enum, char) {
+    sn::detail::make_char_enum_test_suite().run<QString>();
+}
 
-TEST(qenum, tagged) {
-    EXPECT_EQ(sn::to_qstring(1, glenum_1()), QStringLiteral("GL_1"));
-    EXPECT_EQ(sn::from_qstring<int>(QStringLiteral("GL_1"), glenum_1()), 1);
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(schar_test_enum, sn::case_sensitive)
+} // namespace sn::detail
 
-    QString str;
-    int val = 0;
-    EXPECT_TRUE(sn::try_to_qstring(2, &str, glenum_1()));
-    EXPECT_EQ(str, QStringLiteral("GL_2"));
-    EXPECT_TRUE(sn::try_from_qstring(str, &val, glenum_1()));
-    EXPECT_EQ(val, 2);
+TEST(enum, signed_char) {
+    sn::detail::make_schar_enum_test_suite().run<QString>();
+}
 
-    sn::to_qstring(100, &str, glenum_2());
-    EXPECT_EQ(str, QStringLiteral("GL_100"));
-    sn::from_qstring(str, &val, glenum_2());
-    EXPECT_EQ(val, 100);
+namespace sn::detail::test_ns {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(adl_test_enum, sn::case_sensitive)
+} // namespace sn::detail::test_ns
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(adl_test_enum, sn::case_sensitive) // This should compile & hook into ADL-found reflection
+} // namespace sn::detail
 
-    EXPECT_ANY_THROW((void) sn::to_qstring(3, glenum_1()));
-    EXPECT_ANY_THROW((void) sn::from_qstring<int>(QStringLiteral("GL_100"), glenum_1()));
+TEST(enum, namespaces) {
+    sn::detail::make_adl_enum_test_suite().run<QString>();
+
+    // sn::detail functions work and hook into the right reflection, despite being in the wrong namespace.
+    sn::detail::adl_test_enum value = sn::detail::ADL_VALUE_0;
+    QString string;
+    EXPECT_TRUE(sn::detail::try_from_qstring(u"_1", &value));
+    EXPECT_EQ(value, sn::detail::ADL_VALUE_1);
+    EXPECT_TRUE(sn::detail::try_to_qstring(sn::detail::ADL_VALUE_1, &string));
+    EXPECT_EQ(string, u"_1");
+
+    value = sn::detail::ADL_VALUE_0;
+    string.clear();
+    EXPECT_NO_THROW(sn::detail::from_qstring(u"_1", &value));
+    EXPECT_EQ(value, sn::detail::ADL_VALUE_1);
+    EXPECT_NO_THROW(sn::detail::to_qstring(sn::detail::ADL_VALUE_1, &string));
+    EXPECT_EQ(string, u"_1");
 }

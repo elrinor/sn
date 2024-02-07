@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <functional> // For std::identity.
-
 #include "sn/detail/test/enum_test_suite.h"
 
 #include "string_ut.h"

@@ -1,47 +1,10 @@
+#include "qstring_ut.h"
+
 #include <gtest/gtest.h>
 
 #include "sn/detail/test/boolean_test_suite.h"
 #include "sn/detail/test/integer_test_suite.h"
 #include "sn/detail/test/float_test_suite.h"
-
-#include "qstring.h"
-
-namespace sn::detail {
-template<>
-struct test_stringifier<QString> {
-    QString operator()(std::string_view s) const {
-        return QString::fromUtf8(s);
-    }
-};
-
-template<class T>
-struct test_serializer<T, QString> {
-    [[nodiscard]] bool try_to(const T &src, QString *dst) noexcept {
-        return sn::try_to_qstring(src, dst);
-    }
-
-    [[nodiscard]] QString to(const T &src) {
-        return sn::to_qstring(src);
-    }
-
-    [[nodiscard]] bool try_from(QStringView src, T *dst) noexcept {
-        return sn::try_from_qstring(src, dst);
-    }
-
-    [[nodiscard]] T from(QStringView src) {
-        return sn::from_qstring<T>(src);
-    }
-};
-} // namespace sn::detail
-
-// GTest integration. Note that the operator is static and won't escape this TS, but will be found via ADL.
-// We need both functions b/c operator<< is used in test case comments, and PrintTo is used for printing invalid values.
-static std::ostream &operator<<(std::ostream &os, const QString &s) {
-    return os << s.toUtf8().toStdString();
-}
-static void PrintTo(const QString& s, std::ostream* os) {
-    *os << s.toUtf8().toStdString();
-}
 
 template<class T>
 static void run_pointer_tests() {

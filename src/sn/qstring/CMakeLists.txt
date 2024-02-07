@@ -22,6 +22,7 @@ if(SN_QT_LIB)
     if(SN_BUILD_TESTS)
         set(TEST_SN_QSTRING_SOURCES
             enum_qstring_ut.cpp
+            qstring_ut.h
             qstring_ut.cpp)
 
         add_executable(test_sn_qstring ${TEST_SN_QSTRING_SOURCES})
