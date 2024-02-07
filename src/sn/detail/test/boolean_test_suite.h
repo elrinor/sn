@@ -4,23 +4,22 @@
 
 namespace sn::detail {
 
-template<class S, class Stringifier>
-test_suite<bool, S> make_boolean_test_suite(Stringifier _) {
-    test_suite<bool, S> result;
+inline test_suite<bool> make_boolean_test_suite() {
+    test_suite<bool> result;
 
     result.throwing_from = {
-        _(""),
-        _("da")
+        "",
+        "da"
     };
 
     result.valid_from = {
-        {_("0"), false},
-        {_("1"), true}
+        {"0", false},
+        {"1", true}
     };
 
     result.valid_fromto = {
-        {_("true"), true},
-        {_("false"), false}
+        {"true", true},
+        {"false", false}
     };
 
     return result;

@@ -61,12 +61,12 @@ TEST(string, char) {
 }
 
 TEST(string, boolean) {
-    sn::detail::make_boolean_test_suite<std::string>(std::identity()).run(sn::string_callback());
+    sn::detail::make_boolean_test_suite().run<std::string>();
 }
 
 template<class T>
 static void run_integer_tests() {
-    sn::detail::make_integer_test_suite<T, std::string>(std::identity()).run(sn::string_callback());
+    sn::detail::make_integer_test_suite<T>().template run<std::string>();
 }
 
 TEST(string, ints) {
@@ -82,7 +82,7 @@ TEST(string, ints) {
 
 template<class T>
 static void run_float_tests() {
-    sn::detail::make_float_test_suite<T, std::string>(std::identity()).run(sn::string_callback());
+    sn::detail::make_float_test_suite<T>().template run<std::string>();
 }
 
 TEST(string, floats) {

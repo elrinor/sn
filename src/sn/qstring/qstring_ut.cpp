@@ -6,33 +6,33 @@
 
 #include "qstring.h"
 
-struct qstring_callback {
-    template<class T>
-    [[nodiscard]] bool try_to(const T &src, QString *dst) noexcept {
-        return sn::try_to_qstring(src, dst);
-    }
-
-    template<class T>
-    [[nodiscard]] QString to(const T &src) {
-        return sn::to_qstring(src);
-    }
-
-    template<class T>
-    [[nodiscard]] bool try_from(QStringView src, T *dst) noexcept {
-        return sn::try_from_qstring(src, dst);
-    }
-
-    template<class T>
-    [[nodiscard]] T from(QStringView src) {
-        return sn::from_qstring<T>(src);
-    }
-};
-
-struct qstringifier {
+namespace sn::detail {
+template<>
+struct test_stringifier<QString> {
     QString operator()(std::string_view s) const {
         return QString::fromUtf8(s);
     }
 };
+
+template<class T>
+struct test_serializer<T, QString> {
+    [[nodiscard]] bool try_to(const T &src, QString *dst) noexcept {
+        return sn::try_to_qstring(src, dst);
+    }
+
+    [[nodiscard]] QString to(const T &src) {
+        return sn::to_qstring(src);
+    }
+
+    [[nodiscard]] bool try_from(QStringView src, T *dst) noexcept {
+        return sn::try_from_qstring(src, dst);
+    }
+
+    [[nodiscard]] T from(QStringView src) {
+        return sn::from_qstring<T>(src);
+    }
+};
+} // namespace sn::detail
 
 // GTest integration. Note that the operator is static and won't escape this TS, but will be found via ADL.
 // We need both functions b/c operator<< is used in test case comments, and PrintTo is used for printing invalid values.
@@ -101,12 +101,12 @@ TEST(qstring, char) {
 }
 
 TEST(qstring, boolean) {
-    sn::detail::make_boolean_test_suite<QString>(qstringifier()).run(qstring_callback());
+    sn::detail::make_boolean_test_suite().run<QString>();
 }
 
 template<class T>
 static void run_integer_tests() {
-    sn::detail::make_integer_test_suite<T, QString>(qstringifier()).run(qstring_callback());
+    sn::detail::make_integer_test_suite<T>().template run<QString>();
 }
 
 TEST(qstring, ints) {
@@ -122,7 +122,7 @@ TEST(qstring, ints) {
 
 template<class T>
 static void run_float_tests() {
-    sn::detail::make_float_test_suite<T, QString>(qstringifier()).run(qstring_callback());
+    sn::detail::make_float_test_suite<T>().template run<QString>();
 }
 
 TEST(qstring, floats) {
