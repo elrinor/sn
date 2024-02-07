@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "enum_reflection.h"
 #include "enum_string.h"
 
 //

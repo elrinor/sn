@@ -8,6 +8,7 @@
 #include <span>
 #include <unordered_map>
 
+#include "sn/core/globals.h"
 #include "sn/detail/ascii/ascii_functions.h"
 #include "sn/detail/enum_table/enum_table.h"
 

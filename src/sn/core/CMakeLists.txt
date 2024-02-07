@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_CORE_SOURCES
+    enum_reflection.h
     exception.h
     format.h
     globals.h
@@ -11,6 +12,7 @@ set(SN_CORE_SOURCES
 add_library(sn_core INTERFACE ${SN_CORE_SOURCES})
 add_library(sn::core ALIAS sn_core)
 target_include_directories(sn_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+target_compile_definitions(sn_core INTERFACE SN_MAX_SMALL_BUFFER_SIZE=${SN_MAX_SMALL_BUFFER_SIZE})
 lint_target(sn_core)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

@@ -3,9 +3,8 @@
 #include <string>
 #include <string_view>
 
+#include "sn/core/enum_reflection.h"
 #include "sn/core/preprocessor.h"
-#include "sn/string/string.h"
-#include "sn/string/string_fwd.h"
 #include "sn/detail/preprocessor/preprocessor.h"
 
 #if SN_USE_STD_ENUM_HASH
@@ -16,7 +15,8 @@
 #   error "Enum hash library not configured"
 #endif
 
-#include "enum_reflection.h"
+#include "string.h"
+#include "string_fwd.h"
 
 // TODO(elric): #cpp23 the magic below with _enum_table_container isn't needed in c++23, can just create a static
 //              constexpr variable inside a function.

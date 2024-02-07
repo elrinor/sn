@@ -5,7 +5,7 @@
 #include <type_traits> // For std::type_identity.
 #include <string_view>
 
-#include "sn/core/preprocessor.h"
+#include "preprocessor.h"
 
 namespace sn::detail {
 

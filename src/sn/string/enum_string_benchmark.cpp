@@ -1,6 +1,5 @@
 #include <benchmark/benchmark.h>
 
-#include "enum_reflection.h"
 #include "enum_string.h"
 
 #if defined(__GNUC__)
