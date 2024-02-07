@@ -42,7 +42,7 @@ static void run_pointer_tests() {
     EXPECT_FALSE(sn::qstringable<const unsigned char *>);
 }
 
-TEST(qstring, string) {
+TEST(qstring, string) { // NOLINT: this is not std::string.
     run_pointer_tests<QString>();
 
     // char16_t strings work.

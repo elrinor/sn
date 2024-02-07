@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <any>
+#include <string>
 
 #include "type_name.h"
 

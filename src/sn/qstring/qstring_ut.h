@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-#include <QtCore/QString>
+#include <QtCore/QString> // NOLINT: not a C system header.
 
 #include "sn/detail/test/test_suite.h"
 

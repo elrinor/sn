@@ -1,6 +1,7 @@
 #include "std_qstring_enum_table.h"
 
 #include <cassert>
+#include <utility>
 
 namespace sn::detail {
 

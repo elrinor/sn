@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <charconv>
+#include <string>
 
 #if SN_USE_FAST_FLOAT
 #   include <fast_float/fast_float.h>

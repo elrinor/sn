@@ -32,7 +32,7 @@ set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fas
 set(SN_BUNDLED_FROZEN_TAG "dd1f58c5f6c97fbf0832cc4e84676663839b913e" CACHE STRING "Git tag for the bundled frozen library")
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.14.0" CACHE STRING "Git tag for the bundled google test library")
 set(SN_BUNDLED_GOOGLEBENCHMARK_TAG "v1.8.3" CACHE STRING "Git tag for the bundled google benchmark library")
-set(SN_BUNDLED_CPPLINT_TAG "b3fcac06919b83d3e9c8a3b6dc450eba02869092" CACHE STRING "Git tag for the bundled cpplint")
+set(SN_BUNDLED_CPPLINT_TAG "7c64b90e668adf749329aa6c04eed3e7abcaf9c1" CACHE STRING "Git tag for the bundled cpplint")
 
 set(SN_MAX_SMALL_BUFFER_SIZE 128 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase")
 
@@ -96,7 +96,7 @@ if(SN_CHECK_STYLE)
     find_package(Python COMPONENTS Interpreter)
 
     FetchContent_Declare(cpplint
-            GIT_REPOSITORY https://github.com/elrinor/cpplint.git
+            GIT_REPOSITORY https://github.com/cpplint/cpplint.git
             GIT_TAG "${SN_BUNDLED_CPPLINT_TAG}")
     FetchContent_MakeAvailable(cpplint)
 

@@ -110,7 +110,7 @@ void from_string(std::string_view src, friendly *dst) {
 }
 } // namespace friendlyns
 
-TEST(string, friend) {
+TEST(string, friend) { // NOLINT: this is not std::string.
     EXPECT_EQ(sn::to_string(friendlyns::friendly(1)), "1");
     EXPECT_EQ(sn::from_string<friendlyns::friendly>("1"), friendlyns::friendly(1));
 }

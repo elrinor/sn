@@ -74,17 +74,17 @@ TEST(enum, namespaces) {
     sn::detail::make_adl_enum_test_suite().run<QString>();
 
     // sn::detail functions work and hook into the right reflection, despite being in the wrong namespace.
-    sn::detail::adl_test_enum value = sn::detail::ADL_VALUE_0;
-    QString string;
-    EXPECT_TRUE(sn::detail::try_from_qstring(u"_1", &value));
-    EXPECT_EQ(value, sn::detail::ADL_VALUE_1);
-    EXPECT_TRUE(sn::detail::try_to_qstring(sn::detail::ADL_VALUE_1, &string));
-    EXPECT_EQ(string, u"_1");
+    sn::detail::adl_test_enum v = sn::detail::ADL_VALUE_0;
+    QString s;
+    EXPECT_TRUE(sn::detail::try_from_qstring(u"_1", &v));
+    EXPECT_EQ(v, sn::detail::ADL_VALUE_1);
+    EXPECT_TRUE(sn::detail::try_to_qstring(sn::detail::ADL_VALUE_1, &s));
+    EXPECT_EQ(s, u"_1");
 
-    value = sn::detail::ADL_VALUE_0;
-    string.clear();
-    EXPECT_NO_THROW(sn::detail::from_qstring(u"_1", &value));
-    EXPECT_EQ(value, sn::detail::ADL_VALUE_1);
-    EXPECT_NO_THROW(sn::detail::to_qstring(sn::detail::ADL_VALUE_1, &string));
-    EXPECT_EQ(string, u"_1");
+    v = sn::detail::ADL_VALUE_0;
+    s.clear();
+    EXPECT_NO_THROW(sn::detail::from_qstring(u"_1", &v));
+    EXPECT_EQ(v, sn::detail::ADL_VALUE_1);
+    EXPECT_NO_THROW(sn::detail::to_qstring(sn::detail::ADL_VALUE_1, &s));
+    EXPECT_EQ(s, u"_1");
 }

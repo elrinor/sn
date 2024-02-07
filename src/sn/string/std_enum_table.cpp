@@ -1,6 +1,8 @@
 #include "std_enum_table.h"
 
 #include <cassert>
+#include <string>
+#include <utility> // For std::move.
 
 #include "sn/detail/ascii/ascii_functions.h"
 
