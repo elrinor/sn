@@ -55,6 +55,14 @@ TEST(enum, signed_char) {
     sn::detail::make_schar_enum_test_suite().run<QString>();
 }
 
+namespace sn::detail {
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(utf8_test_enum, sn::case_insensitive)
+} // namespace sn::detail
+
+TEST(enum, utf8) {
+    sn::detail::make_utf8_enum_test_suite().run<QString>();
+}
+
 namespace sn::detail::test_ns {
 SN_DEFINE_ENUM_QSTRING_FUNCTIONS(adl_test_enum, sn::case_sensitive)
 } // namespace sn::detail::test_ns

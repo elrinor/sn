@@ -247,6 +247,40 @@ inline test_suite<schar_test_enum> make_schar_enum_test_suite() {
 
 
 //
+// Test suite for utf8 strings. Checks that our to_lower implementation only works for ascii chars.
+//
+
+enum utf8_test_enum {
+    UTF8_VALUE_1 = 1,
+    UTF8_VALUE_2 = 2,
+};
+
+SN_DEFINE_ENUM_REFLECTION(utf8_test_enum, ({
+    {UTF8_VALUE_1, "\xd0\x94\xd0\xbe\xd0\xbc"}, // "Dom" (House) in Russian.
+    {UTF8_VALUE_2, "LOL"}
+}))
+
+inline test_suite<utf8_test_enum> make_utf8_enum_test_suite() {
+    test_suite<utf8_test_enum> result;
+
+    result.throwing_from = {
+        "\xd0\xb4\xd0\xbe\xd0\xbc" // "dom" (house) in Russian.
+    };
+
+    result.valid_from = {
+        {"lol", UTF8_VALUE_2} // Should be case-insensitive for ascii chars.
+    };
+
+    result.valid_fromto = {
+        {"\xd0\x94\xd0\xbe\xd0\xbc", UTF8_VALUE_1},
+        {"LOL", UTF8_VALUE_2}
+    };
+
+    return result;
+}
+
+
+//
 // Test suite for proper ADL routing.
 //
 // We'll also need to write some additional code in the tests themselves b/c test suites don't let us call into
