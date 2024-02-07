@@ -77,6 +77,7 @@
  *
  * The following declarations will be generated:
  * ```
+ * void is_string_supported_type(std::type_identity<TYPE>);
  * [[nodiscard]] bool try_to_string(const TYPE &src, std::string *dst) noexcept;
  * void to_string(const TYPE &src, std::string *dst);
  * [[nodiscard]] bool try_from_string(std::string_view src, TYPE *dst) noexcept;
@@ -88,7 +89,8 @@
  *
  * A typical way to use this macro is:
  * - Invoke it in a header file for your type.
- * - Define all functions in the cpp file.
+ * - Implement all functions in the cpp file. You don't need to implement `is_string_supported_type` as only the
+ *   declaration is used by `sn`.
  *
  * @param TYPE                          Type to generate `sn` string function declarations for.
  * @param ...                           Tags, if any.
