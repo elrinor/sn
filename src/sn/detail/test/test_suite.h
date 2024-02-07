@@ -27,12 +27,12 @@ struct test_suite {
         }
 
         for (const S &s : throwing_from) {
-            EXPECT_ANY_THROW((void) callback.from(s)) << "with s = " << s;
+            EXPECT_ANY_THROW((void) callback.template from<T>(s)) << "with s = " << s;
             EXPECT_FALSE(callback.try_from(s, &tmpv)) << "with s = " << s;
         }
 
         for (const auto &[s, v] : valid_from) {
-            EXPECT_EQ(callback.from(s), v);
+            EXPECT_EQ(callback.template from<T>(s), v);
             EXPECT_TRUE(callback.try_from(s, &tmpv)) << "with s = " << s;
             EXPECT_EQ(tmpv, v);
         }
@@ -41,13 +41,13 @@ struct test_suite {
             EXPECT_EQ(callback.to(v), s) << "with v = " << v;
             EXPECT_TRUE(callback.try_to(v, &tmps)) << "with v = " << v;
             EXPECT_EQ(tmps, s);
-            EXPECT_EQ(callback.from(s), v) << "with s = " << s;
+            EXPECT_EQ(callback.template from<T>(s), v) << "with s = " << s;
             EXPECT_TRUE(callback.try_from(s, &tmpv)) << "with s = " << s;
             EXPECT_EQ(tmpv, v);
         }
 
         for (const T &v : valid_roundtrip) {
-            EXPECT_EQ(callback.from(callback.to(v)), v) << "with v = " << v;
+            EXPECT_EQ(callback.template from<T>(callback.to(v)), v) << "with v = " << v;
             EXPECT_TRUE(callback.try_to(v, &tmps)) << "with v = " << v;
             EXPECT_TRUE(callback.try_from(tmps, &tmpv)) << "with tmps = " << tmps;
             EXPECT_EQ(tmpv, v);

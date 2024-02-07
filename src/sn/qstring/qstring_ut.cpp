@@ -6,20 +6,23 @@
 
 #include "qstring.h"
 
-template<class T>
 struct qstring_callback {
+    template<class T>
     [[nodiscard]] bool try_to(const T &src, QString *dst) noexcept {
         return sn::try_to_qstring(src, dst);
     }
 
+    template<class T>
     [[nodiscard]] QString to(const T &src) {
         return sn::to_qstring(src);
     }
 
+    template<class T>
     [[nodiscard]] bool try_from(QStringView src, T *dst) noexcept {
         return sn::try_from_qstring(src, dst);
     }
 
+    template<class T>
     [[nodiscard]] T from(QStringView src) {
         return sn::from_qstring<T>(src);
     }
@@ -98,12 +101,12 @@ TEST(qstring, char) {
 }
 
 TEST(qstring, boolean) {
-    sn::detail::make_boolean_test_suite<QString>(qstringifier()).run(qstring_callback<bool>());
+    sn::detail::make_boolean_test_suite<QString>(qstringifier()).run(qstring_callback());
 }
 
 template<class T>
 static void run_integer_tests() {
-    sn::detail::make_integer_test_suite<T, QString>(qstringifier()).run(qstring_callback<T>());
+    sn::detail::make_integer_test_suite<T, QString>(qstringifier()).run(qstring_callback());
 }
 
 TEST(qstring, ints) {
@@ -119,7 +122,7 @@ TEST(qstring, ints) {
 
 template<class T>
 static void run_float_tests() {
-    sn::detail::make_float_test_suite<T, QString>(qstringifier()).run(qstring_callback<T>());
+    sn::detail::make_float_test_suite<T, QString>(qstringifier()).run(qstring_callback());
 }
 
 TEST(qstring, floats) {
