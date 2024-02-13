@@ -21,10 +21,10 @@
 
 
 /**
- * Returns the size of the provided tuple.
+ * Returns the size of the provided tuple. For example, `SN_PP_TUPLE_SIZE((A, B))` will expand to `2`.
  *
- * For example, `SN_PP_TUPLE_SIZE((A, B))` will expand to `2`. Note that empty tuples are indistinguishable from
- * tuples if size 1 during preprocessing, and thus this macro never returns `0`.
+ * Note that empty tuples are indistinguishable from tuples of size 1 during preprocessing, and thus this macro never
+ * returns `0` and `SN_PP_TUPLE_SIZE(())` will expand to `1`.
  *
  * This code is auto-generated using the `ppgen` tool in `/tools`.
  *
