@@ -3,7 +3,7 @@
 #include <utility>
 #include <stdexcept>
 
-#include "format.h"
+#include "sn/detail/format/format.h"
 
 namespace sn {
 

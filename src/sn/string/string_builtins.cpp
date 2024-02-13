@@ -12,7 +12,7 @@
 #   include <fast_float/fast_float.h>
 #endif
 
-#include "sn/core/format.h"
+#include "sn/detail/format/format.h"
 
 #include "string_exceptions.h"
 
