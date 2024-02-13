@@ -2,7 +2,7 @@
 
 #include "sn/core/exception.h"
 
-namespace sn {
+namespace sn::detail {
 
 void throw_to_string_error(std::string_view type_name) {
     throw sn::exception("Cannot serialize provided value of type '{}' to string", type_name);
@@ -22,5 +22,5 @@ void throw_number_from_string_error(std::string_view type_name, std::string_view
     throw sn::exception("{}: {}", value, std::make_error_code(error).message());
 }
 
-} // namespace sn
+} // namespace sn::detail
 

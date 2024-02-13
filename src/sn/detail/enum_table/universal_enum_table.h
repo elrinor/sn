@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <concepts>
 #include <utility> // For std::pair.
 #include <string_view>
 
 #include "sn/core/globals.h"
+#include "sn/string/string.h"
 
 #include "small_buffer.h"
 #include "enum_table_exceptions.h"

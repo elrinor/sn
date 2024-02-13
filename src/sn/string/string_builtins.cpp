@@ -45,7 +45,7 @@ void to_string(bool src, std::string *dst) {
 
 void from_string(std::string_view src, bool *dst) {
     if (!try_from_string(src, dst))
-        throw_from_string_error<bool>(src);
+        sn::detail::throw_from_string_error<bool>(src);
 }
 
 
@@ -80,10 +80,10 @@ inline void from_string(std::string_view src, T *dst) {
     std::from_chars_result result = std::from_chars(src.data(), end, *dst);
 
     if (result.ec != std::errc())
-        sn::throw_number_from_string_error<T>(src, result.ec);
+        sn::detail::throw_number_from_string_error<T>(src, result.ec);
 
     if (result.ptr != end)
-        sn::throw_number_from_string_error<T>(src, std::errc::invalid_argument); // "Not a number"
+        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument); // "Not a number"
 }
 } // namespace detail_from_chars
 
@@ -123,19 +123,19 @@ template<class T>
 inline void from_string(std::string_view src, T *dst) {
     // Implementation is pretty much a copy of try_from_string.
     if (src.empty() || std::isspace(src[0]) || src[0] == '+')
-        throw_number_from_string_error<T>(src, std::errc::invalid_argument);
+        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument);
 
     const char *end = src.data() + src.size();
     errno = 0;
     T result = strto<T>(src.data(), &end);
     if (result == 0) {
         if (errno == ERANGE)
-            throw_number_from_string_error<T>(src, std::errc::result_out_of_range);
+            sn::detail::throw_number_from_string_error<T>(src, std::errc::result_out_of_range);
         if (errno != 0)
-            throw_number_from_string_error<T>(src, std::errc::invalid_argument);
+            sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument);
     }
     if (end != src.data() + src.size()) // Tail non-number symbols => not a number.
-        throw_number_from_string_error<T>(src, std::errc::invalid_argument);
+        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument);
     *dst = result;
 }
 } // namespace detail_strtofd
@@ -156,10 +156,10 @@ inline void from_string(std::string_view src, T *dst) {
     fast_float::from_chars_result result = fast_float::from_chars(src.data(), end, *dst);
 
     if (result.ec != std::errc())
-        throw_number_from_string_error<T>(src, result.ec);
+        sn::detail::throw_number_from_string_error<T>(src, result.ec);
 
     if (result.ptr != end)
-        throw_number_from_string_error<T>(src, std::errc::invalid_argument); // "Not a number"
+        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument); // "Not a number"
 }
 } // namespace detail_fast_float
 #endif // SN_USE_FAST_FLOAT

@@ -1,14 +1,11 @@
 #pragma once
 
-#include <cassert>
-#include <array>
-#include <utility> // For std::forward, std::pair.
+#include <utility> // For std::forward.
 #include <string>
 #include <string_view>
 
 #include "sn/core/type_name.h"
 #include "sn/core/globals.h"
-#include "sn/string/string.h"
 
 #include "universal_enum_table.h"
 
