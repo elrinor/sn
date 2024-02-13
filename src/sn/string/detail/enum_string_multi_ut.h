@@ -1,6 +1,6 @@
 #pragma once
 
-#include "enum_string.h"
+#include "sn/string/enum_string.h"
 
 enum class MultiTsEnum {
     MULTI_1,

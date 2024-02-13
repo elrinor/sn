@@ -8,9 +8,9 @@
 #include "sn/detail/preprocessor/preprocessor.h"
 
 #if SN_USE_STD_ENUM_HASH
-#   include "std_enum_table.h"
+#   include "sn/string/detail/std_enum_table.h"
 #elif SN_USE_FROZEN_ENUM_HASH
-#   include "frozen_enum_table.h"
+#   include "sn/string/detail/frozen_enum_table.h"
 #else
 #   error "Enum hash library not configured"
 #endif

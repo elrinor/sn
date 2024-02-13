@@ -2,16 +2,16 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_STRING_SOURCES
     enum_string.h
-    frozen_enum_table.h
-    std_enum_table.cpp
-    std_enum_table.h
     string.h
-    string_builtins.cpp
-    string_builtins.h
     string_concepts.h
-    string_exceptions.cpp
-    string_exceptions.h
-    string_fwd.h)
+    string_fwd.h
+    detail/frozen_enum_table.h
+    detail/std_enum_table.cpp
+    detail/std_enum_table.h
+    detail/string_builtins.cpp
+    detail/string_builtins.h
+    detail/string_exceptions.cpp
+    detail/string_exceptions.h)
 
 add_library(sn_string STATIC ${SN_STRING_SOURCES})
 add_library(sn::string ALIAS sn_string)
@@ -56,12 +56,12 @@ endif()
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_STRING_SOURCES
-        enum_string_multi_ut.h
-        enum_string_multi_first_ut.cpp
-        enum_string_multi_second_ut.cpp
-        enum_string_ut.cpp
-        string_ut.cpp
-        string_ut.h)
+        detail/enum_string_multi_ut.h
+        detail/enum_string_multi_first_ut.cpp
+        detail/enum_string_multi_second_ut.cpp
+        detail/enum_string_ut.cpp
+        detail/string_ut.cpp
+        detail/string_ut.h)
 
     add_executable(test_sn_string ${TEST_SN_STRING_SOURCES})
     target_link_libraries(test_sn_string PUBLIC sn_string sn_detail_test GTest::gtest GTest::gtest_main)
@@ -75,7 +75,7 @@ if(SN_BUILD_TESTS)
 endif()
 
 if(SN_BUILD_BENCHMARKS)
-    set(BENCHMARK_SN_STRING_SOURCES enum_string_benchmark.cpp)
+    set(BENCHMARK_SN_STRING_SOURCES detail/enum_string_benchmark.cpp)
 
     add_executable(benchmark_sn_string ${BENCHMARK_SN_STRING_SOURCES})
     target_link_libraries(benchmark_sn_string PUBLIC sn_string benchmark::benchmark benchmark::benchmark_main)

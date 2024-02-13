@@ -1,6 +1,6 @@
 #include <benchmark/benchmark.h>
 
-#include "enum_string.h"
+#include "sn/string/enum_string.h"
 
 #if defined(__GNUC__)
 #   define BENCHMARK_NOINLINE __attribute__((noinline))

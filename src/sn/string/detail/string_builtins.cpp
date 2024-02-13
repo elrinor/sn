@@ -9,7 +9,7 @@
 #include <string>
 
 #if SN_USE_FAST_FLOAT
-#   include <fast_float/fast_float.h>
+#include <fast_float/fast_float.h>
 #endif
 
 #include "sn/detail/format/format.h"

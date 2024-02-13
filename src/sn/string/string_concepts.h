@@ -1,6 +1,6 @@
 #pragma once
 
-#include "string_builtins.h"
+#include "sn/string/detail/string_builtins.h"
 
 namespace sn {
 

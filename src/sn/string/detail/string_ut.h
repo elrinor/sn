@@ -4,8 +4,7 @@
 #include <string_view>
 
 #include "sn/detail/test/test_suite.h"
-
-#include "string.h"
+#include "sn/string/string.h"
 
 namespace sn::detail {
 template<>

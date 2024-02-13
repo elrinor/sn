@@ -3,7 +3,8 @@
 #include <string>
 #include <string_view>
 
-#include "string_builtins.h"
+#include "sn/string/detail/string_builtins.h"
+
 #include "string_concepts.h"
 
 namespace sn::detail {

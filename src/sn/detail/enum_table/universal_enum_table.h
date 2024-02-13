@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
-#include <concepts>
+#include <concepts> // For std::same_as, std::convertible_to.
 #include <utility> // For std::pair.
 #include <string_view>
 

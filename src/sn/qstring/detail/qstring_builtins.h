@@ -1,7 +1,5 @@
 #pragma once
 
-#include <concepts>
-
 #include "sn/qstring/qstring_fwd.h"
 
 namespace sn::builtins {

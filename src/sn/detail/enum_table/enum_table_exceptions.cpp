@@ -1,7 +1,7 @@
 #include "enum_table_exceptions.h"
 
 #include "sn/core/exception.h"
-#include "sn/string/string_exceptions.h"
+#include "sn/string/detail/string_exceptions.h"
 
 namespace sn::detail {
 

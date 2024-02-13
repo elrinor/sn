@@ -2,9 +2,8 @@
 
 #include <string>
 #include <string_view>
-#include <concepts>
 
-#include "string_fwd.h"
+#include "sn/string/string_fwd.h"
 
 namespace sn::builtins {
 

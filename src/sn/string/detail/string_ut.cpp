@@ -7,8 +7,7 @@
 #include "sn/detail/test/integer_test_suite.h"
 #include "sn/detail/test/boolean_test_suite.h"
 #include "sn/detail/test/float_test_suite.h"
-
-#include "string.h"
+#include "sn/string/string.h"
 
 template<class T>
 static void run_pointer_tests() {
