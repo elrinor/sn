@@ -2,10 +2,10 @@
 
 #include "sn/string/string_exceptions.h"
 
-namespace sn {
+namespace sn::detail {
 
 void throw_from_string_error(std::string_view type_name, QStringView value) {
     sn::throw_from_string_error(type_name, std::string_view(value.toUtf8()));
 }
 
-} // namespace sn
+} // namespace sn::detail

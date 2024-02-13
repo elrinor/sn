@@ -29,8 +29,8 @@ endif()
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_CORE_SOURCES
-        preprocessor_ut.cpp
-        type_name_ut.cpp)
+        detail/preprocessor_ut.cpp
+        detail/type_name_ut.cpp)
 
     add_executable(test_sn_core ${TEST_SN_CORE_SOURCES})
     target_link_libraries(test_sn_core PUBLIC sn_core GTest::gtest GTest::gtest_main)

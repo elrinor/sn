@@ -1,6 +1,6 @@
 #pragma once
 
-#include "qstring_builtins.h"
+#include "sn/qstring/detail/qstring_builtins.h"
 
 namespace sn {
 

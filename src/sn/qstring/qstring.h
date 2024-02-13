@@ -3,7 +3,8 @@
 #include <QtCore/QString>
 #include <QtCore/QStringView>
 
-#include "qstring_builtins.h"
+#include "sn/qstring/detail/qstring_builtins.h"
+
 #include "qstring_concepts.h"
 
 namespace sn::detail {

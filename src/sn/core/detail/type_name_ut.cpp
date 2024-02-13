@@ -3,7 +3,7 @@
 #include <any>
 #include <string>
 
-#include "type_name.h"
+#include "sn/core/type_name.h"
 
 // Tests are only for the funcsig implementation. With typeid all bets are off.
 #if SN_USE_FUNCSIG_TYPE_NAME

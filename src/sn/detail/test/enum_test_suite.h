@@ -5,6 +5,7 @@
 
 #include "sn/core/enum_reflection.h"
 #include "sn/core/type_name.h"
+#include "sn/detail/workaround/to_underlying.h"
 
 #include "test_suite.h"
 
@@ -16,8 +17,7 @@ namespace sn::detail {
 
 template<class T> requires std::is_enum_v<T>
 std::ostream &operator<<(std::ostream &s, T value) {
-    // TODO(elric): #cpp23 use std::to_underlying.
-    return s << sn::type_name<T>() << "(" << static_cast<std::underlying_type_t<T>>(value) << ")";
+    return s << sn::type_name<T>() << "(" << sn::detail::std_to_underlying(value) << ")";
 }
 
 namespace test_ns {

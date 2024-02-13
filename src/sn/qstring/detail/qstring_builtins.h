@@ -2,7 +2,7 @@
 
 #include <concepts>
 
-#include "qstring_fwd.h"
+#include "sn/qstring/qstring_fwd.h"
 
 namespace sn::builtins {
 

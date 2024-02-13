@@ -5,8 +5,7 @@
 #include <QtCore/QString> // NOLINT: not a C system header.
 
 #include "sn/detail/test/test_suite.h"
-
-#include "qstring.h"
+#include "sn/qstring/qstring.h"
 
 namespace sn::detail {
 template<>

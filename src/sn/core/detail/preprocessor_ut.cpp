@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "preprocessor.h"
+#include "sn/core/preprocessor.h"
 
 static_assert(SN_PP_TUPLE_SIZE(()) == 1);
 static_assert(SN_PP_TUPLE_SIZE((1)) == 1);

@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
 #include "sn/detail/test/enum_test_suite.h"
+#include "sn/qstring/enum_qstring.h"
 
 #include "qstring_ut.h"
-#include "enum_qstring.h"
 
 namespace sn::detail {
 SN_DEFINE_ENUM_QSTRING_FUNCTIONS(basic_test_enum, sn::case_sensitive)

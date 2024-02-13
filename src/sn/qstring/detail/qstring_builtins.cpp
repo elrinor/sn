@@ -33,7 +33,7 @@ void to_qstring(bool src, QString *dst) {
 
 void from_qstring(QStringView src, bool *dst) {
     if (!try_from_qstring(src, dst))
-        throw_from_string_error<bool>(src);
+        sn::detail::throw_from_string_error<bool>(src);
 }
 
 
@@ -113,7 +113,7 @@ inline bool try_from_qstring(QStringView src, T *dst) noexcept {
 template<class T>
 inline void from_qstring(QStringView src, T *dst) {
     if (!try_from_qstring(src, dst))
-        throw_from_string_error<T>(src);
+        sn::detail::throw_from_string_error<T>(src);
 }
 
 } // namespace detail_qt
