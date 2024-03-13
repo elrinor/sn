@@ -1,6 +1,6 @@
 #pragma once
 
-#include "type_name_builtins.h"
+#include "sn/core/detail/type_name_builtins.h"
 
 namespace sn::detail {
 
