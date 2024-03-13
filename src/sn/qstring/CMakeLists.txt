@@ -21,9 +21,9 @@ if(SN_QT_LIB)
 
     if(SN_BUILD_TESTS)
         set(TEST_SN_QSTRING_SOURCES
-            detail/enum_qstring_ut.cpp
-            detail/qstring_ut.h
-            detail/qstring_ut.cpp)
+            test/enum_qstring_ut.cpp
+            test/qstring_ut.h
+            test/qstring_ut.cpp)
 
         add_executable(test_sn_qstring ${TEST_SN_QSTRING_SOURCES})
         target_link_libraries(test_sn_qstring PUBLIC sn_qstring sn_detail_test GTest::gtest GTest::gtest_main)

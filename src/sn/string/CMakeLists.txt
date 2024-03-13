@@ -56,12 +56,12 @@ endif()
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_STRING_SOURCES
-        detail/enum_string_multi_ut.h
-        detail/enum_string_multi_first_ut.cpp
-        detail/enum_string_multi_second_ut.cpp
-        detail/enum_string_ut.cpp
-        detail/string_ut.cpp
-        detail/string_ut.h)
+        test/enum_string_multi_first_ut.cpp
+        test/enum_string_multi_second_ut.cpp
+        test/enum_string_multi_ut.h
+        test/enum_string_ut.cpp
+        test/string_ut.cpp
+        test/string_ut.h)
 
     add_executable(test_sn_string ${TEST_SN_STRING_SOURCES})
     target_link_libraries(test_sn_string PUBLIC sn_string sn_detail_test GTest::gtest GTest::gtest_main)
@@ -75,7 +75,7 @@ if(SN_BUILD_TESTS)
 endif()
 
 if(SN_BUILD_BENCHMARKS)
-    set(BENCHMARK_SN_STRING_SOURCES detail/enum_string_benchmark.cpp)
+    set(BENCHMARK_SN_STRING_SOURCES benchmark/enum_string_benchmark.cpp)
 
     add_executable(benchmark_sn_string ${BENCHMARK_SN_STRING_SOURCES})
     target_link_libraries(benchmark_sn_string PUBLIC sn_string benchmark::benchmark benchmark::benchmark_main)
