@@ -6,10 +6,11 @@
 #include <string_view>
 
 #include "preprocessor.h"
+#include "tags.h"
 
 namespace sn::detail {
 
-template<class T, class... Tags>
+template<class T, sn::any_tag... Tags>
 [[nodiscard]] constexpr const auto &do_reflect_enum(Tags... tags) noexcept {
     return reflect_enum(std::type_identity<T>(), tags...);
 }
@@ -18,7 +19,7 @@ template<class T, class... Tags>
 
 namespace sn {
 
-template<class T, class... Tags>
+template<class T, sn::any_tag... Tags>
 [[nodiscard]] constexpr const auto &reflect_enum(Tags... tags) noexcept {
     return sn::detail::do_reflect_enum<T>(tags...);
 }

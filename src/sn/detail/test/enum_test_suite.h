@@ -5,6 +5,7 @@
 
 #include "sn/core/enum_reflection.h"
 #include "sn/core/type_name.h"
+#include "sn/core/tags.h"
 #include "sn/detail/workaround/to_underlying.h"
 
 #include "test_suite.h"
@@ -157,8 +158,8 @@ inline test_suite<compat_ci_test_enum> make_compat_ci_enum_test_suite() {
 // Tagged enum test suite.
 //
 
-struct gl1_test_tag {};
-struct gl2_test_tag {};
+struct gl1_test_tag : sn::tag {};
+struct gl2_test_tag : sn::tag {};
 
 SN_DEFINE_ENUM_REFLECTION(int, ({{1, "GL_1"}, {2, "GL_2"}}), gl1_test_tag)
 SN_DEFINE_ENUM_REFLECTION(int, ({{100, "GL_100"}, {200, "GL_200"}}), gl2_test_tag)
