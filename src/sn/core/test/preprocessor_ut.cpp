@@ -1,4 +1,6 @@
-#include <gtest/gtest.h>
+#include <map>
+
+#include <gtest/gtest.h> // NOLINT: not a C system header.
 
 #include "sn/core/preprocessor.h"
 
@@ -15,7 +17,7 @@ static_assert(SN_PP_TUPLE_SIZE((JUST_1_2_3_4)) == 4);
 #define PREPEND_PLUS(x) +x
 static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (1, 2, 3, 4, 5)) == 15);
 
-TEST(core, pp_for_each) {
+TEST(core, pp_for_each_completeness) {
     struct tmp_data {
         int a = 0;
         int b = 1;
@@ -34,4 +36,28 @@ TEST(core, pp_for_each) {
     EXPECT_EQ(tmp.a, 2);
     EXPECT_EQ(tmp.b, 3);
     EXPECT_EQ(tmp.c, 3);
+}
+
+TEST(core, pp_for_each_order) {
+#define LIST_NUMBER(x) x,
+    std::initializer_list<int> list = {
+        SN_PP_TUPLE_FOR_EACH(LIST_NUMBER, (1, 2, 3))
+    };
+
+    EXPECT_EQ(list.size(), 3);
+    EXPECT_EQ(*list.begin(), 1);
+    EXPECT_EQ(*(list.begin() + 1), 2);
+    EXPECT_EQ(*(list.begin() + 2), 3);
+}
+
+TEST(core, pp_for_each_i) {
+#define LIST_PAIR(i, x) {i, x},
+    std::map<int, int> mapping = {
+        SN_PP_TUPLE_FOR_EACH_I(LIST_PAIR, (1, 2, 3))
+    };
+
+    EXPECT_EQ(mapping.size(), 3);
+    EXPECT_EQ(mapping[0], 1);
+    EXPECT_EQ(mapping[1], 2);
+    EXPECT_EQ(mapping[2], 3);
 }
