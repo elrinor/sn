@@ -17,6 +17,10 @@ static_assert(SN_PP_TUPLE_SIZE((JUST_1_2_3_4)) == 4);
 #define PREPEND_PLUS(x) +x
 static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (1, 2, 3, 4, 5)) == 15);
 
+static_assert(SN_PP_IF(0, 1, 0) == 0);
+static_assert(SN_PP_IF(1, 1, 0) == 1);
+static_assert(SN_PP_IF(100, 1, 0) == 1);
+
 TEST(core, pp_for_each_completeness) {
     struct tmp_data {
         int a = 0;
