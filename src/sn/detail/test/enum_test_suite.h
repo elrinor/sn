@@ -160,9 +160,12 @@ inline test_suite<compat_ci_test_enum> make_compat_ci_enum_test_suite() {
 
 struct gl1_test_tag : sn::tag {};
 struct gl2_test_tag : sn::tag {};
+struct first_test_tag : sn::tag {};
+struct second_test_tag : sn::tag {};
 
 SN_DEFINE_ENUM_REFLECTION(int, ({{1, "GL_1"}, {2, "GL_2"}}), gl1_test_tag)
 SN_DEFINE_ENUM_REFLECTION(int, ({{100, "GL_100"}, {200, "GL_200"}}), gl2_test_tag)
+SN_DEFINE_ENUM_REFLECTION(int, ({{0, "GL_0"}}), first_test_tag, second_test_tag)
 
 inline test_suite<int, gl1_test_tag> make_tagged_enum_test_suite_1() {
     test_suite<int, gl1_test_tag> result;
@@ -188,6 +191,16 @@ inline test_suite<int, gl2_test_tag> make_tagged_enum_test_suite_2() {
         {"GL_100", 100},
         {"GL_200", 200}
     };
+
+    return result;
+}
+
+inline test_suite<int, first_test_tag, second_test_tag> make_tagged_enum_test_suite_3() {
+    test_suite<int, first_test_tag, second_test_tag> result;
+
+    result.throwing_to = {1};
+    result.throwing_from = {"GL_1"};
+    result.valid_fromto = {{"GL_0", 0}};
 
     return result;
 }

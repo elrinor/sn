@@ -32,11 +32,13 @@ TEST(enum, compatibility) {
 namespace sn::detail {
 SN_DEFINE_ENUM_QSTRING_FUNCTIONS(int, sn::case_insensitive, gl1_test_tag)
 SN_DEFINE_ENUM_QSTRING_FUNCTIONS(int, sn::case_insensitive, gl2_test_tag)
+SN_DEFINE_ENUM_QSTRING_FUNCTIONS(int, sn::case_insensitive, first_test_tag, second_test_tag)
 } // namespace sn::detail
 
 TEST(enum, tagged) {
     sn::detail::make_tagged_enum_test_suite_1().run<QString>();
     sn::detail::make_tagged_enum_test_suite_2().run<QString>();
+    sn::detail::make_tagged_enum_test_suite_3().run<QString>();
 }
 
 namespace sn::detail {

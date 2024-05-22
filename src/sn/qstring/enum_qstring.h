@@ -19,7 +19,7 @@
                                                                                                                         \
     template<>                                                                                                          \
     struct _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__> {                                                      \
-        static constexpr auto reflection = sn::reflect_enum<ENUM>(__VA_OPT__(SN_PP_TUPLE_FOR_EACH(_SN_PP_APPEND_PARENS, (__VA_ARGS__)))); \
+        static constexpr auto reflection = sn::reflect_enum<ENUM>(__VA_OPT__(SN_PP_TUPLE_FOR_EACH_I(_SN_PP_DEFAULT_CONSTRUCTORS, (__VA_ARGS__)))); \
         TABLE_DEFINITION_MACRO(value, ENUM, CASE_SENSITIVITY, reflection)                                               \
     };                                                                                                                  \
                                                                                                                         \
