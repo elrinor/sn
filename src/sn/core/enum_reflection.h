@@ -35,7 +35,7 @@ template<class T, sn::any_tag... Tags>
                                                                                                                         \
     template<>                                                                                                          \
     struct _enum_reflection_container<T __VA_OPT__(,) __VA_ARGS__> {                                                    \
-        static constexpr auto value = std::to_array<std::pair<T, std::string_view>>(SN_PP_TUPLE_ENUM(MAPPING));         \
+        static constexpr auto value = std::to_array<std::pair<T, std::string_view>> MAPPING;                            \
     };                                                                                                                  \
                                                                                                                         \
     [[nodiscard]] constexpr const auto &reflect_enum(std::type_identity<T> __VA_OPT__(,) __VA_ARGS__) noexcept {        \
