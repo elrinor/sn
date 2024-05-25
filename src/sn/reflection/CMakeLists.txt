@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_REFLECTION_SOURCES
     reflection.h
-    detail/reflection_type_traits.h)
+    reflection_data.h
+    detail/reflection_type_traits.h
+    detail/member_reflection.h)
 
 add_library(sn_reflection INTERFACE ${SN_REFLECTION_SOURCES})
 add_library(sn::reflection ALIAS sn_reflection)
