@@ -64,6 +64,15 @@ int main(int argc, char **argv) {
     }
 
     fmt::println(stdout, "");
+    fmt::println(stdout, "#define SN_PP_TUPLE_TRANSFORM(MACRO, TUPLE) _SN_PP_TUPLE_TRANSFORM_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
+    fmt::println(stdout, "#define _SN_PP_TUPLE_TRANSFORM_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_TRANSFORM_I_, SIZE)(MACRO, __VA_ARGS__)");
+    fmt::println(stdout, "#define _SN_PP_TUPLE_TRANSFORM_I_0(M, DUMMY) ()");
+    for (int i = 1; i <= count; i++) {
+        auto range = std::views::iota(0, i);
+        fmt::println(stdout, "#define _SN_PP_TUPLE_TRANSFORM_I_{}(M, {}) ({})", i, join("v{}", ", ", range), join("M(v{})", ", ", range));
+    }
+
+    fmt::println(stdout, "");
     fmt::println(stdout, "#define SN_PP_BOOL(X) SN_PP_CAT(_SN_PP_BOOL_I_, X)");
     for (int i = 0; i <= count; i++)
         fmt::println(stdout, "#define _SN_PP_BOOL_I_{} {}", i, i ? 1 : 0);

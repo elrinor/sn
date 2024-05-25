@@ -1,4 +1,5 @@
 #include <map>
+#include <vector>
 
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
@@ -33,6 +34,9 @@ static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (EMPTY3())) true); // And here.
 static_assert(SN_PP_TUPLE_FOR_EACH_I(PREPEND_PLUS, ()) true); // SN_PP_TUPLE_FOR_EACH_I should expand to nothing here.
 static_assert(SN_PP_TUPLE_FOR_EACH_I(PREPEND_PLUS, (EMPTY3())) true); // And here.
 
+// Static tests for SN_PP_TUPLE_TRANSFORM
+static_assert(std::initializer_list<int>SN_PP_TUPLE_TRANSFORM(PREPEND_PLUS, ()).size() == 0); // () expands to ().
+
 TEST(core, pp_for_each_completeness) {
     struct tmp_data {
         int a = 0;
@@ -56,14 +60,11 @@ TEST(core, pp_for_each_completeness) {
 
 TEST(core, pp_for_each_order) {
 #define LIST_NUMBER(x) x,
-    std::initializer_list<int> list = {
+    std::vector<int> list = {
         SN_PP_TUPLE_FOR_EACH(LIST_NUMBER, (1, 2, 3))
     };
 
-    EXPECT_EQ(list.size(), 3);
-    EXPECT_EQ(*list.begin(), 1);
-    EXPECT_EQ(*(list.begin() + 1), 2);
-    EXPECT_EQ(*(list.begin() + 2), 3);
+    EXPECT_EQ(list, (std::vector<int>{1, 2, 3}));
 }
 
 TEST(core, pp_for_each_i) {
@@ -76,4 +77,13 @@ TEST(core, pp_for_each_i) {
     EXPECT_EQ(mapping[0], 1);
     EXPECT_EQ(mapping[1], 2);
     EXPECT_EQ(mapping[2], 3);
+}
+
+TEST(code, pp_transform) {
+#define PREPEND_MINUS(x) -x
+    std::vector<int> values = {
+        SN_PP_TUPLE_ENUM(SN_PP_TUPLE_TRANSFORM(PREPEND_MINUS, (1, 2, 3, 4, 5)))
+    };
+
+    EXPECT_EQ(values, (std::vector<int>{-1, -2, -3, -4, -5}));
 }
