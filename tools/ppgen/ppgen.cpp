@@ -10,10 +10,10 @@ int main(int argc, char **argv) {
 
     int count = sn::from_string<int>(argv[1]);
     auto forward_range = std::views::iota(0, count);
-    auto reverse_range = std::views::iota(1, count + 1) | std::views::reverse;
+    auto reverse_range = std::views::iota(0, count + 1) | std::views::reverse;
 
     fmt::println(stdout, "#define SN_PP_TUPLE_SIZE(TUPLE) _SN_PP_TUPLE_SIZE_I TUPLE");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_SIZE_I(...) _SN_PP_TUPLE_SIZE_II(__VA_ARGS__, {}, )",
+    fmt::println(stdout, "#define _SN_PP_TUPLE_SIZE_I(...) _SN_PP_TUPLE_SIZE_II(__VA_ARGS__ __VA_OPT__(,) {})",
                  fmt::join(reverse_range, ", "));
     fmt::println(stdout, "#define _SN_PP_TUPLE_SIZE_II(v{}, size, ...) size",
                  fmt::join(forward_range, ", v"));
