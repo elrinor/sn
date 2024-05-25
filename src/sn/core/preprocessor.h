@@ -4,10 +4,12 @@
 #   error "sn doesn't support traditional MSVC preprocessor, build with /Zc:preprocessor"
 #endif
 
+
 /**
  * Macro expanding to a comma.
  */
 #define SN_PP_COMMA() ,
+
 
 /**
  * Macro expanding into nothing.
@@ -20,15 +22,6 @@
  */
 #define SN_PP_CAT(L, R) _SN_PP_CAT_I(L, R)
 #define _SN_PP_CAT_I(L, R) L ## R
-
-
-/**
- * Converts a tuple to a comma-separated list of its elements, essentially removing the parentheses.
- *
- * @param TUPLE                         Tuple to enumerate.
- */
-#define SN_PP_TUPLE_ENUM(TUPLE) _SN_PP_TUPLE_ENUM_I TUPLE
-#define _SN_PP_TUPLE_ENUM_I(...) __VA_ARGS__
 
 
 /**
@@ -52,6 +45,15 @@
 
 
 /**
+ * Converts a tuple to a comma-separated list of its elements, essentially removing the parentheses.
+ *
+ * @param TUPLE                         Tuple to enumerate.
+ */
+#define SN_PP_TUPLE_ENUM(TUPLE) _SN_PP_TUPLE_ENUM_I TUPLE
+#define _SN_PP_TUPLE_ENUM_I(...) __VA_ARGS__
+
+
+/**
  * Returns the size of the provided tuple. For example, `SN_PP_TUPLE_SIZE((A, B))` will expand to `2`.
  *
  * Note that empty tuples are indistinguishable from tuples of size 1 during preprocessing, and thus this macro never
@@ -69,9 +71,11 @@
 /**
  * Applies the provided `MACRO` to all elements of `TUPLE`.
  *
+ * For example, `SN_PP_TUPLE_FOR_EACH(M, (A, B))` will expand to `M(A) M(B)`.
+ *
  * This code is auto-generated using the `ppgen` tool in `/tools`.
  *
- * @param MACRO                         Macro to apply.
+ * @param MACRO                         Macro to apply to the tuple's elements.
  * @param TUPLE                         Tuple to iterate over.
  * @see SN_PP_TUPLE_FOR_EACH_I
  */
@@ -209,6 +213,8 @@
 /**
  * Applies the provided `MACRO` to all elements of `TUPLE`, additionally passing the index of the current element as the
  * first argument to `MACRO`.
+ *
+ * For example, `SN_PP_TUPLE_FOR_EACH_I(M, (A, B))` will expand to `M(0, A) M(1, B)`.
  *
  * This code is auto-generated using the `ppgen` tool in `/tools`.
  *
