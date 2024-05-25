@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_REFLECTION_SOURCES
-    reflection.h
-    reflection_data.h
+    class_reflection.h
+    class_reflection_data.h
     detail/reflection_type_traits.h
     detail/member_reflection.h)
 

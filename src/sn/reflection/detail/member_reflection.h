@@ -3,7 +3,7 @@
 #include <utility>
 #include <type_traits>
 
-#include "sn/reflection/reflection_data.h"
+#include "sn/reflection/class_reflection_data.h"
 
 #include "reflection_type_traits.h"
 

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "sn/core/tags.h"
-#include "sn/reflection/reflection.h"
+#include "sn/reflection/class_reflection.h"
 
 struct MyPair {
     int a = 0;

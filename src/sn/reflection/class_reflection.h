@@ -9,7 +9,26 @@
 #include "sn/core/preprocessor.h"
 #include "sn/reflection/detail/member_reflection.h"
 
-#include "reflection_data.h"
+#include "class_reflection_data.h"
+
+
+namespace sn::detail {
+
+template<class T, sn::any_tag... Tags>
+[[nodiscard]] constexpr const auto &do_reflect_class(Tags... tags) noexcept {
+    return reflect_class(std::type_identity<T>(), tags...);
+}
+
+} // namespace sn::detail
+
+namespace sn {
+
+template<class T, sn::any_tag... Tags>
+[[nodiscard]] constexpr const auto &reflect_class(Tags... tags) noexcept {
+    return sn::detail::do_reflect_class<T>(tags...);
+}
+
+} // namespace sn
 
 
 // TODO(elric): #cpp23 the magic below with _class_reflection_container isn't needed in c++23, can just create a static
