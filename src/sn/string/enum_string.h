@@ -3,8 +3,8 @@
 #include <string>
 #include <string_view>
 
-#include "sn/core/enum_reflection.h"
 #include "sn/core/preprocessor.h"
+#include "sn/reflection/enum_reflection.h"
 #include "sn/detail/preprocessor/preprocessor.h"
 
 #if SN_USE_STD_ENUM_HASH

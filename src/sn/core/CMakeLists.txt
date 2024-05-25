@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_CORE_SOURCES
-    enum_reflection.h
     exception.h
     globals.h
     preprocessor.h

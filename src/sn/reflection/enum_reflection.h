@@ -5,8 +5,8 @@
 #include <type_traits> // For std::type_identity.
 #include <string_view>
 
-#include "preprocessor.h"
-#include "tags.h"
+#include "sn/core/preprocessor.h"
+#include "sn/core/tags.h"
 
 namespace sn::detail {
 

@@ -3,9 +3,9 @@
 #include <ostream>
 #include <type_traits>
 
-#include "sn/core/enum_reflection.h"
 #include "sn/core/type_name.h"
 #include "sn/core/tags.h"
+#include "sn/reflection/enum_reflection.h"
 #include "sn/detail/workaround/to_underlying.h"
 
 #include "test_suite.h"

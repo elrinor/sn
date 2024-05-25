@@ -3,8 +3,8 @@
 #include <QtCore/QString>
 #include <QtCore/QStringView>
 
-#include "sn/core/enum_reflection.h"
 #include "sn/core/preprocessor.h"
+#include "sn/reflection/enum_reflection.h"
 #include "sn/detail/preprocessor/preprocessor.h"
 #include "sn/qstring/detail/std_qstring_enum_table.h"
 

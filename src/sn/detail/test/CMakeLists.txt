@@ -8,5 +8,5 @@ set(SN_DETAIL_TEST_SOURCES
     integer_test_suite.h)
 
 add_library(sn_detail_test INTERFACE ${SN_DETAIL_TEST_SOURCES})
-target_link_libraries(sn_detail_test INTERFACE sn_string GTest::gtest)
+target_link_libraries(sn_detail_test INTERFACE sn_string sn_reflection GTest::gtest)
 lint_target(sn_detail_test)
