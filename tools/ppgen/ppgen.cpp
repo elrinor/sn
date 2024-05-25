@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
                  fmt::join(forward_range, ", v"));
 
     fmt::println(stdout, "");
-    fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_REMOVE_PARENS(TUPLE))");
+    fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
     fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_I_, SIZE)(MACRO, __VA_ARGS__)");
     fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_1(MACRO, v0) MACRO(v0)");
     for (int i = 2; i <= count; i++) {
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     }
 
     fmt::println(stdout, "");
-    fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH_I(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_REMOVE_PARENS(TUPLE))");
+    fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH_I(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
     fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_I_I_, SIZE)(MACRO, __VA_ARGS__)");
     fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I_1(MACRO, v0) MACRO(0, v0)");
     for (int i = 2; i <= count; i++) {

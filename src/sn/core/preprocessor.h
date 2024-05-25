@@ -23,10 +23,12 @@
 
 
 /**
- * Removes parentheses from the provided argument.
+ * Converts a tuple to a comma-separated list of its elements, essentially removing the parentheses.
+ *
+ * @param TUPLE                         Tuple to enumerate.
  */
-#define SN_PP_REMOVE_PARENS(TUPLE) _SN_PP_REMOVE_PARENS_I TUPLE
-#define _SN_PP_REMOVE_PARENS_I(...) __VA_ARGS__
+#define SN_PP_TUPLE_ENUM(TUPLE) _SN_PP_TUPLE_ENUM_I TUPLE
+#define _SN_PP_TUPLE_ENUM_I(...) __VA_ARGS__
 
 
 /**
@@ -73,7 +75,7 @@
  * @param TUPLE                         Tuple to iterate over.
  * @see SN_PP_TUPLE_FOR_EACH_I
  */
-#define SN_PP_TUPLE_FOR_EACH(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_REMOVE_PARENS(TUPLE))
+#define SN_PP_TUPLE_FOR_EACH(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))
 #define _SN_PP_TUPLE_FOR_EACH_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_I_, SIZE)(MACRO, __VA_ARGS__)
 #define _SN_PP_TUPLE_FOR_EACH_I_1(MACRO, v0) MACRO(v0)
 #define _SN_PP_TUPLE_FOR_EACH_I_2(MACRO, v0, v1) _SN_PP_TUPLE_FOR_EACH_I_1(MACRO, v0) MACRO(v1)
@@ -214,7 +216,7 @@
  * @param TUPLE                         Tuple to iterate over.
  * @see SN_PP_TUPLE_FOR_EACH
  */
-#define SN_PP_TUPLE_FOR_EACH_I(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_REMOVE_PARENS(TUPLE))
+#define SN_PP_TUPLE_FOR_EACH_I(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))
 #define _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_I_I_, SIZE)(MACRO, __VA_ARGS__)
 #define _SN_PP_TUPLE_FOR_EACH_I_I_1(MACRO, v0) MACRO(0, v0)
 #define _SN_PP_TUPLE_FOR_EACH_I_I_2(MACRO, v0, v1) _SN_PP_TUPLE_FOR_EACH_I_I_1(MACRO, v0) MACRO(1, v1)
