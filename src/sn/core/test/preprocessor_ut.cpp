@@ -29,6 +29,10 @@ static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (1, 2, 3, 4, 5)) == 15);
 static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, ()) true); // SN_PP_TUPLE_FOR_EACH should expand to nothing here.
 static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (EMPTY3())) true); // And here.
 
+// Static tests for SN_PP_TUPLE_FOR_EACH_I
+static_assert(SN_PP_TUPLE_FOR_EACH_I(PREPEND_PLUS, ()) true); // SN_PP_TUPLE_FOR_EACH_I should expand to nothing here.
+static_assert(SN_PP_TUPLE_FOR_EACH_I(PREPEND_PLUS, (EMPTY3())) true); // And here.
+
 TEST(core, pp_for_each_completeness) {
     struct tmp_data {
         int a = 0;

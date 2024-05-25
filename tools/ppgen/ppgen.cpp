@@ -5,19 +5,29 @@
 
 #include "sn/string/string.h"
 
-template<class Range>
-std::string join(std::string_view format, std::string_view sep, Range &&range) {
+template<class... Ranges, std::size_t... indices>
+std::string join(std::string_view format, std::string_view sep, std::index_sequence<indices...>, const Ranges &... ranges) {
     std::string result;
 
-    for (const auto &element : range) {
-        result += fmt::format(fmt::runtime(format), element);
+    // Poor man's zip_view.
+    std::tuple iters(ranges.begin()...);
+    std::tuple ends(ranges.end()...);
+    while (((std::get<indices>(iters) != std::get<indices>(ends)) && ...)) {
+        result += fmt::format(fmt::runtime(format), *std::get<indices>(iters)...);
         result += sep;
+
+        (std::get<indices>(iters)++, ...);
     }
 
     if (!result.empty())
         result.erase(result.size() - sep.size(), sep.size());
 
     return result;
+}
+
+template<class... Ranges>
+std::string join(std::string_view format, std::string_view sep, const Ranges &... ranges) {
+    return join(format, sep, std::index_sequence_for<Ranges...>(), ranges...);
 }
 
 int main(int argc, char **argv) {
@@ -46,12 +56,11 @@ int main(int argc, char **argv) {
     fmt::println(stdout, "");
     fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH_I(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
     fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_I_I_, SIZE)(MACRO, __VA_ARGS__)");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I_1(MACRO, v0) MACRO(0, v0)");
-    for (int i = 2; i <= count; i++) {
+    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I_0(M, DUMMY)");
+    for (int i = 1; i <= count; i++) {
         auto range = std::views::iota(0, i);
-        auto subrange = std::views::iota(0, i - 1);
-        fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I_{}(MACRO, v{}) _SN_PP_TUPLE_FOR_EACH_I_I_{}(MACRO, v{}) MACRO({}, v{})",
-                     i, fmt::join(range, ", v"),  i - 1, fmt::join(subrange, ", v"), i - 1, i - 1);
+        fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I_{}(M, {}) {}",
+                     i, join("v{}", ", ", range),  join("M({}, v{})", " ", range, range));
     }
 
     fmt::println(stdout, "");
