@@ -34,7 +34,7 @@ set(SN_BUNDLED_GOOGLETEST_TAG "v1.14.0" CACHE STRING "Git tag for the bundled go
 set(SN_BUNDLED_GOOGLEBENCHMARK_TAG "v1.8.3" CACHE STRING "Git tag for the bundled google benchmark library")
 set(SN_BUNDLED_CPPLINT_TAG "7c64b90e668adf749329aa6c04eed3e7abcaf9c1" CACHE STRING "Git tag for the bundled cpplint")
 
-set(SN_MAX_SMALL_BUFFER_SIZE 128 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase")
+set(SN_MAX_SMALL_BUFFER_SIZE 256 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase, in bytes")
 
 
 #

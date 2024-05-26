@@ -9,8 +9,8 @@
 #include "sn/core/globals.h"
 #include "sn/string/string.h"
 
-#include "small_buffer.h"
 #include "enum_table_exceptions.h"
+#include "lowercase_buffer.h"
 
 namespace sn::detail {
 
@@ -83,8 +83,7 @@ public:
         };
 
         if constexpr (mode == case_insensitive) {
-            small_buffer<typename string_type::value_type, SN_MAX_SMALL_BUFFER_SIZE> buffer(Traits::to_lower_size(src));
-            return run(Traits::to_lower(src, buffer.data()));
+            return run(lowercase_buffer<Traits>(src));
         } else {
             return run(src);
         }
@@ -114,8 +113,7 @@ public:
         };
 
         if constexpr (mode == case_insensitive) {
-            small_buffer<typename string_type::value_type, SN_MAX_SMALL_BUFFER_SIZE> buffer(Traits::to_lower_size(src));
-            return run(Traits::to_lower(src, buffer.data()));
+            return run(lowercase_buffer<Traits>(src));
         } else {
             return run(src);
         }

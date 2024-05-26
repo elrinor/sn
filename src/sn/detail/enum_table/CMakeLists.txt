@@ -4,7 +4,8 @@ set(SN_DETAIL_ENUM_TABLE_SOURCES
     enum_table.h
     enum_table_exceptions.h
     enum_table_exceptions.cpp
-    small_buffer.h
+    lowercase_buffer.h
+    overwrite_buffer.h
     universal_enum_table.h)
 
 add_library(sn_detail_enum_table STATIC ${SN_DETAIL_ENUM_TABLE_SOURCES})
