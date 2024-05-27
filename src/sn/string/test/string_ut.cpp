@@ -1,8 +1,9 @@
 #include "string_ut.h"
 
-#include <gtest/gtest.h>
-
+#include <string>
 #include <functional> // For std::identity.
+
+#include <gtest/gtest.h> // NOLINT: not a C system header.
 
 #include "sn/detail/test/integer_test_suite.h"
 #include "sn/detail/test/boolean_test_suite.h"
@@ -10,33 +11,66 @@
 #include "sn/string/string.h"
 
 template<class T>
+static void check_supported() {
+    static_assert(sn::has_to_string<T>);
+    static_assert(sn::has_try_to_string<T>);
+    static_assert(sn::has_from_string<T>);
+    static_assert(sn::has_try_from_string<T>);
+}
+
+template<class T>
+static void check_unsupported() {
+    static_assert(!sn::has_to_string<T>);
+    static_assert(!sn::has_try_to_string<T>);
+    static_assert(!sn::has_from_string<T>);
+    static_assert(!sn::has_try_from_string<T>);
+}
+
+template<class T>
+static void check_has_to_string_only() {
+    static_assert(sn::has_to_string<T>);
+    static_assert(sn::has_try_to_string<T>);
+    static_assert(!sn::has_from_string<T>);
+    static_assert(!sn::has_try_from_string<T>);
+}
+
+template<class T>
 static void run_pointer_tests() {
     // Check all char pointers & array types.
-    EXPECT_TRUE(sn::stringable<char[4]>);
-    EXPECT_FALSE(sn::stringable<char8_t[4]>);
-    EXPECT_FALSE(sn::stringable<char16_t[4]>);
-    EXPECT_FALSE(sn::stringable<char32_t[4]>);
-    EXPECT_FALSE(sn::stringable<wchar_t[4]>);
-    EXPECT_TRUE(sn::stringable<const char *>);
-    EXPECT_FALSE(sn::stringable<const char8_t *>);
-    EXPECT_FALSE(sn::stringable<const char16_t *>);
-    EXPECT_FALSE(sn::stringable<const char32_t *>);
-    EXPECT_FALSE(sn::stringable<const wchar_t *>);
+    check_has_to_string_only<char[4]>();
+    check_unsupported<char8_t[4]>();
+    check_unsupported<char16_t[4]>();
+    check_unsupported<char32_t[4]>();
+    check_unsupported<wchar_t[4]>();
+    check_has_to_string_only<const char *>();
+    check_unsupported<const char8_t *>();
+    check_unsupported<const char16_t *>();
+    check_unsupported<const char32_t *>();
+    check_unsupported<const wchar_t *>();
+    check_has_to_string_only<char *>();
+    check_unsupported<char8_t *>();
+    check_unsupported<char16_t *>();
+    check_unsupported<char32_t *>();
+    check_unsupported<wchar_t *>();
 
     // Same checks for from_string, albeit this one is more of a sanity check as the first arg is always a std::string_view.
-    EXPECT_TRUE(requires(T s) { sn::builtins::from_string("123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u8"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(u"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(U"123", &s); });
-    EXPECT_FALSE(requires(T s) { sn::builtins::from_string(L"123", &s); });
+    static_assert(requires(T s) { sn::builtins::from_string("123", &s); });
+    static_assert(!requires(T s) { sn::builtins::from_string(u8"123", &s); });
+    static_assert(!requires(T s) { sn::builtins::from_string(u"123", &s); });
+    static_assert(!requires(T s) { sn::builtins::from_string(U"123", &s); });
+    static_assert(!requires(T s) { sn::builtins::from_string(L"123", &s); });
 
     // And we also do some sanity checks for non-char pointers.
-    EXPECT_FALSE(sn::stringable<void *>);
-    EXPECT_FALSE(sn::stringable<int *>);
-    EXPECT_FALSE(sn::stringable<unsigned char *>);
-    EXPECT_FALSE(sn::stringable<const void *>);
-    EXPECT_FALSE(sn::stringable<const int *>);
-    EXPECT_FALSE(sn::stringable<const unsigned char *>);
+    check_unsupported<unsigned char *>();
+    check_unsupported<signed char *>();
+    check_unsupported<const unsigned char *>();
+    check_unsupported<const signed char *>();
+    check_unsupported<void *>();
+    check_unsupported<int *>();
+    check_unsupported<unsigned int *>();
+    check_unsupported<const void *>();
+    check_unsupported<const int *>();
+    check_unsupported<const unsigned char *>();
 }
 
 TEST(string, string) {
@@ -54,9 +88,9 @@ TEST(string, string) {
 }
 
 TEST(string, char) {
-    EXPECT_FALSE(sn::stringable<char>);
-    EXPECT_FALSE(sn::stringable<unsigned char>);
-    EXPECT_FALSE(sn::stringable<signed char>);
+    check_unsupported<char>();
+    check_unsupported<unsigned char>();
+    check_unsupported<signed char>();
 }
 
 TEST(string, boolean) {
@@ -112,4 +146,13 @@ void from_string(std::string_view src, friendly *dst) {
 TEST(string, friend) { // NOLINT: this is not std::string.
     EXPECT_EQ(sn::to_string(friendlyns::friendly(1)), "1");
     EXPECT_EQ(sn::from_string<friendlyns::friendly>("1"), friendlyns::friendly(1));
+}
+
+class Base {};
+class Derived : public Base {};
+SN_DECLARE_STRING_FUNCTIONS(Base)
+
+TEST(string, slicing) {
+    check_supported<Base>();
+    check_unsupported<Derived>();
 }
