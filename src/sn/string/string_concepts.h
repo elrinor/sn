@@ -4,7 +4,7 @@
 
 #include "sn/string/detail/string_builtins.h"
 
-namespace sn::builtins::poison {
+namespace sn::detail::poison {
 
 /**
  * @internal
@@ -62,12 +62,12 @@ string_overload_not_found try_from_string(std::string_view src, T *dst, Tags...)
 template<class T, class... Tags>
 string_overload_not_found from_string(std::string_view src, T *dst, Tags...) = delete;
 
-} // namespace sn::builtins::poison
+} // namespace sn::detail::poison
 
 namespace sn::detail::concepts {
 
-using namespace sn::builtins; // NOLINT
-using namespace sn::builtins::poison; // NOLINT
+using namespace sn::detail::builtins; // NOLINT
+using namespace sn::detail::poison; // NOLINT
 
 template<class T, class... Tags>
 concept has_try_to_string =

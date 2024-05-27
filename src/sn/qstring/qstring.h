@@ -14,7 +14,7 @@ template<class T, sn::any_tag... Tags>
 [[nodiscard]] bool do_try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_to_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_to_qstring(const T &, QString *)`?");
-    using sn::builtins::try_to_qstring;
+    using sn::detail::builtins::try_to_qstring;
     return try_to_qstring(src, dst, tags...);
 }
 
@@ -22,7 +22,7 @@ template<class T, sn::any_tag... Tags>
 void do_to_qstring(const T &src, QString *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_to_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void to_qstring(const T &, QString *)`?");
-    using sn::builtins::to_qstring;
+    using sn::detail::builtins::to_qstring;
     to_qstring(src, dst, tags...);
 }
 
@@ -30,7 +30,7 @@ template<class T, sn::any_tag... Tags>
 [[nodiscard]] bool do_try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_from_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_from_qstring(QStringView, T *)`?");
-    using sn::builtins::try_from_qstring;
+    using sn::detail::builtins::try_from_qstring;
     return try_from_qstring(src, dst, tags...);
 }
 
@@ -38,7 +38,7 @@ template<class T, sn::any_tag... Tags>
 void do_from_qstring(QStringView src, T *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_from_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void from_qstring(QStringView, T *)`?");
-    using sn::builtins::from_qstring;
+    using sn::detail::builtins::from_qstring;
     from_qstring(src, dst, tags...);
 }
 

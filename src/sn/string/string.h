@@ -14,7 +14,7 @@ template<class T, sn::any_tag... Tags>
 [[nodiscard]] bool do_try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_to_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_to_string(const T &, std::string *)`?");
-    using sn::builtins::try_to_string;
+    using sn::detail::builtins::try_to_string;
     return try_to_string(src, dst, tags...);
 }
 
@@ -22,7 +22,7 @@ template<class T, sn::any_tag... Tags>
 void do_to_string(const T &src, std::string *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_to_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void to_string(const T &, std::string *)`?");
-    using sn::builtins::to_string;
+    using sn::detail::builtins::to_string;
     to_string(src, dst, tags...);
 }
 
@@ -30,7 +30,7 @@ template<class T, sn::any_tag... Tags>
 [[nodiscard]] bool do_try_from_string(std::string_view src, T *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_from_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_from_string(std::string_view, T *)`?");
-    using sn::builtins::try_from_string;
+    using sn::detail::builtins::try_from_string;
     return try_from_string(src, dst, tags...);
 }
 
@@ -38,7 +38,7 @@ template<class T, sn::any_tag... Tags>
 void do_from_string(std::string_view src, T *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_from_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void from_string(std::string_view, T *)`?");
-    using sn::builtins::from_string;
+    using sn::detail::builtins::from_string;
     from_string(src, dst, tags...);
 }
 

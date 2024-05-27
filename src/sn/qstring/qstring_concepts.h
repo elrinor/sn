@@ -4,7 +4,7 @@
 
 #include "sn/qstring/detail/qstring_builtins.h"
 
-namespace sn::builtins::poison {
+namespace sn::detail::poison {
 
 struct qstring_overload_not_found {};
 
@@ -17,12 +17,12 @@ qstring_overload_not_found try_from_qstring(QStringView src, T *dst, Tags...) no
 template<class T, class... Tags>
 qstring_overload_not_found from_qstring(QStringView src, T *dst, Tags...) = delete;
 
-} // namespace sn::builtins::poison
+} // namespace sn::detail::poison
 
 namespace sn::detail::concepts {
 
-using namespace sn::builtins; // NOLINT
-using namespace sn::builtins::poison; // NOLINT
+using namespace sn::detail::builtins; // NOLINT
+using namespace sn::detail::poison; // NOLINT
 
 template<class T, class... Tags>
 concept has_try_to_qstring =

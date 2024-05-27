@@ -56,11 +56,11 @@ static void run_pointer_tests() {
     check_unsupported<wchar_t *>();
 
     // Same checks for from_qstring, albeit this one is more of a sanity check as the first arg is always a QStringView.
-    static_assert(!requires(T s) { sn::builtins::from_qstring("123", &s); });
-    static_assert(!requires(T s) { sn::builtins::from_qstring(u8"123", &s); });
-    static_assert(requires(T s) { sn::builtins::from_qstring(u"123", &s); });
-    static_assert(!requires(T s) { sn::builtins::from_qstring(U"123", &s); });
-    static_assert(requires(T s) { sn::builtins::from_qstring(L"123", &s); } == isWindows);
+    static_assert(!requires(T s) { sn::detail::builtins::from_qstring("123", &s); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_qstring(u8"123", &s); });
+    static_assert(requires(T s) { sn::detail::builtins::from_qstring(u"123", &s); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_qstring(U"123", &s); });
+    static_assert(requires(T s) { sn::detail::builtins::from_qstring(L"123", &s); } == isWindows);
 
     // And we also do some sanity checks for non-char pointers.
     check_unsupported<unsigned char *>();

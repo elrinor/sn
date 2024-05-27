@@ -4,7 +4,7 @@
 
 #include "qstring_exceptions.h"
 
-namespace sn::builtins {
+namespace sn::detail::builtins {
 
 //
 // bool.
@@ -135,4 +135,4 @@ SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long)
 SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(float)
 SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(double)
 
-} // namespace sn::builtins
+} // namespace sn::detail::builtins

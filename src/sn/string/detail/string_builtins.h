@@ -5,7 +5,7 @@
 
 #include "sn/string/string_fwd.h"
 
-namespace sn::builtins {
+namespace sn::detail::builtins {
 
 //
 // Support for std::string.
@@ -106,4 +106,4 @@ _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long long)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(float)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(double)
 
-} // namespace sn::builtins
+} // namespace sn::detail::builtins

@@ -54,11 +54,11 @@ static void run_pointer_tests() {
     check_unsupported<wchar_t *>();
 
     // Same checks for from_string, albeit this one is more of a sanity check as the first arg is always a std::string_view.
-    static_assert(requires(T s) { sn::builtins::from_string("123", &s); });
-    static_assert(!requires(T s) { sn::builtins::from_string(u8"123", &s); });
-    static_assert(!requires(T s) { sn::builtins::from_string(u"123", &s); });
-    static_assert(!requires(T s) { sn::builtins::from_string(U"123", &s); });
-    static_assert(!requires(T s) { sn::builtins::from_string(L"123", &s); });
+    static_assert(requires(T s) { sn::detail::builtins::from_string("123", &s); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(u8"123", &s); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(u"123", &s); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(U"123", &s); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(L"123", &s); });
 
     // And we also do some sanity checks for non-char pointers.
     check_unsupported<unsigned char *>();

@@ -16,7 +16,7 @@
 
 #include "string_exceptions.h"
 
-namespace sn::builtins {
+namespace sn::detail::builtins {
 
 //
 // bool.
@@ -191,4 +191,4 @@ SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars)
 SN_DEFINE_NUMERIC_STRING_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
 SN_DEFINE_NUMERIC_STRING_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
 
-} // namespace sn::builtins
+} // namespace sn::detail::builtins

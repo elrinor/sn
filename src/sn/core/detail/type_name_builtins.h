@@ -105,7 +105,7 @@ constexpr std::string_view type_name_impl() noexcept {
 } // namespace sn::detail
 
 
-namespace sn::builtins {
+namespace sn::detail::builtins {
 
 template<class T>
 [[nodiscard]] std::string_view type_name(std::type_identity<T>) noexcept {
@@ -140,6 +140,6 @@ SN_DEFINE_BUILTIN_TYPE_NAME(std::wstring_view, "std::wstring_view")
 
 #undef SN_DEFINE_BUILTIN_TYPE_NAME
 
-} // namespace sn::builtins
+} // namespace sn::detail::builtins
 
 
