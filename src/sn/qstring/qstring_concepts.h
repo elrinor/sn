@@ -42,11 +42,11 @@ concept has_from_qstring =
 
 } // namespace sn::detail::concepts
 
-namespace sn {
+namespace sn::concepts {
 
 using sn::detail::concepts::has_try_to_qstring;
 using sn::detail::concepts::has_to_qstring;
 using sn::detail::concepts::has_try_from_qstring;
 using sn::detail::concepts::has_from_qstring;
 
-} // namespace sn
+} // namespace sn::concepts

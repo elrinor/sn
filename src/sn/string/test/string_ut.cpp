@@ -12,26 +12,26 @@
 
 template<class T>
 static void check_supported() {
-    static_assert(sn::has_to_string<T>);
-    static_assert(sn::has_try_to_string<T>);
-    static_assert(sn::has_from_string<T>);
-    static_assert(sn::has_try_from_string<T>);
+    static_assert(sn::concepts::has_to_string<T>);
+    static_assert(sn::concepts::has_try_to_string<T>);
+    static_assert(sn::concepts::has_from_string<T>);
+    static_assert(sn::concepts::has_try_from_string<T>);
 }
 
 template<class T>
 static void check_unsupported() {
-    static_assert(!sn::has_to_string<T>);
-    static_assert(!sn::has_try_to_string<T>);
-    static_assert(!sn::has_from_string<T>);
-    static_assert(!sn::has_try_from_string<T>);
+    static_assert(!sn::concepts::has_to_string<T>);
+    static_assert(!sn::concepts::has_try_to_string<T>);
+    static_assert(!sn::concepts::has_from_string<T>);
+    static_assert(!sn::concepts::has_try_from_string<T>);
 }
 
 template<class T>
 static void check_has_to_string_only() {
-    static_assert(sn::has_to_string<T>);
-    static_assert(sn::has_try_to_string<T>);
-    static_assert(!sn::has_from_string<T>);
-    static_assert(!sn::has_try_from_string<T>);
+    static_assert(sn::concepts::has_to_string<T>);
+    static_assert(sn::concepts::has_try_to_string<T>);
+    static_assert(!sn::concepts::has_from_string<T>);
+    static_assert(!sn::concepts::has_try_from_string<T>);
 }
 
 template<class T>

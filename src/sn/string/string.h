@@ -10,7 +10,7 @@
 
 namespace sn::detail {
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_to_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_to_string(const T &, std::string *)`?");
@@ -18,7 +18,7 @@ template<class T, sn::any_tag... Tags>
     return try_to_string(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void do_to_string(const T &src, std::string *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_to_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void to_string(const T &, std::string *)`?");
@@ -26,7 +26,7 @@ void do_to_string(const T &src, std::string *dst, Tags... tags) {
     to_string(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_from_string(std::string_view src, T *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_from_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_from_string(std::string_view, T *)`?");
@@ -34,7 +34,7 @@ template<class T, sn::any_tag... Tags>
     return try_from_string(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void do_from_string(std::string_view src, T *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_from_string<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void from_string(std::string_view, T *)`?");
@@ -47,7 +47,7 @@ void do_from_string(std::string_view src, T *dst, Tags... tags) {
 namespace sn::niebloids {
 
 struct to_string {
-    template<class T, sn::any_tag... Tags>
+    template<class T, sn::concepts::tag... Tags>
     [[nodiscard]] std::string operator()(const T &src, Tags... tags) const {
         std::string result;
         sn::detail::do_to_string(src, &result, tags...);
@@ -57,7 +57,7 @@ struct to_string {
 
 template<class T>
 struct from_string {
-    template<sn::any_tag... Tags>
+    template<sn::concepts::tag... Tags>
     [[nodiscard]] T operator()(std::string_view src, Tags... tags) const {
         T result;
         sn::detail::do_from_string(src, &result, tags...);
@@ -73,34 +73,34 @@ inline constexpr sn::niebloids::to_string to_string_v;
 template<class T>
 inline constexpr sn::niebloids::from_string<T> from_string_v;
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
     return sn::detail::do_try_to_string(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void to_string(const T &src, std::string *dst, Tags... tags) {
     sn::detail::do_to_string(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] std::string to_string(const T &src, Tags... tags) {
     std::string result;
     sn::detail::do_to_string(src, &result, tags...);
     return result;
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_from_string(std::string_view src, T *dst, Tags... tags) noexcept {
     return sn::detail::do_try_from_string(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void from_string(std::string_view src, T *dst, Tags... tags) {
     sn::detail::do_from_string(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] T from_string(std::string_view src, Tags... tags) {
     T result;
     sn::detail::do_from_string(src, &result, tags...);

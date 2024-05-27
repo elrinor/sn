@@ -10,7 +10,7 @@
 
 namespace sn::detail {
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_to_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_to_qstring(const T &, QString *)`?");
@@ -18,7 +18,7 @@ template<class T, sn::any_tag... Tags>
     return try_to_qstring(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void do_to_qstring(const T &src, QString *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_to_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void to_qstring(const T &, QString *)`?");
@@ -26,7 +26,7 @@ void do_to_qstring(const T &src, QString *dst, Tags... tags) {
     to_qstring(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
     static_assert(sn::detail::concepts::has_try_from_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `bool try_from_qstring(QStringView, T *)`?");
@@ -34,7 +34,7 @@ template<class T, sn::any_tag... Tags>
     return try_from_qstring(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void do_from_qstring(QStringView src, T *dst, Tags... tags) {
     static_assert(sn::detail::concepts::has_from_qstring<T, Tags...>,
                   "Type T is not supported, did you forget to declare `void from_qstring(QStringView, T *)`?");
@@ -47,7 +47,7 @@ void do_from_qstring(QStringView src, T *dst, Tags... tags) {
 namespace sn::niebloids {
 
 struct to_qstring {
-    template<class T, sn::any_tag... Tags>
+    template<class T, sn::concepts::tag... Tags>
     [[nodiscard]] QString operator()(const T &src, Tags... tags) const {
         QString result;
         sn::detail::do_to_qstring(src, &result, tags...);
@@ -57,7 +57,7 @@ struct to_qstring {
 
 template<class T>
 struct from_qstring {
-    template<sn::any_tag... Tags>
+    template<sn::concepts::tag... Tags>
     [[nodiscard]] T operator()(QStringView src, Tags... tags) const {
         T result;
         sn::detail::do_from_qstring(src, &result, tags...);
@@ -73,34 +73,34 @@ inline constexpr sn::niebloids::to_qstring to_qstring_v;
 template<class T>
 inline constexpr sn::niebloids::from_qstring<T> from_qstring_v;
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
     return sn::detail::do_try_to_qstring(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void to_qstring(const T &src, QString *dst, Tags... tags) {
     sn::detail::do_to_qstring(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] QString to_qstring(const T &src, Tags... tags) {
     QString result;
     sn::detail::do_to_qstring(src, &result, tags...);
     return result;
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
     return sn::detail::do_try_from_qstring(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 void from_qstring(QStringView src, T *dst, Tags... tags) {
     sn::detail::do_from_qstring(src, dst, tags...);
 }
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] T from_qstring(QStringView src, Tags... tags) {
     T result;
     sn::detail::do_from_qstring(src, &result, tags...);

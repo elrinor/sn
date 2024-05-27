@@ -87,11 +87,11 @@ concept has_from_string =
 
 } // namespace sn::detail::concepts
 
-namespace sn {
+namespace sn::concepts {
 
 using sn::detail::concepts::has_try_to_string;
 using sn::detail::concepts::has_to_string;
 using sn::detail::concepts::has_try_from_string;
 using sn::detail::concepts::has_from_string;
 
-} // namespace sn
+} // namespace sn::concepts

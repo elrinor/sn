@@ -11,7 +11,7 @@ namespace sn {
 /**
  * Structure describing a reflected field.
  */
-template<class T, class Getter, class Setter, sn::any_tag... Tags>
+template<class T, class Getter, class Setter, sn::concepts::tag... Tags>
 struct field_reflection {
     [[no_unique_address]] std::type_identity<T> type;
     std::string_view name;

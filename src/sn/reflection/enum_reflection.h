@@ -10,7 +10,7 @@
 
 namespace sn::detail {
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] constexpr const auto &do_reflect_enum(Tags... tags) noexcept {
     return reflect_enum(std::type_identity<T>(), tags...);
 }
@@ -19,7 +19,7 @@ template<class T, sn::any_tag... Tags>
 
 namespace sn {
 
-template<class T, sn::any_tag... Tags>
+template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] constexpr const auto &reflect_enum(Tags... tags) noexcept {
     return sn::detail::do_reflect_enum<T>(tags...);
 }
