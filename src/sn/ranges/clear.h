@@ -7,7 +7,7 @@ void do_clear(Container &container) { // NOLINT: intentional lvalue ref.
 }
 } // namespace sn::detail
 
-namespace sn::niebloids {
+namespace sn::detail::niebloids {
 struct clear {
     template<class Container>
     void operator()(Container &container) const { // NOLINT: intentional lvalue ref.
@@ -18,8 +18,8 @@ struct clear {
         }
     }
 };
-} // namespace sn::niebloids
+} // namespace sn::detail::niebloids
 
 namespace sn::ranges {
-constexpr sn::niebloids::clear clear;
+constexpr sn::detail::niebloids::clear clear;
 } // namespace sn::ranges

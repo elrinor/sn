@@ -44,7 +44,7 @@ void do_from_string(std::string_view src, T *dst, Tags... tags) {
 
 } // namespace sn::detail
 
-namespace sn::niebloids {
+namespace sn::detail::niebloids {
 
 struct to_string {
     template<class T, sn::concepts::tag... Tags>
@@ -65,13 +65,13 @@ struct from_string {
     }
 };
 
-} // namespace sn::niebloids
+} // namespace sn::detail::niebloids
 
 namespace sn {
 
-inline constexpr sn::niebloids::to_string to_string_v;
+inline constexpr sn::detail::niebloids::to_string to_string_v;
 template<class T>
-inline constexpr sn::niebloids::from_string<T> from_string_v;
+inline constexpr sn::detail::niebloids::from_string<T> from_string_v;
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {

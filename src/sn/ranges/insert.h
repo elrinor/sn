@@ -9,7 +9,7 @@ void do_insert(Container &container, T &&value) { // NOLINT: intentional lvalue 
 }
 } // namespace sn::detail
 
-namespace sn::niebloids {
+namespace sn::detail::niebloids {
 struct insert {
     template<class Container, class T>
     void operator()(Container &container, T &&value) const { // NOLINT: intentional lvalue ref.
@@ -22,9 +22,9 @@ struct insert {
         }
     }
 };
-} // namespace sn::niebloids
+} // namespace sn::detail::niebloids
 
 namespace sn::ranges {
 // TODO(elric): DOCS! calls (almost) the same methods as ranges::to, see cppref
-constexpr  sn::niebloids::insert insert;
+constexpr  sn::detail::niebloids::insert insert;
 } // namespace sn::ranges

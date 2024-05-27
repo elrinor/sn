@@ -44,7 +44,7 @@ void do_from_qstring(QStringView src, T *dst, Tags... tags) {
 
 } // namespace sn::detail
 
-namespace sn::niebloids {
+namespace sn::detail::niebloids {
 
 struct to_qstring {
     template<class T, sn::concepts::tag... Tags>
@@ -65,13 +65,13 @@ struct from_qstring {
     }
 };
 
-} // namespace sn::niebloids
+} // namespace sn::detail::niebloids
 
 namespace sn {
 
-inline constexpr sn::niebloids::to_qstring to_qstring_v;
+inline constexpr sn::detail::niebloids::to_qstring to_qstring_v;
 template<class T>
-inline constexpr sn::niebloids::from_qstring<T> from_qstring_v;
+inline constexpr sn::detail::niebloids::from_qstring<T> from_qstring_v;
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
