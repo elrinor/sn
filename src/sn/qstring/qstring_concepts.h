@@ -1,12 +1,52 @@
 #pragma once
 
+#include <concepts>
+
 #include "sn/qstring/detail/qstring_builtins.h"
+
+namespace sn::builtins::poison {
+
+struct qstring_overload_not_found {};
+
+template<class T, class... Tags>
+qstring_overload_not_found try_to_qstring(const T &, QString *, Tags...) noexcept = delete;
+template<class T, class... Tags>
+qstring_overload_not_found to_qstring(const T &src, QString *, Tags...) = delete;
+template<class T, class... Tags>
+qstring_overload_not_found try_from_qstring(QStringView src, T *dst, Tags...) noexcept = delete;
+template<class T, class... Tags>
+qstring_overload_not_found from_qstring(QStringView src, T *dst, Tags...) = delete;
+
+} // namespace sn::builtins::poison
+
+namespace sn::detail::concepts {
+
+using namespace sn::builtins; // NOLINT
+using namespace sn::builtins::poison; // NOLINT
+
+template<class T, class... Tags>
+concept has_try_to_qstring =
+    requires(const T &src, QString *dst, Tags... tags) { {try_to_qstring(src, dst, tags...)} -> std::same_as<bool>; }; // NOLINT
+
+template<class T, class... Tags>
+concept has_to_qstring =
+    requires(const T &src, QString *dst, Tags... tags) { {to_qstring(src, dst, tags...)} -> std::same_as<void>; }; // NOLINT
+
+template<class T, class... Tags>
+concept has_try_from_qstring =
+    requires(QStringView src, T *dst, Tags... tags) { {try_from_qstring(src, dst, tags...)} -> std::same_as<bool>; }; // NOLINT
+
+template<class T, class... Tags>
+concept has_from_qstring =
+    requires(QStringView src, T *dst, Tags... tags) { {from_qstring(src, dst, tags...)} -> std::same_as<void>; }; // NOLINT
+
+} // namespace sn::detail::concepts
 
 namespace sn {
 
-template<class T, class... Tags>
-concept qstringable =
-    requires(Tags... tags) { sn::builtins::is_qstring_supported_type(std::type_identity<T>(), tags...); } ||
-    requires(Tags... tags) { is_qstring_supported_type(std::type_identity<T>(), tags...); }; // NOLINT: that ; is needed.
+using sn::detail::concepts::has_try_to_qstring;
+using sn::detail::concepts::has_to_qstring;
+using sn::detail::concepts::has_try_from_qstring;
+using sn::detail::concepts::has_from_qstring;
 
 } // namespace sn

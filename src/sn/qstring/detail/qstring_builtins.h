@@ -8,8 +8,6 @@ namespace sn::builtins {
 // Support for QString.
 //
 
-void is_qstring_supported_type(std::type_identity<QString>);
-
 [[nodiscard]] inline bool try_to_qstring(const QString &src, QString *dst) noexcept {
     *dst = src;
     return true;
@@ -33,8 +31,6 @@ inline void from_qstring(QStringView src, QString *dst) {
 // Support for QStringView, to_qstring only.
 //
 
-void is_qstring_supported_type(std::type_identity<QStringView>);
-
 [[nodiscard]] inline bool try_to_qstring(QStringView src, QString *dst) noexcept {
     *dst = src.toString();
     return true;
@@ -44,16 +40,10 @@ inline void to_qstring(QStringView src, QString *dst) {
     *dst = src.toString();
 }
 
-[[nodiscard]] inline bool try_from_qstring(QStringView src, QStringView *dst) noexcept = delete;
-inline void from_qstring(QStringView src, QStringView *dst) = delete;
-
 
 //
-// Support for char16_t[N], to_string only.
+// Support for const char16_t[N], to_string only.
 //
-
-template<std::size_t N>
-void is_qstring_supported_type(std::type_identity<char16_t[N]>);
 
 template<std::size_t N>
 [[nodiscard]] inline bool try_to_qstring(const char16_t (&src)[N], QString *dst) noexcept {
@@ -66,17 +56,10 @@ inline void to_qstring(const char16_t (&src)[N], QString *dst) {
     *dst = QString::fromUtf16(src);
 }
 
-template<std::size_t N>
-[[nodiscard]] inline bool try_from_qstring(QStringView src, const char16_t (*dst)[N]) noexcept = delete;
-template<std::size_t N>
-inline void from_qstring(QStringView src, const char16_t (*dst)[N]) = delete;
-
 
 //
 // Support for const char16_t *, to_string only.
 //
-
-void is_qstring_supported_type(std::type_identity<const char16_t *>);
 
 [[nodiscard]] inline bool try_to_qstring(const char16_t *src, QString *dst) noexcept {
     *dst = QString::fromUtf16(src);
@@ -87,8 +70,19 @@ inline void to_qstring(const char16_t *src, QString *dst) {
     *dst = QString::fromUtf16(src);
 }
 
-[[nodiscard]] inline bool try_from_qstring(QStringView src, const char16_t **dst) noexcept = delete;
-inline void from_qstring(QStringView src, const char16_t **dst) = delete;
+
+//
+// Support for char16_t *, to_string only.
+//
+
+[[nodiscard]] inline bool try_to_qstring(char16_t *src, QString *dst) noexcept {
+    *dst = QString::fromUtf16(src);
+    return true;
+}
+
+inline void to_qstring(char16_t *src, QString *dst) {
+    *dst = QString::fromUtf16(src);
+}
 
 
 //
