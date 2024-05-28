@@ -66,6 +66,7 @@ inline test_suite<T> make_integer_test_suite() {
         result.valid_fromto.emplace_back("-1", -1);
 
     result.valid_from = {
+        {"010", 10}, // This is not an octal number.
         {prepend_zeros(1, sn::to_string(std::numeric_limits<T>::max())), std::numeric_limits<T>::max()},
         {prepend_zeros(1, sn::to_string(std::numeric_limits<T>::min())), std::numeric_limits<T>::min()},
         {prepend_zeros(100, sn::to_string(std::numeric_limits<T>::max())), std::numeric_limits<T>::max()},
