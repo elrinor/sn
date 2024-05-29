@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 
+#include "sn/core/common_tags.h"
 #include "sn/string/string_fwd.h"
 
 namespace sn::detail::builtins {
@@ -95,6 +96,7 @@ inline void to_string(char *src, std::string *dst) {
 //
 
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(bool)
+
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(short)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned short)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(int)
@@ -103,7 +105,67 @@ _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long long)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long long)
+
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(float)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(double)
+
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(short, sn::dynamic_base_tag)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned short, sn::dynamic_base_tag)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(int, sn::dynamic_base_tag)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned int, sn::dynamic_base_tag)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long, sn::dynamic_base_tag)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long, sn::dynamic_base_tag)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long long, sn::dynamic_base_tag)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::dynamic_base_tag)
+
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<2>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<2>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<2>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<2>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<2>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<2>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<2>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<2>)
+
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<8>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<8>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<8>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<8>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<8>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<8>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<8>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<8>)
+
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<16>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<16>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<16>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<16>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<16>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<16>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<16>)
+_SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<16>)
+
+#define _SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(TYPE, ... /* TAGS */)                                  \
+    inline bool try_to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept {                          \
+        return try_to_string(src, dst);                                                                                 \
+    }                                                                                                                   \
+    inline bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept {                   \
+        return try_from_string(src, dst);                                                                               \
+    }                                                                                                                   \
+    inline void to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__) {                                       \
+        to_string(src, dst);                                                                                            \
+    }                                                                                                                   \
+    inline void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) {                                \
+        from_string(src, dst);                                                                                          \
+    }
+
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<10>)
 
 } // namespace sn::detail::builtins
