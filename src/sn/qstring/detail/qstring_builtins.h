@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sn/core/common_tags.h"
 #include "sn/qstring/qstring_fwd.h"
 
 namespace sn::detail::builtins {
@@ -98,6 +99,7 @@ inline void to_qstring(char16_t *src, QString *dst) {
 //
 
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(bool)
+
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(short)
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned short)
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(int)
@@ -106,7 +108,69 @@ _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long)
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long)
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long long)
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long long)
+
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(float)
 _SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(double)
+
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(short, sn::dynamic_base_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned short, sn::dynamic_base_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(int, sn::dynamic_base_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned int, sn::dynamic_base_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long, sn::dynamic_base_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long, sn::dynamic_base_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long long, sn::dynamic_base_tag)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::dynamic_base_tag)
+
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<2>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<2>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<2>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<2>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<2>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<2>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<2>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<2>)
+
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<8>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<8>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<8>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<8>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<8>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<8>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<8>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<8>)
+
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<16>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<16>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<16>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<16>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<16>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<16>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<16>)
+_SN_DECLARE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<16>)
+
+#define _SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(TYPE, ... /* TAGS */)                                 \
+    inline bool try_to_qstring(TYPE src, QString *dst __VA_OPT__(,) __VA_ARGS__) noexcept {                             \
+        return try_to_qstring(src, dst);                                                                                \
+    }                                                                                                                   \
+    inline bool try_from_qstring(QStringView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept {                       \
+        return try_from_qstring(src, dst);                                                                              \
+    }                                                                                                                   \
+    inline void to_qstring(TYPE src, QString *dst __VA_OPT__(,) __VA_ARGS__) {                                          \
+        to_qstring(src, dst);                                                                                           \
+    }                                                                                                                   \
+    inline void from_qstring(QStringView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) {                                    \
+        from_qstring(src, dst);                                                                                         \
+    }
+
+// TODO(elric): just add domains, tag traits, sn::is_ignored_tag<domain, tag> => T/F?
+
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(short, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(unsigned short, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(int, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(unsigned int, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(long, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(long long, sn::base_tag<10>)
+_SN_DEFINE_TAG_IGNORING_INLINE_QSTRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::base_tag<10>)
 
 } // namespace sn::detail::builtins
