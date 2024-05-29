@@ -18,28 +18,30 @@ SN_PP_STATIC_TEST(SN_PP_IF(0, T, F), "F");
 SN_PP_STATIC_TEST(SN_PP_IF(100, T, F), "T");
 
 // Static tests for SN_PP_TUPLE_SIZE
-static_assert(SN_PP_TUPLE_SIZE(()) == 0);
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE(()), "0");
 #define EMPTY3 EMPTY2
 #define EMPTY2 EMPTY1
 #define EMPTY1 EMPTY0
 #define EMPTY0 SN_PP_EMPTY
-static_assert(SN_PP_TUPLE_SIZE((EMPTY3())) == 0);
-static_assert(SN_PP_TUPLE_SIZE((1)) == 1);
-static_assert(SN_PP_TUPLE_SIZE((1, 2, 3)) == 3);
-static_assert(SN_PP_TUPLE_SIZE((1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64)) == 64);
-static_assert(SN_PP_TUPLE_SIZE((SN_PP_TUPLE_ENUM((1, 2, 3)))) == 3);
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((EMPTY3())), "0");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((1)), "1");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((1, 2, 3)), "3");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64)), "64");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((SN_PP_TUPLE_ENUM((1, 2, 3)))), "3");
 #define JUST_1_2_3_4 1, 2, 3, 4
-static_assert(SN_PP_TUPLE_SIZE((JUST_1_2_3_4)) == 4);
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((JUST_1_2_3_4)), "4");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((0, JUST_1_2_3_4)), "5");
 
 // Static tests for SN_PP_TUPLE_FOR_EACH
-#define PREPEND_PLUS(x) +x
-static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (1, 2, 3, 4, 5)) == 15);
-static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, ()) true); // SN_PP_TUPLE_FOR_EACH should expand to nothing here.
-static_assert(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (EMPTY3())) true); // And here.
+#define PREPEND_PLUS(X) +X
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (1, 2, 3, 4, 5)), "+1 +2 +3 +4 +5");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, ()), "");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (EMPTY3())), "");
 
 // Static tests for SN_PP_TUPLE_FOR_EACH_I
-static_assert(SN_PP_TUPLE_FOR_EACH_I(PREPEND_PLUS, ()) true); // SN_PP_TUPLE_FOR_EACH_I should expand to nothing here.
-static_assert(SN_PP_TUPLE_FOR_EACH_I(PREPEND_PLUS, (EMPTY3())) true); // And here.
+#define SUM_TWO(D, X) +D+X
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, ()), "");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (EMPTY3())), "");
 
 // Static tests for SN_PP_TUPLE_TRANSFORM
 static_assert(std::initializer_list<int>SN_PP_TUPLE_TRANSFORM(PREPEND_PLUS, ()).size() == 0); // () expands to ().
