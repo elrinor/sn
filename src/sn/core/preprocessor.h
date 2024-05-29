@@ -250,8 +250,8 @@
 
 
 /**
- * Applies the provided `MACRO` to all elements of `TUPLE`, additionally passing the `DATA` argument as the
- * first argument to `MACRO`. For example, `SN_PP_TUPLE_FOR_EACH_D(M, D, (A, B))` will expand to `M(D, A) M(D, B)`.
+ * Applies the provided `MACRO` to all elements of `TUPLE`, additionally passing `DATA` as the first argument to
+ * `MACRO`. For example, `SN_PP_TUPLE_FOR_EACH_D(M, D, (A, B))` will expand to `M(D, A) M(D, B)`.
  *
  * Note that unlike boost preprocessor, we support empty tuples, and `SN_PP_TUPLE_FOR_EACH_D(M, D, ())` expands to
  * nothing.
@@ -268,8 +268,8 @@
 
 
 /**
- * Applies the provided `MACRO` to all elements of `TUPLE`, additionally passing the `DATA` argument as the
- * first argument and the index of the current element as the second argument to `MACRO`. For example,
+ * Applies the provided `MACRO` to all elements of `TUPLE`, additionally passing `DATA` as the first argument and
+ * the index of the current element as the second argument to `MACRO`. For example,
  * `SN_PP_TUPLE_FOR_EACH_DI(M, D, (A, B))` will expand to `M(D, 0, A) M(D, 0, B)`.
  *
  * Note that unlike boost preprocessor, we support empty tuples, and `SN_PP_TUPLE_FOR_EACH_DI(M, D, ())` expands to
@@ -426,6 +426,53 @@
  */
 #define SN_PP_TUPLE_TRANSFORM(MACRO, TUPLE) (SN_PP_TUPLE_FOR_EACH_DI(_SN_PP_TUPLE_TRANSFORM_I, MACRO, TUPLE))
 #define _SN_PP_TUPLE_TRANSFORM_I(MACRO, I, VALUE) SN_PP_COMMA_IF(I) MACRO(VALUE)
+
+
+/**
+ * Transforms the provided `TUPLE` by applying the provided `MACRO` to all of its elements, additionally passing the
+ * index of the current element as the first argument to `MACRO`. For example, `SN_PP_TUPLE_TRANSFORM_I(M, (A, B))` will
+ * expand to `(M(0, A), M(1, B))`.
+ *
+ * Note that unlike boost preprocessor, we support empty tuples, so `SN_PP_TUPLE_TRANSFORM_I(M, ())` expands to `()`.
+ *
+ * @param MACRO                         Macro to apply to the tuple's elements.
+ * @param TUPLE                         Tuple to iterate over.
+ * @see SN_PP_TUPLE_FOR_EACH_I
+ */
+#define SN_PP_TUPLE_TRANSFORM_I(MACRO, TUPLE) (SN_PP_TUPLE_FOR_EACH_DI(_SN_PP_TUPLE_TRANSFORM_I_I, MACRO, TUPLE))
+#define _SN_PP_TUPLE_TRANSFORM_I_I(MACRO, I, VALUE) SN_PP_COMMA_IF(I) MACRO(I, VALUE)
+
+
+/**
+ * Transforms the provided `TUPLE` by applying the provided `MACRO` to all of its elements, additionally passing `DATA`
+ * as the first argument to `MACRO`. For example, `SN_PP_TUPLE_TRANSFORM_D(M, D, (A, B))` will expand to
+ * `(M(D, A), M(D, B))`.
+ *
+ * Note that unlike boost preprocessor, we support empty tuples, so `SN_PP_TUPLE_TRANSFORM_D(M, ())` expands to `()`.
+ *
+ * @param MACRO                         Macro to apply to the tuple's elements.
+ * @param TUPLE                         Tuple to iterate over.
+ * @see SN_PP_TUPLE_FOR_EACH_I
+ */
+#define SN_PP_TUPLE_TRANSFORM_D(MACRO, DATA, TUPLE) (SN_PP_TUPLE_FOR_EACH_DI(_SN_PP_TUPLE_TRANSFORM_D_I, (MACRO, DATA), TUPLE))
+#define _SN_PP_TUPLE_TRANSFORM_D_I(DATA, I, VALUE) SN_PP_COMMA_IF(I) _SN_PP_TUPLE_TRANSFORM_D_II(SN_PP_TUPLE_ELEM(0, DATA), SN_PP_TUPLE_ELEM(1, DATA), VALUE)
+#define _SN_PP_TUPLE_TRANSFORM_D_II(MACRO, DATA, VALUE) MACRO(DATA, VALUE)
+
+
+/**
+ * Transforms the provided `TUPLE` by applying the provided `MACRO` to all of its elements, additionally passing `DATA`
+ * as the first argument and the index of the current element as the second argument to `MACRO`. For example,
+ * `SN_PP_TUPLE_TRANSFORM_DI(M, D, (A, B))` will expand to `(M(D, 0, A), M(D, 1, B))`.
+ *
+ * Note that unlike boost preprocessor, we support empty tuples, so `SN_PP_TUPLE_TRANSFORM_D(M, ())` expands to `()`.
+ *
+ * @param MACRO                         Macro to apply to the tuple's elements.
+ * @param TUPLE                         Tuple to iterate over.
+ * @see SN_PP_TUPLE_FOR_EACH_I
+ */
+#define SN_PP_TUPLE_TRANSFORM_DI(MACRO, DATA, TUPLE) (SN_PP_TUPLE_FOR_EACH_DI(_SN_PP_TUPLE_TRANSFORM_DI_I, (MACRO, DATA), TUPLE))
+#define _SN_PP_TUPLE_TRANSFORM_DI_I(DATA, I, VALUE) SN_PP_COMMA_IF(I) _SN_PP_TUPLE_TRANSFORM_DI_II(SN_PP_TUPLE_ELEM(0, DATA), SN_PP_TUPLE_ELEM(1, DATA), I, VALUE)
+#define _SN_PP_TUPLE_TRANSFORM_DI_II(MACRO, DATA, I, VALUE) MACRO(DATA, I, VALUE)
 
 
 /**
