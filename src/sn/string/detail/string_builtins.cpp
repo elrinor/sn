@@ -90,15 +90,15 @@ inline void from_string(std::string_view src, T *dst) {
 #if SN_USE_STRTOF
 namespace detail_strtofd {
 template<class T>
-inline T strto(const char *str, const char **end);
+inline T wrapped_strto(const char *str, const char **end) = delete;
 
 template<>
-inline float strto<float>(const char *str, const char **end) {
+inline float wrapped_strto<float>(const char *str, const char **end) {
     return std::strtof(str, const_cast<char **>(end));
 }
 
 template<>
-inline double strto<double>(const char *str, const char **end) {
+inline double wrapped_strto<double>(const char *str, const char **end) {
     return std::strtod(str, const_cast<char **>(end));
 }
 
@@ -110,7 +110,7 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
     const char *src_end = src.data() + src.size();
     const char *end = src_end;
     errno = 0; // strto* does not change errno on success.
-    T result = strto<T>(src.data(), &end);
+    T result = wrapped_strto<T>(src.data(), &end);
     if ((result != 0 || errno == 0) && end == src_end) {
         *dst = result;
         return true;
@@ -127,7 +127,7 @@ inline void from_string(std::string_view src, T *dst) {
 
     const char *end = src.data() + src.size();
     errno = 0;
-    T result = strto<T>(src.data(), &end);
+    T result = wrapped_strto<T>(src.data(), &end);
     if (result == 0) {
         if (errno == ERANGE)
             sn::detail::throw_number_from_string_error<T>(src, std::errc::result_out_of_range);
