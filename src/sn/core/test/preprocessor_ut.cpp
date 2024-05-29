@@ -1,7 +1,4 @@
-#include <map>
-#include <vector>
-
-#include <gtest/gtest.h> // NOLINT: not a C system header.
+#include <string_view>
 
 #include "sn/core/preprocessor.h"
 
@@ -33,66 +30,23 @@ SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((JUST_1_2_3_4)), "4");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((0, JUST_1_2_3_4)), "5");
 
 // Static tests for SN_PP_TUPLE_FOR_EACH
-#define PREPEND_PLUS(X) +X
-SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (1, 2, 3, 4, 5)), "+1 +2 +3 +4 +5");
-SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, ()), "");
-SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(PREPEND_PLUS, (EMPTY3())), "");
+#define SUM_ONE(X) +X
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, ()), "");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, (EMPTY3())), "");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, (1)), "+1");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, (1, 2, 3, 4, 5)), "+1 +2 +3 +4 +5");
 
 // Static tests for SN_PP_TUPLE_FOR_EACH_I
-#define SUM_TWO(D, X) +D+X
+#define SUM_TWO(A, B) +A+B
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, ()), "");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (EMPTY3())), "");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (1)), "+0+1");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (1, 2, 3, 4, 5)), "+0+1 +1+2 +2+3 +3+4 +4+5");
+
+
 
 // Static tests for SN_PP_TUPLE_TRANSFORM
-static_assert(std::initializer_list<int>SN_PP_TUPLE_TRANSFORM(PREPEND_PLUS, ()).size() == 0); // () expands to ().
-
-TEST(core, pp_for_each_completeness) {
-    struct tmp_data {
-        int a = 0;
-        int b = 1;
-        int c = 2;
-    };
-
-    tmp_data tmp;
-
-#define INCREMENT_FIELD(x) tmp.x++;
-    SN_PP_TUPLE_FOR_EACH(INCREMENT_FIELD, (a, b, c));
-    EXPECT_EQ(tmp.a, 1);
-    EXPECT_EQ(tmp.b, 2);
-    EXPECT_EQ(tmp.c, 3);
-
-    SN_PP_TUPLE_FOR_EACH(INCREMENT_FIELD, SN_PP_TUPLE_ENUM(((a, b))))
-    EXPECT_EQ(tmp.a, 2);
-    EXPECT_EQ(tmp.b, 3);
-    EXPECT_EQ(tmp.c, 3);
-}
-
-TEST(core, pp_for_each_order) {
-#define LIST_NUMBER(x) x,
-    std::vector<int> list = {
-        SN_PP_TUPLE_FOR_EACH(LIST_NUMBER, (1, 2, 3))
-    };
-
-    EXPECT_EQ(list, (std::vector<int>{1, 2, 3}));
-}
-
-TEST(core, pp_for_each_i) {
-#define LIST_PAIR(i, x) {i, x},
-    std::map<int, int> mapping = {
-        SN_PP_TUPLE_FOR_EACH_I(LIST_PAIR, (1, 2, 3))
-    };
-
-    EXPECT_EQ(mapping.size(), 3);
-    EXPECT_EQ(mapping[0], 1);
-    EXPECT_EQ(mapping[1], 2);
-    EXPECT_EQ(mapping[2], 3);
-}
-
-TEST(code, pp_transform) {
-#define PREPEND_MINUS(x) -x
-    std::vector<int> values = {
-        SN_PP_TUPLE_ENUM(SN_PP_TUPLE_TRANSFORM(PREPEND_MINUS, (1, 2, 3, 4, 5)))
-    };
-
-    EXPECT_EQ(values, (std::vector<int>{-1, -2, -3, -4, -5}));
-}
+SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, ()), "()");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, (EMPTY3())), "()");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, (1)), "(+1)");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, (1, 2, 3, 4, 5)), "(+1, +2, +3, +4, +5)");
