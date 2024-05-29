@@ -4,7 +4,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "sn/core/tags.h"
+#include "sn/core/tag.h"
 
 namespace sn {
 

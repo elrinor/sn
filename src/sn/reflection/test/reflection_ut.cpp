@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sn/core/tags.h"
+#include "sn/core/tag.h"
 #include "sn/reflection/class_reflection.h"
 
 struct MyPair {

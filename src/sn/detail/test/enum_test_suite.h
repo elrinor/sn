@@ -4,7 +4,7 @@
 #include <type_traits>
 
 #include "sn/core/type_name.h"
-#include "sn/core/tags.h"
+#include "sn/core/tag.h"
 #include "sn/reflection/enum_reflection.h"
 #include "sn/detail/workaround/to_underlying.h"
 

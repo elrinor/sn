@@ -6,7 +6,7 @@
 #include <string_view>
 
 #include "sn/core/preprocessor.h"
-#include "sn/core/tags.h"
+#include "sn/core/tag.h"
 
 namespace sn::detail {
 

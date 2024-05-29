@@ -3,7 +3,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringView>
 
-#include "sn/core/tags.h"
+#include "sn/core/tag.h"
 #include "sn/qstring/detail/qstring_builtins.h"
 
 #include "qstring_concepts.h"

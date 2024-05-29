@@ -7,7 +7,7 @@
 #include <tuple>
 
 #include "sn/core/preprocessor.h"
-#include "sn/core/tags.h"
+#include "sn/core/tag.h"
 #include "sn/reflection/detail/member_reflection.h"
 
 #include "class_reflection_data.h"

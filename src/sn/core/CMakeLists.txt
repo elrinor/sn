@@ -4,7 +4,7 @@ set(SN_CORE_SOURCES
     exception.h
     globals.h
     preprocessor.h
-    tags.h
+    tag.h
     type_name.h
     detail/type_name_builtins.h)
 

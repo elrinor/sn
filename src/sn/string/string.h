@@ -3,7 +3,7 @@
 #include <string>
 #include <string_view>
 
-#include "sn/core/tags.h"
+#include "sn/core/tag.h"
 #include "sn/string/detail/string_builtins.h"
 
 #include "string_concepts.h"
