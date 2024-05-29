@@ -5,10 +5,17 @@
 
 #include "sn/core/preprocessor.h"
 
+#define SN_PP_STATIC_TEST(MACRO, RESULT)                                                                                \
+    _SN_PP_STATIC_TEST_I(MACRO, RESULT, SN_PP_CAT(left_, __LINE__), SN_PP_CAT(right_, __LINE__))
+#define _SN_PP_STATIC_TEST_I(MACRO, RESULT, MACRO_VAR, RESULT_VAR)                                                      \
+    static constexpr char MACRO_VAR[] = SN_PP_STRINGIZE(MACRO);                                                         \
+    static constexpr char RESULT_VAR[] = RESULT;                                                                        \
+    static_assert(std::string_view(MACRO_VAR) == std::string_view(RESULT_VAR));
+
 // Static tests for SN_PP_IF
-static_assert(SN_PP_IF(0, 1, 0) == 0);
-static_assert(SN_PP_IF(1, 1, 0) == 1);
-static_assert(SN_PP_IF(100, 1, 0) == 1);
+SN_PP_STATIC_TEST(SN_PP_IF(1, T, F), "T");
+SN_PP_STATIC_TEST(SN_PP_IF(0, T, F), "F");
+SN_PP_STATIC_TEST(SN_PP_IF(100, T, F), "T");
 
 // Static tests for SN_PP_TUPLE_SIZE
 static_assert(SN_PP_TUPLE_SIZE(()) == 0);

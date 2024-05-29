@@ -25,6 +25,15 @@
 
 
 /**
+ * Converts its argument into a string after it has been expanded.
+ *
+ * @param TEXT                          The text to be converted to a string literal.
+ */
+#define SN_PP_STRINGIZE(TEXT) _SN_PP_STRINGIZE_I(TEXT)
+#define _SN_PP_STRINGIZE_I(...) #__VA_ARGS__
+
+
+/**
  * Chooses between two values based on a condition.
  *
  * @param COND                          Condition to check, expected to be a non-negative number.
