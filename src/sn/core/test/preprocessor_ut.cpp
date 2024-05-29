@@ -2,12 +2,34 @@
 
 #include "sn/core/preprocessor.h"
 
+static consteval bool ws_equals(std::string_view l, std::string_view r) {
+    for (std::size_t i = 0, j = 0; !(i == l.size() && j == r.size()); ) {
+        if (l[i] == ' ') {
+            i++;
+            continue;;
+        }
+
+        if (r[j] == ' ') {
+            j++;
+            continue;
+        }
+
+        if (i == l.size() || j == r.size() || l[i] != r[j])
+            return false;
+
+        i++;
+        j++;
+    }
+
+    return true;
+}
+
 #define SN_PP_STATIC_TEST(MACRO, RESULT)                                                                                \
     _SN_PP_STATIC_TEST_I(MACRO, RESULT, SN_PP_CAT(left_, __LINE__), SN_PP_CAT(right_, __LINE__))
 #define _SN_PP_STATIC_TEST_I(MACRO, RESULT, MACRO_VAR, RESULT_VAR)                                                      \
     static constexpr char MACRO_VAR[] = SN_PP_STRINGIZE(MACRO);                                                         \
     static constexpr char RESULT_VAR[] = RESULT;                                                                        \
-    static_assert(std::string_view(MACRO_VAR) == std::string_view(RESULT_VAR));
+    static_assert(ws_equals(MACRO_VAR, RESULT_VAR));
 
 // Static tests for SN_PP_IF
 SN_PP_STATIC_TEST(SN_PP_IF(1, T, F), "T");
@@ -34,19 +56,24 @@ SN_PP_STATIC_TEST(SN_PP_TUPLE_SIZE((0, JUST_1_2_3_4)), "5");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, ()), "");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, (EMPTY3())), "");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, (1)), "+1");
-SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, (1, 2, 3, 4, 5)), "+1 +2 +3 +4 +5");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH(SUM_ONE, (1, 2, 3, 4, 5)), "+1+2+3+4+5");
 
 // Static tests for SN_PP_TUPLE_FOR_EACH_I
 #define SUM_TWO(A, B) +A+B
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, ()), "");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (EMPTY3())), "");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (1)), "+0+1");
-SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (1, 2, 3, 4, 5)), "+0+1 +1+2 +2+3 +3+4 +4+5");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_I(SUM_TWO, (1, 2, 3, 4, 5)), "+0+1+1+2+2+3+3+4+4+5");
 
+// Static tests for SN_PP_TUPLE_FOR_EACH_D
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_D(SUM_TWO, 10, (1, 2, 3)), "+10+1+10+2+10+3");
 
+// Static tests for SN_PP_TUPLE_FOR_EACH_DI
+#define SUM_THREE(D, I, X) +D+I+X
+SN_PP_STATIC_TEST(SN_PP_TUPLE_FOR_EACH_DI(SUM_THREE, 10, (1, 2, 3)), "+10+0+1+10+1+2+10+2+3");
 
 // Static tests for SN_PP_TUPLE_TRANSFORM
 SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, ()), "()");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, (EMPTY3())), "()");
 SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, (1)), "(+1)");
-SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, (1, 2, 3, 4, 5)), "(+1, +2, +3, +4, +5)");
+SN_PP_STATIC_TEST(SN_PP_TUPLE_TRANSFORM(SUM_ONE, (1, 2, 3, 4, 5)), "(+1,+2,+3,+4,+5)");

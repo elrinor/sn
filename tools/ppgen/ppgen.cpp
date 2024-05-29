@@ -45,31 +45,21 @@ int main(int argc, char **argv) {
                  join("v{}", ", ", forward_range));
 
     fmt::println(stdout, "");
-    fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_I_, SIZE)(MACRO, __VA_ARGS__)");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_0(M, DUMMY)");
+    fmt::println(stdout, "#define SN_PP_TUPLE_ELEM(I, TUPLE) SN_PP_CAT(_SN_PP_TUPLE_ELEM_O_, I) TUPLE");
     for (int i = 1; i <= count; i++) {
         auto range = std::views::iota(0, i);
-        fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_{}(M, {}) {}", i, join("v{}", ", ", range), join("M(v{})", " ", range));
+        fmt::println(stdout, "#define _SN_PP_TUPLE_ELEM_O_{}({}, ...) v{}",
+                     i - 1, join("v{}", ", ", range), i - 1);
     }
 
     fmt::println(stdout, "");
-    fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH_I(MACRO, TUPLE) _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_I_I_, SIZE)(MACRO, __VA_ARGS__)");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I_0(M, DUMMY)");
+    fmt::println(stdout, "#define SN_PP_TUPLE_FOR_EACH_DI(MACRO, DATA, TUPLE) _SN_PP_TUPLE_FOR_EACH_DI_I(MACRO, DATA, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
+    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_DI_I(MACRO, DATA, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_FOR_EACH_DI_O_, SIZE)(MACRO, DATA, __VA_ARGS__)");
+    fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_DI_O_0(M, D, DUMMY)");
     for (int i = 1; i <= count; i++) {
         auto range = std::views::iota(0, i);
-        fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_I_I_{}(M, {}) {}",
-                     i, join("v{}", ", ", range),  join("M({}, v{})", " ", range, range));
-    }
-
-    fmt::println(stdout, "");
-    fmt::println(stdout, "#define SN_PP_TUPLE_TRANSFORM(MACRO, TUPLE) _SN_PP_TUPLE_TRANSFORM_I(MACRO, SN_PP_TUPLE_SIZE(TUPLE), SN_PP_TUPLE_ENUM(TUPLE))");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_TRANSFORM_I(MACRO, SIZE, ...) SN_PP_CAT(_SN_PP_TUPLE_TRANSFORM_I_, SIZE)(MACRO, __VA_ARGS__)");
-    fmt::println(stdout, "#define _SN_PP_TUPLE_TRANSFORM_I_0(M, DUMMY) ()");
-    for (int i = 1; i <= count; i++) {
-        auto range = std::views::iota(0, i);
-        fmt::println(stdout, "#define _SN_PP_TUPLE_TRANSFORM_I_{}(M, {}) ({})", i, join("v{}", ", ", range), join("M(v{})", ", ", range));
+        fmt::println(stdout, "#define _SN_PP_TUPLE_FOR_EACH_DI_O_{}(M, D, {}) {}",
+                     i, join("v{}", ", ", range),  join("M(D, {}, v{})", " ", range, range));
     }
 
     fmt::println(stdout, "");
