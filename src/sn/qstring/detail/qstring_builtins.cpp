@@ -97,7 +97,7 @@ consteval int effective_base() {
 
 template<int base>
 consteval int effective_base(sn::base_tag<base>) {
-    return 10;
+    return base;
 }
 
 inline int effective_base(sn::dynamic_base_tag base) {
@@ -143,8 +143,14 @@ inline bool try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
             return false; // Leading whitespaces / '+' prefix.
         if (src.back().isSpace())
             return false; // Trailing whitespaces.
-        if (effective_base(tags...) == 10 && src.size() >= 2 && !src[1].isDigit())
-            return false; // 0x and 0b prefixes, only for base=10.
+
+        // 0x and 0b prefixes.
+        if (src.size() >= 2) {
+            if (effective_base(tags...) <= 10 && !src[1].isDigit())
+                return false;
+            if (effective_base(tags...) == 16 && src[1] == QLatin1Char('x'))
+                return false;
+        }
     }
 
     bool result;

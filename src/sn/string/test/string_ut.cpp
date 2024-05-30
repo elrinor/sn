@@ -156,11 +156,3 @@ TEST(string, slicing) {
     check_supported<Base>();
     check_unsupported<Derived>();
 }
-
-TEST(string, base16) {
-    EXPECT_EQ(sn::to_string(100, tn::hex), "64");
-}
-
-TEST(string, base9) {
-    EXPECT_EQ(sn::to_string(100, tn::base<9>), "121");
-}

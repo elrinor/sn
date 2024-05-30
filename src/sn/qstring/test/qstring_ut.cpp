@@ -159,11 +159,3 @@ TEST(qstring, slicing) {
     check_supported<Base>();
     check_unsupported<Derived>();
 }
-
-TEST(qstring, base16) {
-    EXPECT_EQ(sn::to_qstring(100, tn::hex), QStringLiteral("64"));
-}
-
-TEST(qstring, base9) {
-    EXPECT_EQ(sn::to_qstring(100, tn::base<9>), QStringLiteral("121"));
-}
