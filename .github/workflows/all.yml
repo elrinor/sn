@@ -17,7 +17,7 @@ on:
       - published
 
 env:
-  NDK_REVISION: r26-rc1
+  NDK_REVISION: r26d
 
 jobs:
   all:
