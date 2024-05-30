@@ -80,12 +80,16 @@ jobs:
           rm -rf /usr/bin/link.exe
           which link.exe
 
-      - name: '[linux-x86] Install Dependencies'
-        if: matrix.platform == 'linux' && matrix.architecture == 'x86'
+      - name: '[linux] Setup GCC'
+        if: matrix.platform == 'linux'
         run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install -y gcc-multilib g++-multilib
+          if [ "${{matrix.architecture}}" = "x86" ]; then
+            sudo dpkg --add-architecture i386
+            sudo apt-get update
+            sudo apt-get install -y gcc-12-multilib g++-12-multilib
+          fi
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
 
       - name: '[android] Setup NDK'
         if: matrix.platform == 'android'

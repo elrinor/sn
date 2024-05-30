@@ -110,11 +110,11 @@ inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
     // This will make it possible to avoid allocations in most cases.
     std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
 
-    // TODO(elric): #cpp23 use resize_and_overwrite, using libcxx's __resize_default_init gives x1.5 speedup.
-    dst->resize(max_size);
-    std::to_chars_result result = wrapped_to_chars(dst->data(), dst->data() + max_size, src, tags...);
-    assert(result.ec == std::errc()); // Should never fail.
-    dst->resize(result.ptr - dst->data());
+    dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
+        std::to_chars_result result = wrapped_to_chars(data, data + size, src, tags...);
+        assert(result.ec == std::errc()); // Should never fail.
+        return result.ptr - data;
+    });
 
     return true;
 }
