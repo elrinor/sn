@@ -108,6 +108,13 @@ inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
     // Numbers taken from https://tastyhedge.com/blog/memory-layout-of-std-string/.
     //
     // This will make it possible to avoid allocations in most cases.
+    //
+    // But this also means that the fast path in std::to_chars that compares the size of the buffer with maximum
+    // possible size won't trigger, and std::to_chars will do length estimation first. So, might actually be slower.
+    //
+    // There's still an opportunity for optimization here because we actually know that the number will fit in the
+    // buffer, and thus the length check inside std::to_chars isn't necessary. But will need to roll out our own
+    // std::to_chars for that.
     std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
 
     dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
