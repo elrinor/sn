@@ -27,7 +27,7 @@ template<class T, sn::concepts::tag... Tags>
 } // namespace sn
 
 // TODO(elric): #cpp23 the magic below with _enum_reflection_container isn't needed in c++23, can just create a static
-//              constexpr variable inside the function.
+//              constexpr variable inside the function once we have P2647.
 
 #define SN_DEFINE_ENUM_REFLECTION(T, MAPPING, ... /* TAGS */)                                                           \
     template<class...>                                                                                                  \

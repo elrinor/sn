@@ -19,7 +19,7 @@
 #include "string_fwd.h"
 
 // TODO(elric): #cpp23 the magic below with _enum_table_container isn't needed in c++23, can just create a static
-//              constexpr variable inside a function.
+//              constexpr variable inside a function once we have P2647.
 
 #define _SN_DEFINE_ENUM_STRING_FUNCTIONS_I(ENUM, CASE_SENSITIVITY, TABLE_DEFINITION_MACRO, ATTRIBUTES, ... /* TAGS */)  \
     template<class...>                                                                                                  \

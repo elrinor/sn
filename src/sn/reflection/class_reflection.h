@@ -33,7 +33,7 @@ template<class T, sn::concepts::tag... Tags>
 
 
 // TODO(elric): #cpp23 the magic below with _class_reflection_container isn't needed in c++23, can just create a static
-//              constexpr variable inside the function.
+//              constexpr variable inside the function once we have P2647.
 
 #define SN_DEFINE_CLASS_REFLECTION(T, CLASS_REFLECTION, ... /* TAGS */)                                                 \
     template<class...>                                                                                                  \
