@@ -47,6 +47,23 @@ private:
 
 } // namespace sn
 
+namespace sn::detail {
+
+consteval int base_value() {
+    return 10;
+}
+
+template<int base>
+consteval int base_value(sn::base_tag<base>) {
+    return base;
+}
+
+inline int base_value(sn::dynamic_base_tag base) {
+    return base.value();
+}
+
+} // namespace sn::detail
+
 namespace tn {
 /**
  * Creates a tag for converting integers to/from string using bases other than 10.

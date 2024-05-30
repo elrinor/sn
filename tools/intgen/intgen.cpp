@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
                 values.push_back(max_lengths[k]);
             }
             fmt::println("template<>");
-            fmt::println("static constexpr std::array<unsigned char, 35> max_integer_lengths<{}, {}> = {{{}}};",
+            fmt::println("static constexpr std::array<std::uint8_t, 35> max_integer_lengths<{}, {}> = {{{}}};",
                          sign, size, fmt::join(values, ", "));
         }
     }

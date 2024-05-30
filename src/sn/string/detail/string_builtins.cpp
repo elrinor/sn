@@ -29,17 +29,17 @@ namespace sn::detail::builtins {
 template<bool is_signed, int size>
 static constexpr std::nullptr_t max_integer_lengths = nullptr;
 template<>
-constexpr std::array<unsigned char, 35> max_integer_lengths<true, 2> = {17, 11, 9, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 2> = {17, 11, 9, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4};
 template<>
-constexpr std::array<unsigned char, 35> max_integer_lengths<false, 2> = {16, 11, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 2> = {16, 11, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 template<>
-constexpr std::array<unsigned char, 35> max_integer_lengths<true, 4> = {33, 21, 17, 15, 13, 13, 12, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 4> = {33, 21, 17, 15, 13, 13, 12, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7};
 template<>
-constexpr std::array<unsigned char, 35> max_integer_lengths<false, 4> = {32, 21, 16, 14, 13, 12, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 4> = {32, 21, 16, 14, 13, 12, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 template<>
-constexpr std::array<unsigned char, 35> max_integer_lengths<true, 8> = {65, 41, 33, 29, 26, 24, 23, 21, 20, 20, 19, 19, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 8> = {65, 41, 33, 29, 26, 24, 23, 21, 20, 20, 19, 19, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14};
 template<>
-constexpr std::array<unsigned char, 35> max_integer_lengths<false, 8> = {64, 41, 32, 28, 25, 23, 22, 21, 20, 19, 18, 18, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 8> = {64, 41, 32, 28, 25, 23, 22, 21, 20, 19, 18, 18, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13};
 
 
 //
@@ -77,23 +77,28 @@ void from_string(std::string_view src, bool *dst) {
 // Arithmetic types.
 //
 
-namespace detail_to_string {
+namespace detail_to_chars {
 template<class T>
-inline bool try_to_string(T src, std::string *dst) noexcept {
-    // TODO(elric): this is likely suboptimal, format goes through vformat and a temp buffer.
-    *dst = sn::detail::format("{}", src);
-    return true;
+inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value) {
+    // This is a separate function because std::to_chars w/o the base argument is a separate function in some STL
+    // implementations, to make the default code path more efficient.
+    return std::to_chars(first, last, value);
 }
 
 template<class T>
-inline void to_string(T src, std::string *dst) {
-    (void) try_to_string(src, dst);
+inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, sn::dynamic_base_tag base) {
+    return std::to_chars(first, last, value, base.value());
 }
 
-template<class T>
-inline bool try_to_string(T src, std::string *dst, sn::dynamic_base_tag base) noexcept {
-    // We can actually do better, but it's probably not worth it given that dynamic_base_tag usage should be very very
-    // rare.
+template<class T, int base>
+inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, sn::base_tag<base>) {
+    static_assert(base != 10); // Base 10 should be handled by the overload w/o the tag parameter.
+    return std::to_chars(first, last, value, base);
+}
+
+template<class T, class... Tags>
+inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
+    // We can actually do better, but it's probably not worth it.
     //
     // Since all modern STL implementations use small string optimization, we can first check if the value fits in the
     // small string buffer. These are the small buffer sizes:
@@ -102,45 +107,23 @@ inline bool try_to_string(T src, std::string *dst, sn::dynamic_base_tag base) no
     // - 22 chars for clang's libc++.
     // Numbers taken from https://tastyhedge.com/blog/memory-layout-of-std-string/.
     //
-    // This will make it possible to avoid allocations for most cases. But, not really worth it as all of the sane
-    // use cases are covered by other code paths.
-    std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[base.value() - 2];
+    // This will make it possible to avoid allocations in most cases.
+    std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
 
-    // TODO(elric): #cpp23 use resize_and_overwrite
+    // TODO(elric): #cpp23 use resize_and_overwrite, using libcxx's __resize_default_init gives x1.5 speedup.
     dst->resize(max_size);
-    std::to_chars_result result = std::to_chars(dst->data(), dst->data() + max_size, src, base.value());
+    std::to_chars_result result = wrapped_to_chars(dst->data(), dst->data() + max_size, src, tags...);
     assert(result.ec == std::errc()); // Should never fail.
     dst->resize(result.ptr - dst->data());
 
     return true;
 }
 
-template<class T>
-inline void to_string(T src, std::string *dst, sn::dynamic_base_tag base) {
-    (void) try_to_string(src, dst, base);
+template<class T, class... Tags>
+inline void to_string(T src, std::string *dst, Tags... tags) {
+    (void) try_to_string(src, dst, tags...);
 }
-
-template<class T, int base>
-inline bool try_to_string(T src, std::string *dst, sn::base_tag<base>) noexcept {
-    // We can route this function through fmt::format because it supports all the sane static bases.
-    // We're using lowercase format specs because that's how std::to_chars work.
-    if constexpr (base == 2) {
-        *dst = sn::detail::format("{:b}", src);
-    } else if constexpr (base == 8) {
-        *dst = sn::detail::format("{:o}", src);
-    } else {
-        static_assert(base == 16);
-        *dst = sn::detail::format("{:x}", src);
-    }
-
-    return true;
-}
-
-template<class T, int base>
-inline void to_string(T src, std::string *dst, sn::base_tag<base> tag) {
-    (void) try_to_string(src, dst, tag);
-}
-} // namespace detail_to_string
+} // namespace detail_to_chars
 
 namespace detail_from_chars {
 template<class T>
@@ -157,6 +140,7 @@ inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *en
 
 template<class T, int base>
 inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *end, T *value, sn::base_tag<base>) {
+    static_assert(base != 10); // Base 10 should be handled by the overload w/o the tag parameter.
     return std::from_chars(ptr, end, *value, base);
 }
 
@@ -261,13 +245,13 @@ inline void from_string(std::string_view src, T *dst) {
     SN_DEFINE_NUMERIC_STRING_FUNCTIONS_I(TYPE, FROM_STRING_NAMESPACE, _SN_PP_TUPLE_TYPES_TO_DECL_PARAMS(arg, (__VA_ARGS__)), _SN_PP_TUPLE_TYPES_TO_CALL_PARAMS(arg, (__VA_ARGS__)))
 #define SN_DEFINE_NUMERIC_STRING_FUNCTIONS_I(TYPE, FROM_STRING_NAMESPACE, DECL_PARAMS, CALL_PARAMS)                     \
     bool try_to_string(TYPE src, std::string *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) noexcept {                    \
-        return detail_to_string::try_to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                        \
+        return detail_to_chars::try_to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                         \
     }                                                                                                                   \
     bool try_from_string(std::string_view src, TYPE *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) noexcept {             \
         return FROM_STRING_NAMESPACE::try_from_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                 \
     }                                                                                                                   \
     void to_string(TYPE src, std::string *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) {                                 \
-        detail_to_string::to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                                   \
+        detail_to_chars::to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                                    \
     }                                                                                                                   \
     void from_string(std::string_view src, TYPE *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) {                          \
         FROM_STRING_NAMESPACE::from_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                            \

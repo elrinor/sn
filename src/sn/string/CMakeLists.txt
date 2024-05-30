@@ -75,7 +75,9 @@ if(SN_BUILD_TESTS)
 endif()
 
 if(SN_BUILD_BENCHMARKS)
-    set(BENCHMARK_SN_STRING_SOURCES benchmark/enum_string_benchmark.cpp)
+    set(BENCHMARK_SN_STRING_SOURCES
+        benchmark/enum_string_benchmark.cpp
+        benchmark/int_string_benchmark.cpp)
 
     add_executable(benchmark_sn_string ${BENCHMARK_SN_STRING_SOURCES})
     target_link_libraries(benchmark_sn_string PUBLIC sn_string benchmark::benchmark benchmark::benchmark_main)

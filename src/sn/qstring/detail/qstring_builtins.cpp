@@ -91,19 +91,6 @@ inline QString wrapped_qstring_number(T value, sn::base_tag<base>) {
     return QString::number(value, base);
 }
 
-consteval int effective_base() {
-    return 10;
-}
-
-template<int base>
-consteval int effective_base(sn::base_tag<base>) {
-    return base;
-}
-
-inline int effective_base(sn::dynamic_base_tag base) {
-    return base.value();
-}
-
 template<class T, class... Tags>
 inline bool try_to_qstring(T src, QString *dst, Tags... tags) noexcept {
     // Qt doesn't round-trip negative zero, while std functions do. We want to be consistent with std functions.
@@ -146,9 +133,9 @@ inline bool try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
 
         // 0x and 0b prefixes.
         if (src.size() >= 2) {
-            if (effective_base(tags...) <= 10 && !src[1].isDigit())
+            if (sn::detail::base_value(tags...) <= 10 && !src[1].isDigit())
                 return false;
-            if (effective_base(tags...) == 16 && src[1] == QLatin1Char('x'))
+            if (sn::detail::base_value(tags...) == 16 && src[1] == QLatin1Char('x'))
                 return false;
         }
     }
