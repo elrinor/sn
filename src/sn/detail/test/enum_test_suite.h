@@ -2,11 +2,11 @@
 
 #include <ostream>
 #include <type_traits>
+#include <utility> // For std::to_underlying.
 
 #include "sn/core/type_name.h"
 #include "sn/core/tag.h"
 #include "sn/reflection/enum_reflection.h"
-#include "sn/detail/workaround/to_underlying.h"
 
 #include "tester.h"
 
@@ -18,7 +18,7 @@ namespace sn::detail {
 
 template<class T> requires std::is_enum_v<T>
 std::ostream &operator<<(std::ostream &s, T value) {
-    return s << sn::type_name<T>() << "(" << sn::detail::std_to_underlying(value) << ")";
+    return s << sn::type_name<T>() << "(" << std::to_underlying(value) << ")";
 }
 
 namespace adl_test_ns {
