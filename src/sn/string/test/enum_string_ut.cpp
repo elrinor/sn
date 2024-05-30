@@ -67,9 +67,9 @@ TEST(enum, utf8) {
     sn::detail::make_utf8_enum_test_suite().run<std::string>();
 }
 
-namespace sn::detail::test_ns {
+namespace sn::detail::adl_test_ns {
 SN_DEFINE_ENUM_STRING_FUNCTIONS(adl_test_enum, sn::case_sensitive)
-} // namespace sn::detail::test_ns
+} // namespace sn::detail::adl_test_ns
 namespace sn::detail {
 SN_DEFINE_ENUM_STRING_FUNCTIONS(adl_test_enum, sn::case_sensitive) // This should compile & hook into ADL-found reflection
 } // namespace sn::detail

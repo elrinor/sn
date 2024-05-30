@@ -21,12 +21,12 @@ std::ostream &operator<<(std::ostream &s, T value) {
     return s << sn::type_name<T>() << "(" << sn::detail::std_to_underlying(value) << ")";
 }
 
-namespace test_ns {
+namespace adl_test_ns {
 template<class T> requires std::is_enum_v<T>
 std::ostream &operator<<(std::ostream &s, T value) {
     return sn::detail::operator<<(s, value);
 }
-} // namespace test_ns
+} // namespace adl_test_ns
 
 
 //
@@ -301,20 +301,20 @@ inline test_suite<utf8_test_enum> make_utf8_enum_test_suite() {
 // customization points directly. See the corresponding tests.
 //
 
-namespace test_ns {
+namespace adl_test_ns {
 enum class adl_test_enum {
     ADL_VALUE_0 = 0,
     ADL_VALUE_1 = 1,
 };
 using enum adl_test_enum;
 SN_DEFINE_ENUM_REFLECTION(adl_test_enum, ({{ADL_VALUE_1, "_1"}}))
-} // namespace test_ns
+} // namespace adl_test_ns
 
 // That's the problematic SN_DEFINE_ENUM_REFLECTION. We are testing that this one won't be used in serialization code.
 // Note that while we can issue diagnostics here, this will be messy. Just checking that the ADL-found function doesn't
 // exist will violate ODR, so we'll also need counters. TLDR: it's a mess and not worth it.
-using test_ns::adl_test_enum;
-using enum test_ns::adl_test_enum;
+using adl_test_ns::adl_test_enum;
+using enum adl_test_ns::adl_test_enum;
 SN_DEFINE_ENUM_REFLECTION(adl_test_enum, ({{ADL_VALUE_1, "WUT"}}))
 
 inline test_suite<adl_test_enum> make_adl_enum_test_suite() {
