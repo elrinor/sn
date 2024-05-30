@@ -8,7 +8,7 @@
 #include "sn/reflection/enum_reflection.h"
 #include "sn/detail/workaround/to_underlying.h"
 
-#include "test_suite.h"
+#include "tester.h"
 
 namespace sn::detail {
 
@@ -47,12 +47,13 @@ SN_DEFINE_ENUM_REFLECTION(basic_test_enum, ({
     { BASIC_VALUE_3, "CCC" },
 }))
 
-inline test_suite<basic_test_enum> make_basic_enum_test_suite() {
-    test_suite<basic_test_enum> result;
+template<class Ops>
+inline void run_basic_enum_test_suite(const Ops &ops) {
+    sn::detail::tester<basic_test_enum, Ops> tester(ops);
 
-    result.throwing_to = {BASIC_UNSERIALIZABLE};
+    tester.expect_throwing_to({BASIC_UNSERIALIZABLE});
 
-    result.throwing_from = {
+    tester.expect_throwing_from({
         "AAA",
         "ccc",
         "1",
@@ -64,15 +65,13 @@ inline test_suite<basic_test_enum> make_basic_enum_test_suite() {
         "\taaa",
         "aaa\t",
         "\taaa\t",
-    };
+    });
 
-    result.valid_fromto = {
+    tester.expect_valid_fromto({
         {"aaa", BASIC_VALUE_1},
         {"bbb", BASIC_VALUE_2},
         {"CCC", BASIC_VALUE_3},
-    };
-
-    return result;
+    });
 }
 
 
@@ -94,25 +93,24 @@ SN_DEFINE_ENUM_REFLECTION(ci_test_enum, ({
     {CI_VALUE_4, "111_ab"},
 }))
 
-inline test_suite<ci_test_enum> make_ci_enum_test_suite() {
-    test_suite<ci_test_enum> result;
+template<class Ops>
+inline void run_ci_enum_test_suite(const Ops &ops) {
+    tester<ci_test_enum, Ops> t(ops);
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"AAA", CI_VALUE_1},
         {"bbb", CI_VALUE_2},
         {"Ccc", CI_VALUE_3},
         {"111_ab", CI_VALUE_4},
-    };
+    });
 
-    result.valid_from = {
+    t.expect_valid_from({
         {"AaA", CI_VALUE_1},
         {"aaa", CI_VALUE_1},
         {"BBB", CI_VALUE_2},
         {"ccc", CI_VALUE_3},
         {"111_AB", CI_VALUE_4},
-    };
-
-    return result;
+    });
 }
 
 
@@ -133,24 +131,23 @@ SN_DEFINE_ENUM_REFLECTION(compat_ci_test_enum, ({
     {COMPAT_CI_VALUE_2, "OLD_2"},
 }))
 
-inline test_suite<compat_ci_test_enum> make_compat_ci_enum_test_suite() {
-    test_suite<compat_ci_test_enum> result;
+template<class Ops>
+inline void run_compat_ci_enum_test_suite(const Ops &ops) {
+    tester<compat_ci_test_enum, Ops> t(ops);
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"COMPAT_1", COMPAT_CI_VALUE_1},
         {"COMPAT_2", COMPAT_CI_VALUE_2}
-    };
+    });
 
-    result.valid_from = {
+    t.expect_valid_from({
         {"compat_1", COMPAT_CI_VALUE_1},
         {"OLD_1", COMPAT_CI_VALUE_1},
         {"old_1", COMPAT_CI_VALUE_1},
         {"compat_2", COMPAT_CI_VALUE_2},
         {"OLD_2", COMPAT_CI_VALUE_2},
         {"old_2", COMPAT_CI_VALUE_2},
-    };
-
-    return result;
+    });
 }
 
 
@@ -167,42 +164,27 @@ SN_DEFINE_ENUM_REFLECTION(int, ({{1, "GL_1"}, {2, "GL_2"}}), gl1_test_tag)
 SN_DEFINE_ENUM_REFLECTION(int, ({{100, "GL_100"}, {200, "GL_200"}}), gl2_test_tag)
 SN_DEFINE_ENUM_REFLECTION(int, ({{0, "GL_0"}}), first_test_tag, second_test_tag)
 
-inline test_suite<int, gl1_test_tag> make_tagged_enum_test_suite_1() {
-    test_suite<int, gl1_test_tag> result;
+template<class Ops>
+inline void run_tagged_enum_test_suite(const Ops &ops) {
+    tester<int, Ops> t(ops);
 
-    result.throwing_to = {100, 3};
-    result.throwing_from = {"GL_100"};
-
-    result.valid_fromto = {
+    t.expect_throwing_to({100, 3}, gl1_test_tag());
+    t.expect_throwing_from({"GL_100"}, gl1_test_tag());
+    t.expect_valid_fromto({
         {"GL_1", 1},
         {"GL_2", 2}
-    };
+    }, gl1_test_tag());
 
-    return result;
-}
-
-inline test_suite<int, gl2_test_tag> make_tagged_enum_test_suite_2() {
-    test_suite<int, gl2_test_tag> result;
-
-    result.throwing_to = {1, 300};
-    result.throwing_from = {"GL_1"};
-
-    result.valid_fromto = {
+    t.expect_throwing_to({1, 300}, gl2_test_tag());
+    t.expect_throwing_from({"GL_1"}, gl2_test_tag());
+    t.expect_valid_fromto({
         {"GL_100", 100},
         {"GL_200", 200}
-    };
+    }, gl2_test_tag());
 
-    return result;
-}
-
-inline test_suite<int, first_test_tag, second_test_tag> make_tagged_enum_test_suite_3() {
-    test_suite<int, first_test_tag, second_test_tag> result;
-
-    result.throwing_to = {1};
-    result.throwing_from = {"GL_1"};
-    result.valid_fromto = {{"GL_0", 0}};
-
-    return result;
+    t.expect_throwing_to({1}, first_test_tag(), second_test_tag());
+    t.expect_throwing_from({"GL_1"}, first_test_tag(), second_test_tag());
+    t.expect_valid_fromto({{"GL_0", 0}}, first_test_tag(), second_test_tag());
 }
 
 
@@ -218,19 +200,16 @@ enum char_test_enum : char {
 
 SN_DEFINE_ENUM_REFLECTION(char_test_enum, ({{CHAR_VALUE_1, "CHAR_1"}, {CHAR_VALUE_2, "CHAR_2"}}))
 
-inline test_suite<char_test_enum> make_char_enum_test_suite() {
-    test_suite<char_test_enum> result;
+template<class Ops>
+inline void run_char_enum_test_suite(const Ops &ops) {
+    tester<char_test_enum, Ops> t(ops);
 
-    result.throwing_to_message = {
-        {CHAR_VALUE_UNK, "'64'"}
-    };
+    t.expect_throwing_to_with_message({{CHAR_VALUE_UNK, "'64'"}});
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"CHAR_1", CHAR_VALUE_1},
         {"CHAR_2", CHAR_VALUE_2}
-    };
-
-    return result;
+    });
 }
 
 
@@ -245,18 +224,17 @@ enum schar_test_enum : signed char {
 
 SN_DEFINE_ENUM_REFLECTION(schar_test_enum, ({{SCHAR_VALUE_1, "SCHAR_1"}}))
 
-inline test_suite<schar_test_enum> make_schar_enum_test_suite() {
-    test_suite<schar_test_enum> result;
+template<class Ops>
+inline void run_schar_enum_test_suite(const Ops &ops) {
+    tester<schar_test_enum, Ops> t(ops);
 
-    result.throwing_to_message = {
+    t.expect_throwing_to_with_message({
         {SCHAR_VALUE_UNK, "'-100'"}
-    };
+    });
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"SCHAR_1", SCHAR_VALUE_1},
-    };
-
-    return result;
+    });
 }
 
 
@@ -274,23 +252,22 @@ SN_DEFINE_ENUM_REFLECTION(utf8_test_enum, ({
     {UTF8_VALUE_2, "LOL"}
 }))
 
-inline test_suite<utf8_test_enum> make_utf8_enum_test_suite() {
-    test_suite<utf8_test_enum> result;
+template<class Ops>
+inline void run_utf8_enum_test_suite(const Ops &ops) {
+    tester<utf8_test_enum, Ops> t(ops);
 
-    result.throwing_from = {
+    t.expect_throwing_from({
         "\xd0\xb4\xd0\xbe\xd0\xbc" // "dom" (house) in Russian.
-    };
+    });
 
-    result.valid_from = {
+    t.expect_valid_from({
         {"lol", UTF8_VALUE_2} // Should be case-insensitive for ascii chars.
-    };
+    });
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"\xd0\x94\xd0\xbe\xd0\xbc", UTF8_VALUE_1},
         {"LOL", UTF8_VALUE_2}
-    };
-
-    return result;
+    });
 }
 
 
@@ -317,14 +294,13 @@ using adl_test_ns::adl_test_enum;
 using enum adl_test_ns::adl_test_enum;
 SN_DEFINE_ENUM_REFLECTION(adl_test_enum, ({{ADL_VALUE_1, "WUT"}}))
 
-inline test_suite<adl_test_enum> make_adl_enum_test_suite() {
-    test_suite<adl_test_enum> result;
+template<class Ops>
+inline void run_adl_enum_test_suite(const Ops &ops) {
+    tester<adl_test_enum, Ops> t(ops);
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"_1", ADL_VALUE_1},
-    };
-
-    return result;
+    });
 }
 
 

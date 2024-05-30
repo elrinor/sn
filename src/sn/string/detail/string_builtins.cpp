@@ -121,15 +121,14 @@ inline void to_string(T src, std::string *dst, sn::dynamic_base_tag base) {
 
 template<class T, int base>
 inline bool try_to_string(T src, std::string *dst, sn::base_tag<base>) noexcept {
-    static_assert(base == 2 || base == 8 || base == 16);
-
     // We can route this function through fmt::format because it supports all the sane static bases.
     // We're using lowercase format specs because that's how std::to_chars work.
     if constexpr (base == 2) {
         *dst = sn::detail::format("{:b}", src);
     } else if constexpr (base == 8) {
         *dst = sn::detail::format("{:o}", src);
-    } else { // base == 16
+    } else {
+        static_assert(base == 16);
         *dst = sn::detail::format("{:x}", src);
     }
 

@@ -2,16 +2,16 @@
 
 #include <limits>
 
-#include "test_suite.h"
+#include "tester.h"
 #include "integer_test_suite.h"
 
 namespace sn::detail {
 
-template<class T>
-inline test_suite<T> make_float_test_suite() {
-    test_suite<T> result;
+template<class T, class Ops>
+inline void run_float_test_suite(const Ops &ops) {
+    tester<T, Ops> t(ops);
 
-    result.throwing_from = {
+    t.expect_throwing_from({
         "+1",
         "+1.5",
         " 1.5",
@@ -20,9 +20,9 @@ inline test_suite<T> make_float_test_suite() {
         "1 ",
         "\t10.0000",
         "10.0000\t",
-    };
+    });
 
-    result.valid_from = {
+    t.expect_valid_from({
         {"0.0", 0.0f},
         {"-0.0", -0.0f},
         {".5", 0.5f},
@@ -44,9 +44,9 @@ inline test_suite<T> make_float_test_suite() {
         {"-Inf", -std::numeric_limits<T>::infinity()},
         {"-iNf", -std::numeric_limits<T>::infinity()},
         {"-inF", -std::numeric_limits<T>::infinity()},
-    };
+    });
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"0", 0.0f},
         {"-0", -0.0f},
         {"1", 1.0f},
@@ -56,11 +56,9 @@ inline test_suite<T> make_float_test_suite() {
         {"0.5", 0.5f},
         {"inf", std::numeric_limits<T>::infinity()},
         {"-inf", -std::numeric_limits<T>::infinity()},
-    };
+    });
 
     // TODO(elric): test NANs.
-
-    return result;
 }
 
 } // namespace sn::detail

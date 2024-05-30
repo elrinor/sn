@@ -94,12 +94,12 @@ TEST(string, char) {
 }
 
 TEST(string, boolean) {
-    sn::detail::make_boolean_test_suite().run<std::string>();
+    sn::detail::run_boolean_test_suite(sn::detail::string_ops());
 }
 
 template<class T>
 static void run_integer_tests() {
-    sn::detail::make_integer_test_suite<T>().template run<std::string>();
+    sn::detail::run_integer_test_suite<T>(sn::detail::string_ops());
 }
 
 TEST(string, ints) {
@@ -115,7 +115,7 @@ TEST(string, ints) {
 
 template<class T>
 static void run_float_tests() {
-    sn::detail::make_float_test_suite<T>().template run<std::string>();
+    sn::detail::run_float_test_suite<T>(sn::detail::string_ops());
 }
 
 TEST(string, floats) {

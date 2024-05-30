@@ -1,28 +1,27 @@
 #pragma once
 
-#include "test_suite.h"
+#include "tester.h"
 
 namespace sn::detail {
 
-inline test_suite<bool> make_boolean_test_suite() {
-    test_suite<bool> result;
+template<class Ops>
+inline void run_boolean_test_suite(const Ops &ops) {
+    tester<bool, Ops> t(ops);
 
-    result.throwing_from = {
+    t.expect_throwing_from({
         "",
         "da"
-    };
+    });
 
-    result.valid_from = {
+    t.expect_valid_from({
         {"0", false},
         {"1", true}
-    };
+    });
 
-    result.valid_fromto = {
+    t.expect_valid_fromto({
         {"true", true},
         {"false", false}
-    };
-
-    return result;
+    });
 }
 
 } // namespace sn::detail

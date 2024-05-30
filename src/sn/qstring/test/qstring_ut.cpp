@@ -97,12 +97,12 @@ TEST(qstring, char) {
 }
 
 TEST(qstring, boolean) {
-    sn::detail::make_boolean_test_suite().run<QString>();
+    sn::detail::run_boolean_test_suite(sn::detail::qstring_ops());
 }
 
 template<class T>
 static void run_integer_tests() {
-    sn::detail::make_integer_test_suite<T>().template run<QString>();
+    sn::detail::run_integer_test_suite<T>(sn::detail::qstring_ops());
 }
 
 TEST(qstring, ints) {
@@ -118,7 +118,7 @@ TEST(qstring, ints) {
 
 template<class T>
 static void run_float_tests() {
-    sn::detail::make_float_test_suite<T>().template run<QString>();
+    sn::detail::run_float_test_suite<T>(sn::detail::qstring_ops());
 }
 
 TEST(qstring, floats) {
