@@ -3,8 +3,6 @@
 #include <array>
 #include <memory>
 
-#include "sn/detail/workaround/make_unique_for_overwrite.h"
-
 namespace sn::detail {
 
 /**
@@ -23,7 +21,7 @@ class overwrite_buffer {
 public:
     explicit overwrite_buffer(std::size_t size) {
         if (size > small_size)
-            _big = sn::detail::std_make_unique_for_overwrite<char[]>(size);
+            _big = std::make_unique_for_overwrite<char[]>(size);
     }
 
     [[nodiscard]] void *data() {
