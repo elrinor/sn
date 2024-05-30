@@ -85,6 +85,60 @@ inline void run_integer_test_suite(const Ops &ops) {
         std::numeric_limits<T>::max(),
         std::numeric_limits<T>::min()
     });
+
+    static constexpr const char *base_strings_for_100[] = {
+        nullptr,
+        nullptr,
+        "1100100",
+        "10201",
+        "1210",
+        "400",
+        "244",
+        "202",
+        "144",
+        "121",
+        "100",
+        "91",
+        "84",
+        "79",
+        "72",
+        "6a",
+        "64",
+        "5f",
+        "5a",
+        "55",
+        "50",
+        "4g",
+        "4c",
+        "48",
+        "44",
+        "40",
+        "3m",
+        "3j",
+        "3g",
+        "3d",
+        "3a",
+        "37",
+        "34",
+        "31",
+        "2w",
+        "2u",
+        "2s"
+    };
+
+    for (std::size_t base = 2; base <= 36; base++) {
+        std::string positive_str = base_strings_for_100[base];
+        t.expect_valid_fromto(positive_str, 100, tn::dynamic_base(base));
+        t.expect_valid_from(prepend_zeros(100, positive_str), 100, tn::dynamic_base(base));
+
+        t.expect_throwing_from({" " + positive_str, positive_str + " ", "+" + positive_str});
+
+        if (std::is_signed_v<T>) {
+            std::string negative_str = "-" + positive_str;
+            t.expect_valid_fromto(negative_str, -100, tn::dynamic_base(base));
+            t.expect_valid_from(prepend_zeros(100, negative_str), -100, tn::dynamic_base(base));
+        }
+    }
 }
 
 } // namespace sn::detail

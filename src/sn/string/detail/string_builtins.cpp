@@ -80,6 +80,7 @@ void from_string(std::string_view src, bool *dst) {
 namespace detail_to_string {
 template<class T>
 inline bool try_to_string(T src, std::string *dst) noexcept {
+    // TODO(elric): this is likely suboptimal, format goes through vformat and a temp buffer.
     *dst = sn::detail::format("{}", src);
     return true;
 }
