@@ -155,10 +155,10 @@ inline void run_compat_ci_enum_test_suite(const Ops &ops) {
 // Tagged enum test suite.
 //
 
-struct gl1_test_tag : sn::tag {};
-struct gl2_test_tag : sn::tag {};
-struct first_test_tag : sn::tag {};
-struct second_test_tag : sn::tag {};
+struct gl1_test_tag : sn::tags::tag {};
+struct gl2_test_tag : sn::tags::tag {};
+struct first_test_tag : sn::tags::tag {};
+struct second_test_tag : sn::tags::tag {};
 
 SN_DEFINE_ENUM_REFLECTION(int, ({{1, "GL_1"}, {2, "GL_2"}}), gl1_test_tag)
 SN_DEFINE_ENUM_REFLECTION(int, ({{100, "GL_100"}, {200, "GL_200"}}), gl2_test_tag)

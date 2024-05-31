@@ -86,12 +86,12 @@ inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value) {
 }
 
 template<class T>
-inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, sn::dynamic_base_tag base) {
+inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, sn::tags::dynamic_base_tag base) {
     return std::to_chars(first, last, value, base.value());
 }
 
 template<class T, int base>
-inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, sn::base_tag<base>) {
+inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, sn::tags::base_tag<base>) {
     static_assert(base != 10); // Base 10 should be handled by the overload w/o the tag parameter.
     return std::to_chars(first, last, value, base);
 }
@@ -141,12 +141,12 @@ inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *en
 }
 
 template<class T>
-inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *end, T *value, sn::dynamic_base_tag base) {
+inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *end, T *value, sn::tags::dynamic_base_tag base) {
     return std::from_chars(ptr, end, *value, base.value());
 }
 
 template<class T, int base>
-inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *end, T *value, sn::base_tag<base>) {
+inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *end, T *value, sn::tags::base_tag<base>) {
     static_assert(base != 10); // Base 10 should be handled by the overload w/o the tag parameter.
     return std::from_chars(ptr, end, *value, base);
 }
@@ -286,40 +286,40 @@ SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars)
 SN_DEFINE_NUMERIC_STRING_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
 SN_DEFINE_NUMERIC_STRING_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::dynamic_base_tag)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<2>)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<8>)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<16>)
 
 } // namespace sn::detail::builtins

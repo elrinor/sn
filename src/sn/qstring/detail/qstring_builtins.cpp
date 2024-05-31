@@ -67,12 +67,12 @@ inline void wrapped_qstringview_to_ex(QStringView src, T *dst, bool *ok) {
 }
 
 template<class T>
-inline void wrapped_qstringview_to_ex(QStringView src, T *dst, bool *ok, sn::dynamic_base_tag base) {
+inline void wrapped_qstringview_to_ex(QStringView src, T *dst, bool *ok, sn::tags::dynamic_base_tag base) {
     wrapped_qstringview_to(src, dst, ok, base.value());
 }
 
 template<class T, int base>
-inline void wrapped_qstringview_to_ex(QStringView src, T *dst, bool *ok, sn::base_tag<base>) {
+inline void wrapped_qstringview_to_ex(QStringView src, T *dst, bool *ok, sn::tags::base_tag<base>) {
     wrapped_qstringview_to(src, dst, ok, base);
 }
 
@@ -82,12 +82,12 @@ inline QString wrapped_qstring_number(T value) {
 }
 
 template<class T>
-inline QString wrapped_qstring_number(T value, sn::dynamic_base_tag base) {
+inline QString wrapped_qstring_number(T value, sn::tags::dynamic_base_tag base) {
     return QString::number(value, base.value());
 }
 
 template<class T, int base>
-inline QString wrapped_qstring_number(T value, sn::base_tag<base>) {
+inline QString wrapped_qstring_number(T value, sn::tags::base_tag<base>) {
     return QString::number(value, base);
 }
 
@@ -181,40 +181,40 @@ SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long)
 SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(float)
 SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(double)
 
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::dynamic_base_tag)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::tags::dynamic_base_tag)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::tags::dynamic_base_tag)
 
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::base_tag<2>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::tags::base_tag<2>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::tags::base_tag<2>)
 
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::base_tag<8>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::tags::base_tag<8>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::tags::base_tag<8>)
 
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::base_tag<16>)
-SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(short, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned short, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(int, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned int, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(long long, sn::tags::base_tag<16>)
+SN_DEFINE_NUMERIC_QSTRING_FUNCTIONS(unsigned long long, sn::tags::base_tag<16>)
 
 } // namespace sn::detail::builtins

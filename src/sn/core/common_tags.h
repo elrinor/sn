@@ -4,13 +4,13 @@
 
 #include "tag.h"
 
-namespace sn {
+namespace sn::tags {
 
 /**
  * Tag for converting integers to/from string using bases other than 10.
  *
  * Don't use this tag type in your code directly, use `tn::base<N>` instead. This tag type only supports a limited
- * number of base values, while `tn::base<N>` becomes a `sn::dynamic_base_tag` for values that are not supported by
+ * number of base values, while `tn::base<N>` becomes a `sn::tags::dynamic_base_tag` for values that are not supported by
  * this tag type.
  *
  * @tparam value                        Base value.
@@ -45,23 +45,21 @@ private:
     int _value = 0;
 };
 
-} // namespace sn
+} // namespace sn::tags
 
 namespace sn::detail {
-
 consteval int base_value() {
     return 10;
 }
 
 template<int base>
-consteval int base_value(sn::base_tag<base>) {
+consteval int base_value(sn::tags::base_tag<base>) {
     return base;
 }
 
-inline int base_value(sn::dynamic_base_tag base) {
+inline int base_value(sn::tags::dynamic_base_tag base) {
     return base.value();
 }
-
 } // namespace sn::detail
 
 namespace tn {
@@ -78,8 +76,8 @@ namespace tn {
  * @param value                         Base value.
  * @return                              Tag to be used with `sn` functions.
  */
-[[nodiscard]] constexpr sn::dynamic_base_tag dynamic_base(int value) {
-    return sn::dynamic_base_tag(value);
+[[nodiscard]] constexpr sn::tags::dynamic_base_tag dynamic_base(int value) {
+    return sn::tags::dynamic_base_tag(value);
 }
 
 /**
@@ -92,13 +90,13 @@ namespace tn {
  * @tparam value                        Base value.
  */
 template<int value>
-constexpr sn::base_tag<value> base;
+constexpr sn::tags::base_tag<value> base;
 template<int value> requires(value != 2 && value != 8 && value != 10 && value != 16)
-constexpr sn::dynamic_base_tag base<value> = sn::dynamic_base_tag(value);
+constexpr sn::tags::dynamic_base_tag base<value> = sn::tags::dynamic_base_tag(value);
 
-constexpr sn::base_tag<2> bin;
-constexpr sn::base_tag<8> oct;
-constexpr sn::base_tag<10> dec;
-constexpr sn::base_tag<16> hex;
+constexpr sn::tags::base_tag<2> bin;
+constexpr sn::tags::base_tag<8> oct;
+constexpr sn::tags::base_tag<10> dec;
+constexpr sn::tags::base_tag<16> hex;
 
 } // namespace tn

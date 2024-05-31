@@ -18,13 +18,13 @@ inline std::string to_debug_string() {
     return "<none>";
 }
 
-inline std::string to_debug_string(sn::dynamic_base_tag tag) {
-    return sn::detail::format("sn::dynamic_base_tag({})", tag.value());
+inline std::string to_debug_string(sn::tags::dynamic_base_tag tag) {
+    return sn::detail::format("sn::tags::dynamic_base_tag({})", tag.value());
 }
 
 template<int base>
-inline std::string to_debug_string(sn::base_tag<base>) {
-    return sn::detail::format("sn::base_tag<{}>()", base);
+inline std::string to_debug_string(sn::tags::base_tag<base>) {
+    return sn::detail::format("sn::tags::base_tag<{}>()", base);
 }
 
 template<sn::concepts::tag... Tags>

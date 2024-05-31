@@ -16,7 +16,7 @@ struct MyPair {
     }
 };
 
-struct some_tag : public sn::tag {};
+struct some_tag : public sn::tags::tag {};
 
 SN_DEFINE_CLASS_REFLECTION(MyPair, (
     (&MyPair::a, "a", some_tag()),

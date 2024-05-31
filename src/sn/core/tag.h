@@ -2,14 +2,14 @@
 
 #include <type_traits>
 
-namespace sn {
+namespace sn::tags {
 
 /**
  * Base class for all `sn` tags. Derive all your tags from `sn::tag`.
  */
 struct tag {};
 
-} // namespace sn
+} // namespace sn::tags
 
 namespace sn::concepts {
 
@@ -22,6 +22,6 @@ namespace sn::concepts {
  * overload that returns an `std::string` and assumes that the 2nd arg is a tag, which is definitely not what we want.
  */
 template<class T>
-concept tag = std::is_base_of_v<sn::tag, T>;
+concept tag = std::is_base_of_v<sn::tags::tag, T>;
 
 } // namespace sn::concepts
