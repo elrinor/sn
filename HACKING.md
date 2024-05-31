@@ -11,3 +11,6 @@
 * Don't include the heavy stuff, especially from the headers. So, no `<ranges>`.
 * We're targeting C++23 right now, but will likely switch to C++26 once compilers catch up. This is not 100% decided yet, but it looks like we'll need `pack...[indexing]` for tag sorting. Thus, the current target standard for sn 1.0 is C++26.
 
+## Code organization
+* One of the goals of `sn` is to be an IDE-friendly library. This means, for example, that when the user types `sn::`, he should see the actual user-facing `sn` functions and nothing else. When he types `tn::`, he should see user-facing tags and nothing else. If we're offering some facility, then there should be little need to consult documentation on how to use it.
+* Yes, I can hear you macro haters. There is very little that we can do right now to make our macros better, but that's an area of active research.
