@@ -6,6 +6,7 @@ if(SN_QT_LIB)
         qstring.h
         qstring_concepts.h
         qstring_fwd.h
+        qstring_tags.h
         detail/ascii_qstring_functions.h
         detail/qstring_builtins.cpp
         detail/qstring_builtins.h

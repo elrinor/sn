@@ -5,6 +5,7 @@ set(SN_STRING_SOURCES
     string.h
     string_concepts.h
     string_fwd.h
+    string_tags.h
     detail/frozen_enum_table.h
     detail/std_enum_table.cpp
     detail/std_enum_table.h

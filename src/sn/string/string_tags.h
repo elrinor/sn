@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "tag.h"
+#include "sn/core/tag.h"
 
 namespace sn::tags {
 

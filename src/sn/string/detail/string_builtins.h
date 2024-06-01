@@ -3,8 +3,8 @@
 #include <string>
 #include <string_view>
 
-#include "sn/core/common_tags.h"
 #include "sn/string/string_fwd.h"
+#include "sn/string/string_tags.h"
 
 namespace sn::detail::builtins {
 

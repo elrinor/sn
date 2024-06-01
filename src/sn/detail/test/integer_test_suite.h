@@ -4,7 +4,6 @@
 #include <string>
 #include <string_view>
 
-#include "enum_test_suite.h"
 #include "sn/string/string.h"
 
 #include "tester.h"

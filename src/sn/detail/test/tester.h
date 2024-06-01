@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
-#include "sn/core/common_tags.h"
 #include "sn/core/type_name.h"
+#include "sn/string/string_tags.h"
 #include "sn/detail/format/format.h"
 
 namespace sn::detail {

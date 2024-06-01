@@ -1,7 +1,7 @@
 #pragma once
 
-#include "sn/core/common_tags.h"
 #include "sn/qstring/qstring_fwd.h"
+#include "sn/qstring/qstring_tags.h"
 
 namespace sn::detail::builtins {
 
