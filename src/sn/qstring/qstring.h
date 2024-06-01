@@ -5,39 +5,38 @@
 
 #include "sn/core/tag.h"
 #include "sn/qstring/detail/qstring_builtins.h"
+#include "sn/detail/validation/validation.h"
 
 #include "qstring_concepts.h"
 
 namespace sn::detail {
 
+_SN_DEFINE_VALIDATION_FUNCTIONS(to_qstring, from_qstring, QString *, QStringView)
+
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
-    static_assert(sn::detail::concepts::has_try_to_qstring<T, Tags...>,
-                  "Type T is not supported, did you forget to declare `bool try_to_qstring(const T &, QString *)`?");
+    validate_try_to_qstring<T, Tags...>();
     using sn::detail::builtins::try_to_qstring;
     return try_to_qstring(src, dst, tags...);
 }
 
 template<class T, sn::concepts::tag... Tags>
 void do_to_qstring(const T &src, QString *dst, Tags... tags) {
-    static_assert(sn::detail::concepts::has_to_qstring<T, Tags...>,
-                  "Type T is not supported, did you forget to declare `void to_qstring(const T &, QString *)`?");
+    validate_to_qstring<T, Tags...>();
     using sn::detail::builtins::to_qstring;
     to_qstring(src, dst, tags...);
 }
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_from_qstring(QStringView src, T *dst, Tags... tags) noexcept {
-    static_assert(sn::detail::concepts::has_try_from_qstring<T, Tags...>,
-                  "Type T is not supported, did you forget to declare `bool try_from_qstring(QStringView, T *)`?");
+    validate_try_from_qstring<T, Tags...>();
     using sn::detail::builtins::try_from_qstring;
     return try_from_qstring(src, dst, tags...);
 }
 
 template<class T, sn::concepts::tag... Tags>
 void do_from_qstring(QStringView src, T *dst, Tags... tags) {
-    static_assert(sn::detail::concepts::has_from_qstring<T, Tags...>,
-                  "Type T is not supported, did you forget to declare `void from_qstring(QStringView, T *)`?");
+    validate_from_qstring<T, Tags...>();
     using sn::detail::builtins::from_qstring;
     from_qstring(src, dst, tags...);
 }

@@ -17,7 +17,7 @@ if(SN_QT_LIB)
 
     add_library(sn_qstring STATIC ${SN_QSTRING_SOURCES})
     add_library(sn::qstring ALIAS sn_qstring)
-    target_link_libraries(sn_qstring PUBLIC sn_core sn_string sn_reflection sn_detail_ascii sn_detail_enum_table Qt::Core)
+    target_link_libraries(sn_qstring PUBLIC sn_core sn_string sn_reflection sn_detail_ascii sn_detail_enum_table sn_detail_validation Qt::Core)
     lint_target(sn_qstring)
 
     if(SN_BUILD_TESTS)

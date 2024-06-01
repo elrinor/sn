@@ -16,7 +16,7 @@ set(SN_STRING_SOURCES
 
 add_library(sn_string STATIC ${SN_STRING_SOURCES})
 add_library(sn::string ALIAS sn_string)
-target_link_libraries(sn_string PUBLIC sn_core sn_reflection sn_detail_ascii sn_detail_enum_table sn_detail_preprocessor)
+target_link_libraries(sn_string PUBLIC sn_core sn_reflection sn_detail_ascii sn_detail_enum_table sn_detail_preprocessor sn_detail_validation)
 lint_target(sn_string)
 
 if(SN_FLOAT_LIB STREQUAL "strtof")

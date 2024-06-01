@@ -11,6 +11,7 @@
     _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TRY_FROM_NAME), SN_PP_CAT(has_, TRY_FROM_NAME), bool, TRY_FROM_NAME, (FROM_ARG, T *)) \
     _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, FROM_NAME),     SN_PP_CAT(has_, FROM_NAME),     void, FROM_NAME,     (FROM_ARG, T *))
 
+// TODO(elric): #cpp26 use sn::type_name and formatting to get better error messages here.
 #define _SN_DEFINE_VALIDATION_FUNCTIONS_II(VALIDATOR_NAME, CONCEPT_NAME, FUNCTION_RETURN, FUNCTION_NAME, FUNCTION_ARGS)  \
     template<class T, class... Tags>                                                                                    \
     consteval void VALIDATOR_NAME() {                                                                                   \
