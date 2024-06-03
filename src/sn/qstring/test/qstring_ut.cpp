@@ -8,26 +8,26 @@
 
 template<class T>
 static void check_supported() {
-    static_assert(sn::concepts::has_to_qstring<T>);
-    static_assert(sn::concepts::has_try_to_qstring<T>);
-    static_assert(sn::concepts::has_from_qstring<T>);
-    static_assert(sn::concepts::has_try_from_qstring<T>);
+    static_assert(sn::concepts::to_qstringable<T>);
+    static_assert(sn::concepts::try_to_qstringable<T>);
+    static_assert(sn::concepts::from_qstringable<T>);
+    static_assert(sn::concepts::try_from_qstringable<T>);
 }
 
 template<class T>
 static void check_unsupported() {
-    static_assert(!sn::concepts::has_to_qstring<T>);
-    static_assert(!sn::concepts::has_try_to_qstring<T>);
-    static_assert(!sn::concepts::has_from_qstring<T>);
-    static_assert(!sn::concepts::has_try_from_qstring<T>);
+    static_assert(!sn::concepts::to_qstringable<T>);
+    static_assert(!sn::concepts::try_to_qstringable<T>);
+    static_assert(!sn::concepts::from_qstringable<T>);
+    static_assert(!sn::concepts::try_from_qstringable<T>);
 }
 
 template<class T>
 static void check_has_to_string_only() {
-    static_assert(sn::concepts::has_to_qstring<T>);
-    static_assert(sn::concepts::has_try_to_qstring<T>);
-    static_assert(!sn::concepts::has_from_qstring<T>);
-    static_assert(!sn::concepts::has_try_from_qstring<T>);
+    static_assert(sn::concepts::to_qstringable<T>);
+    static_assert(sn::concepts::try_to_qstringable<T>);
+    static_assert(!sn::concepts::from_qstringable<T>);
+    static_assert(!sn::concepts::try_from_qstringable<T>);
 }
 
 template<class T>

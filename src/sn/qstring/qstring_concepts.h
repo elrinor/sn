@@ -25,28 +25,28 @@ using namespace sn::detail::builtins; // NOLINT
 using namespace sn::detail::poison; // NOLINT
 
 template<class T, class... Tags>
-concept has_try_to_qstring =
+concept try_to_qstringable =
     requires(const T &src, QString *dst, Tags... tags) { {try_to_qstring(src, dst, tags...)} -> std::same_as<bool>; }; // NOLINT
 
 template<class T, class... Tags>
-concept has_to_qstring =
+concept to_qstringable =
     requires(const T &src, QString *dst, Tags... tags) { {to_qstring(src, dst, tags...)} -> std::same_as<void>; }; // NOLINT
 
 template<class T, class... Tags>
-concept has_try_from_qstring =
+concept try_from_qstringable =
     requires(QStringView src, T *dst, Tags... tags) { {try_from_qstring(src, dst, tags...)} -> std::same_as<bool>; }; // NOLINT
 
 template<class T, class... Tags>
-concept has_from_qstring =
+concept from_qstringable =
     requires(QStringView src, T *dst, Tags... tags) { {from_qstring(src, dst, tags...)} -> std::same_as<void>; }; // NOLINT
 
 } // namespace sn::detail::concepts
 
 namespace sn::concepts {
 
-using sn::detail::concepts::has_try_to_qstring;
-using sn::detail::concepts::has_to_qstring;
-using sn::detail::concepts::has_try_from_qstring;
-using sn::detail::concepts::has_from_qstring;
+using sn::detail::concepts::try_to_qstringable;
+using sn::detail::concepts::to_qstringable;
+using sn::detail::concepts::try_from_qstringable;
+using sn::detail::concepts::from_qstringable;
 
 } // namespace sn::concepts
