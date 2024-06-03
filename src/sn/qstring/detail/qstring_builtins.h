@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QtCore/QString>
+#include <QtCore/QStringView>
+
 #include "sn/qstring/qstring_fwd.h"
 #include "sn/qstring/qstring_tags.h"
 
