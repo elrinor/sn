@@ -11,7 +11,7 @@
 
 namespace sn::detail {
 
-_SN_DEFINE_VALIDATION_FUNCTIONS(to_string, from_string, std::string *, std::string_view)
+_SN_DEFINE_VALIDATION_FUNCTIONS(string, std::string *, std::string_view)
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {

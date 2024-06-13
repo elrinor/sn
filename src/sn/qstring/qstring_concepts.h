@@ -1,6 +1,6 @@
 #pragma once
 
-#include <concepts>
+#include <concepts> // For std::same_as.
 
 #include "sn/qstring/detail/qstring_builtins.h"
 

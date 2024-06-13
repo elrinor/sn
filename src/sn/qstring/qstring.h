@@ -11,7 +11,7 @@
 
 namespace sn::detail {
 
-_SN_DEFINE_VALIDATION_FUNCTIONS(to_qstring, from_qstring, QString *, QStringView)
+_SN_DEFINE_VALIDATION_FUNCTIONS(qstring, QString *, QStringView)
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {

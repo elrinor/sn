@@ -2,8 +2,8 @@
 
 #include "sn/core/preprocessor.h"
 
-#define _SN_DEFINE_VALIDATION_FUNCTIONS(TO_NAME, FROM_NAME, TO_ARG, FROM_ARG)                                           \
-    _SN_DEFINE_VALIDATION_FUNCTIONS_I(SN_PP_CAT(try_, TO_NAME), TO_NAME, SN_PP_CAT(try_, FROM_NAME), FROM_NAME, TO_ARG, FROM_ARG)
+#define _SN_DEFINE_VALIDATION_FUNCTIONS(NAME, TO_ARG, FROM_ARG)                                                         \
+    _SN_DEFINE_VALIDATION_FUNCTIONS_I(SN_PP_CAT(try_to_, NAME), SN_PP_CAT(to_, NAME), SN_PP_CAT(try_from_, NAME), SN_PP_CAT(from_, NAME), TO_ARG, FROM_ARG)
 
 #define _SN_DEFINE_VALIDATION_FUNCTIONS_I(TRY_TO_NAME, TO_NAME, TRY_FROM_NAME, FROM_NAME, TO_ARG, FROM_ARG)             \
     _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TRY_TO_NAME),   SN_PP_CAT(TRY_TO_NAME, able),   bool, TRY_TO_NAME,   (const T &, TO_ARG)) \
