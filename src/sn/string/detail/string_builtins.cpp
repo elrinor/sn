@@ -13,7 +13,7 @@
 #include <fast_float/fast_float.h>
 #endif
 
-#include "sn/detail/codegen/tuple_types.h"
+#include "sn/detail/codegen/forwarding.h"
 #include "sn/detail/format/format.h"
 
 #include "string_exceptions.h"
@@ -248,21 +248,8 @@ inline void from_string(std::string_view src, T *dst) {
 } // namespace detail_fast_float
 #endif // SN_USE_FAST_FLOAT
 
-#define SN_DEFINE_NUMERIC_STRING_FUNCTIONS(TYPE, FROM_STRING_NAMESPACE, ... /* TAGS */)                                 \
-    SN_DEFINE_NUMERIC_STRING_FUNCTIONS_I(TYPE, FROM_STRING_NAMESPACE, _SN_PP_TUPLE_TYPES_TO_DECL_PARAMS(arg, (__VA_ARGS__)), _SN_PP_TUPLE_TYPES_TO_CALL_PARAMS(arg, (__VA_ARGS__)))
-#define SN_DEFINE_NUMERIC_STRING_FUNCTIONS_I(TYPE, FROM_STRING_NAMESPACE, DECL_PARAMS, CALL_PARAMS)                     \
-    bool try_to_string(TYPE src, std::string *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) noexcept {                    \
-        return detail_to_chars::try_to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                         \
-    }                                                                                                                   \
-    bool try_from_string(std::string_view src, TYPE *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) noexcept {             \
-        return FROM_STRING_NAMESPACE::try_from_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                 \
-    }                                                                                                                   \
-    void to_string(TYPE src, std::string *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) {                                 \
-        detail_to_chars::to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                                    \
-    }                                                                                                                   \
-    void from_string(std::string_view src, TYPE *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_PARAMS)) {                          \
-        FROM_STRING_NAMESPACE::from_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_PARAMS));                            \
-    }
+#define _SN_DEFINE_FORWARDING_STRING_FUNCTIONS(TYPE, FROM_STRING_NAMESPACE, ... /* TAGS */)                             \
+    _SN_DEFINE_FORWARDING_FUNCTIONS(string, TYPE, std::string *, std::string_view, TYPE *, detail_to_chars, FROM_STRING_NAMESPACE, (__VA_ARGS__))
 
 #if SN_USE_STRTOF
 #   define SN_FLOAT_FROM_STRING_NAMESPACE detail_strtofd
@@ -274,52 +261,52 @@ inline void from_string(std::string_view src, T *dst) {
 #   error "Floating point string conversion library not configured"
 #endif
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(short, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned short, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(int, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned int, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long long, detail_from_chars)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long long, detail_from_chars)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(float, SN_FLOAT_FROM_STRING_NAMESPACE)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(double, SN_FLOAT_FROM_STRING_NAMESPACE)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::dynamic_base_tag)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::dynamic_base_tag)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::dynamic_base_tag)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<2>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<2>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<2>)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<8>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<8>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<8>)
 
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<16>)
-SN_DEFINE_NUMERIC_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(short, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned short, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(int, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned int, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(long long, detail_from_chars, sn::tags::base_tag<16>)
+_SN_DEFINE_FORWARDING_STRING_FUNCTIONS(unsigned long long, detail_from_chars, sn::tags::base_tag<16>)
 
 } // namespace sn::detail::builtins

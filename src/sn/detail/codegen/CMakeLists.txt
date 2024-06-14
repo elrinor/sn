@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_DETAIL_CODEGEN_SOURCES
+    forwarding.h
     tuple_types.h
     validation.h)
 
