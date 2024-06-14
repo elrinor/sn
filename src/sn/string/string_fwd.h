@@ -6,11 +6,14 @@
 
 #include "sn/core/preprocessor.h" // For __VA_OPT__.
 
-#define _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, TYPE_ARG, NORMAL_ATTRIBUTES, NODISCARD_ATTRIBUTES, ... /* TAGS */)         \
-    NODISCARD_ATTRIBUTES bool try_to_string(TYPE_ARG src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept;         \
-    NORMAL_ATTRIBUTES void to_string(TYPE_ARG src, std::string *dst __VA_OPT__(,) __VA_ARGS__);                         \
-    NODISCARD_ATTRIBUTES bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept;      \
-    NORMAL_ATTRIBUTES void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
+//
+// A note on implementation.
+//
+// We used to have a single _SN_DECLARE_FUNCTIONS macro that did it all, and the macros in all *fwd.h headers were just
+// invoking it. This was subsequently scrapped because we want the SN_DECLARE_* macros to be understandable for the
+// people using them. People will come here, copy-paste the macro body, then paste it into their cpp file, and start
+// implementing the functions.
+//
 
 /**
  * @internal
@@ -19,7 +22,10 @@
  * better codegen on most architectures as the 1st arg can now be passed in registers.
  */
 #define _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(TYPE, ... /* TAGS */)                                                     \
-    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, TYPE, [[]], [[nodiscard]] __VA_OPT__(,) __VA_ARGS__)
+    [[nodiscard]] bool try_to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept;                    \
+    void to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__);                                               \
+    [[nodiscard]] bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept;             \
+    void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
 
 /**
  * Generates `sn` string function declarations for `TYPE` with tag types passed in varargs.
@@ -43,7 +49,10 @@
  * @param ...                           Tags, if any.
  */
 #define SN_DECLARE_STRING_FUNCTIONS(TYPE, ... /* TAGS */)                                                               \
-    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, const TYPE &, [[]], [[nodiscard]] __VA_OPT__(,) __VA_ARGS__)
+    [[nodiscard]] bool try_to_string(const TYPE &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept;             \
+    void to_string(const TYPE &src, std::string *dst __VA_OPT__(,) __VA_ARGS__);                                        \
+    [[nodiscard]] bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept;             \
+    void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
 
 /**
  * Same as `SN_DECLARE_STRING_FUNCTIONS`, but declares friend functions. To be used inside a class definition.
@@ -51,4 +60,7 @@
  * @see SN_DECLARE_STRING_FUNCTIONS
  */
 #define SN_DECLARE_FRIEND_STRING_FUNCTIONS(TYPE, ... /* TAGS */)                                                        \
-    _SN_DECLARE_STRING_FUNCTIONS_I(TYPE, const TYPE &, friend, friend __VA_OPT__(,) __VA_ARGS__) // Can't have [[nodiscard]] on a friend function declaration...
+    friend bool try_to_string(const TYPE &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept;                    \
+    friend void to_string(const TYPE &src, std::string *dst __VA_OPT__(,) __VA_ARGS__);                                 \
+    friend bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept;                    \
+    friend void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
