@@ -5,7 +5,7 @@
 
 #include "sn/core/preprocessor.h"
 #include "sn/reflection/enum_reflection.h"
-#include "sn/detail/preprocessor/preprocessor.h"
+#include "sn/detail/codegen/tuple_types.h"
 
 #if SN_USE_STD_ENUM_HASH
 #   include "sn/string/detail/std_enum_table.h"

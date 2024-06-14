@@ -5,7 +5,7 @@
 
 #include "sn/core/tag.h"
 #include "sn/string/detail/string_builtins.h"
-#include "sn/detail/validation/validation.h"
+#include "sn/detail/codegen/validation.h"
 
 #include "string_concepts.h"
 

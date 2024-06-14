@@ -2,17 +2,17 @@
 
 #include "sn/core/preprocessor.h"
 
-#define _SN_DEFINE_VALIDATION_FUNCTIONS(NAME, TO_ARG, FROM_ARG)                                                         \
-    _SN_DEFINE_VALIDATION_FUNCTIONS_I(SN_PP_CAT(try_to_, NAME), SN_PP_CAT(to_, NAME), SN_PP_CAT(try_from_, NAME), SN_PP_CAT(from_, NAME), TO_ARG, FROM_ARG)
+#define _SN_DEFINE_VALIDATION_FUNCTIONS(NAME, TO_DST_TYPE, FROM_SRC_TYPE)                                                       \
+    _SN_DEFINE_VALIDATION_FUNCTIONS_I(SN_PP_CAT(try_to_, NAME), SN_PP_CAT(to_, NAME), SN_PP_CAT(try_from_, NAME), SN_PP_CAT(from_, NAME), TO_DST_TYPE, FROM_SRC_TYPE)
 
-#define _SN_DEFINE_VALIDATION_FUNCTIONS_I(TRY_TO_NAME, TO_NAME, TRY_FROM_NAME, FROM_NAME, TO_ARG, FROM_ARG)             \
-    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TRY_TO_NAME),   SN_PP_CAT(TRY_TO_NAME, able),   bool, TRY_TO_NAME,   (const T &, TO_ARG)) \
-    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TO_NAME),       SN_PP_CAT(TO_NAME, able),       void, TO_NAME,       (const T &, TO_ARG)) \
-    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TRY_FROM_NAME), SN_PP_CAT(TRY_FROM_NAME, able), bool, TRY_FROM_NAME, (FROM_ARG, T *)) \
-    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, FROM_NAME),     SN_PP_CAT(FROM_NAME, able),     void, FROM_NAME,     (FROM_ARG, T *))
+#define _SN_DEFINE_VALIDATION_FUNCTIONS_I(TRY_TO_NAME, TO_NAME, TRY_FROM_NAME, FROM_NAME, TO_DST_TYPE, FROM_SRC_TYPE)   \
+    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TRY_TO_NAME),   SN_PP_CAT(TRY_TO_NAME, able),   bool, TRY_TO_NAME,   (const T &, TO_DST_TYPE)) \
+    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TO_NAME),       SN_PP_CAT(TO_NAME, able),       void, TO_NAME,       (const T &, TO_DST_TYPE)) \
+    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, TRY_FROM_NAME), SN_PP_CAT(TRY_FROM_NAME, able), bool, TRY_FROM_NAME, (FROM_SRC_TYPE, T *)) \
+    _SN_DEFINE_VALIDATION_FUNCTIONS_II(SN_PP_CAT(validate_, FROM_NAME),     SN_PP_CAT(FROM_NAME, able),     void, FROM_NAME,     (FROM_SRC_TYPE, T *))
 
 // TODO(elric): #cpp26 use sn::type_name and formatting to get better error messages here.
-#define _SN_DEFINE_VALIDATION_FUNCTIONS_II(VALIDATOR_NAME, CONCEPT_NAME, FUNCTION_RETURN, FUNCTION_NAME, FUNCTION_ARGS)  \
+#define _SN_DEFINE_VALIDATION_FUNCTIONS_II(VALIDATOR_NAME, CONCEPT_NAME, FUNCTION_RETURN, FUNCTION_NAME, FUNCTION_ARGS) \
     template<class T, class... Tags>                                                                                    \
     consteval void VALIDATOR_NAME() {                                                                                   \
         if constexpr (sizeof...(Tags) == 0) {                                                                           \

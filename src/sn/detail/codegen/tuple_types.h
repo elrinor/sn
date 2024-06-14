@@ -2,8 +2,6 @@
 
 #include "sn/core/preprocessor.h"
 
-// This is where the common preprocessing routines go that we don't expose as part of SN interface.
-
 /**
  * @internal
  *

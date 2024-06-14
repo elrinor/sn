@@ -5,7 +5,7 @@
 
 #include "sn/core/tag.h"
 #include "sn/qstring/detail/qstring_builtins.h"
-#include "sn/detail/validation/validation.h"
+#include "sn/detail/codegen/validation.h"
 
 #include "qstring_concepts.h"
 
