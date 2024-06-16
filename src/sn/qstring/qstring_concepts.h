@@ -9,9 +9,9 @@ namespace sn::detail::poison {
 struct qstring_overload_not_found {};
 
 template<class T, class... Tags>
-qstring_overload_not_found try_to_qstring(const T &, QString *, Tags...) noexcept = delete;
+qstring_overload_not_found try_to_qstring(const T &src, QString *dst, Tags...) noexcept = delete;
 template<class T, class... Tags>
-qstring_overload_not_found to_qstring(const T &src, QString *, Tags...) = delete;
+qstring_overload_not_found to_qstring(const T &src, QString *dst, Tags...) = delete;
 template<class T, class... Tags>
 qstring_overload_not_found try_from_qstring(QStringView src, T *dst, Tags...) noexcept = delete;
 template<class T, class... Tags>

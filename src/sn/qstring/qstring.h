@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QtCore/QString>
-#include <QtCore/QStringView>
-
 #include "sn/core/tag.h"
 #include "sn/qstring/detail/qstring_builtins.h"
 #include "sn/detail/codegen/validation.h"
@@ -11,7 +8,7 @@
 
 namespace sn::detail {
 
-_SN_DEFINE_VALIDATION_FUNCTIONS(qstring, QString *, QStringView)
+_SN_DEFINE_VALIDATION_FUNCTIONS(qstring, QString *dst, QStringView src)
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
@@ -43,34 +40,7 @@ void do_from_qstring(QStringView src, T *dst, Tags... tags) {
 
 } // namespace sn::detail
 
-namespace sn::detail::niebloids {
-
-struct to_qstring {
-    template<class T, sn::concepts::tag... Tags>
-    [[nodiscard]] QString operator()(const T &src, Tags... tags) const {
-        QString result;
-        sn::detail::do_to_qstring(src, &result, tags...);
-        return result;
-    }
-};
-
-template<class T>
-struct from_qstring {
-    template<sn::concepts::tag... Tags>
-    [[nodiscard]] T operator()(QStringView src, Tags... tags) const {
-        T result;
-        sn::detail::do_from_qstring(src, &result, tags...);
-        return result;
-    }
-};
-
-} // namespace sn::detail::niebloids
-
 namespace sn {
-
-inline constexpr sn::detail::niebloids::to_qstring to_qstring_v;
-template<class T>
-inline constexpr sn::detail::niebloids::from_qstring<T> from_qstring_v;
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {

@@ -20,6 +20,13 @@ if(SN_QT_LIB)
     target_link_libraries(sn_qstring PUBLIC sn_core sn_string sn_reflection sn_detail_ascii sn_detail_enum_table sn_detail_codegen Qt::Core)
     lint_target(sn_qstring)
 
+    add_generate_headers(sn_qstring_generate_headers
+        DIR ${CMAKE_CURRENT_SOURCE_DIR}
+        NAME "qstring"
+        TYPE "QString"
+        VIEW "QStringView"
+        DECLS "class QString;\nclass QStringView;")
+
     if(SN_BUILD_TESTS)
         set(TEST_SN_QSTRING_SOURCES
             test/enum_qstring_ut.cpp

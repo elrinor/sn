@@ -11,7 +11,7 @@
 
 namespace sn::detail {
 
-_SN_DEFINE_VALIDATION_FUNCTIONS(string, std::string *, std::string_view)
+_SN_DEFINE_VALIDATION_FUNCTIONS(string, std::string *dst, std::string_view src)
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
@@ -43,34 +43,7 @@ void do_from_string(std::string_view src, T *dst, Tags... tags) {
 
 } // namespace sn::detail
 
-namespace sn::detail::niebloids {
-
-struct to_string {
-    template<class T, sn::concepts::tag... Tags>
-    [[nodiscard]] std::string operator()(const T &src, Tags... tags) const {
-        std::string result;
-        sn::detail::do_to_string(src, &result, tags...);
-        return result;
-    }
-};
-
-template<class T>
-struct from_string {
-    template<sn::concepts::tag... Tags>
-    [[nodiscard]] T operator()(std::string_view src, Tags... tags) const {
-        T result;
-        sn::detail::do_from_string(src, &result, tags...);
-        return result;
-    }
-};
-
-} // namespace sn::detail::niebloids
-
 namespace sn {
-
-inline constexpr sn::detail::niebloids::to_string to_string_v;
-template<class T>
-inline constexpr sn::detail::niebloids::from_string<T> from_string_v;
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
