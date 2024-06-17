@@ -16,7 +16,7 @@ set(SN_BUILD_TOOLS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tools")
 set(SN_BUILD_BENCHMARKS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN benchmarks")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
 
-set(SN_QT_LIB "" CACHE STRING "Qt package to build sn with, 'Qt5', 'Qt6', or empty if you don't need Qt support")
+set(SN_QT_SUPPORT "OFF" CACHE BOOL "Build with Qt6 support")
 
 set(SN_FORMAT_LIB "fmt_bundled" CACHE STRING "Format library to use, 'std', 'fmt_bundled', or 'fmt_external'")
 set_property(CACHE SN_FORMAT_LIB PROPERTY STRINGS std fmt_bundled fmt_external)
@@ -48,8 +48,8 @@ endif()
 #
 # Set up Qt.
 #
-if(SN_QT_LIB)
-    find_package(${SN_QT_LIB} REQUIRED COMPONENTS Core)
+if(SN_QT_SUPPORT)
+    find_package(Qt6 REQUIRED COMPONENTS Core)
 
     if(PROJECT_IS_TOP_LEVEL)
         add_compile_definitions(QT_NO_CAST_FROM_ASCII) # No implicit casts from char* into QString, use QStringLiteral.

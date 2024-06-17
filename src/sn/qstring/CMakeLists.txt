@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
-if(SN_QT_LIB)
+if(SN_QT_SUPPORT)
     set(SN_QSTRING_SOURCES
         enum_qstring.h
         qstring.h

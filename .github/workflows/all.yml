@@ -51,6 +51,12 @@ jobs:
       run:
         shell: ${{matrix.shell}}
     steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ref: '${{inputs.myCommit}}'
+
       - name: '[windows] Setup msys'
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
@@ -100,7 +106,7 @@ jobs:
         run: |
           echo "ANDROID_NDK=${{steps.setup-ndk.outputs.ndk-path}}" >> $GITHUB_ENV          
 
-      - name: 'Install Qt6 (if supported)'
+      - name: 'Install Qt6'
         if: matrix.qt_arch != ''
         uses: jurplel/install-qt-action@v4
         with:
@@ -109,13 +115,6 @@ jobs:
           target: ${{fromJson('["desktop", "android"]')[matrix.platform == 'android']}}
           cache: true
           arch: '${{matrix.qt_arch}}'
-          # TODO(elric): pass proper archives here, we don't need to download everything.
-
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          ref: '${{inputs.myCommit}}'
 
       # Re-linting on other platforms doesn't make sense, we don't have platform-specific source files.
       - name: '[linux-x86_64] Lint'
@@ -126,4 +125,4 @@ jobs:
 
       - name: 'Build and test'
         run: |
-          scripts/build_test_all.sh -j4 "${{matrix.platform}}" "${{matrix.architecture}}" "."
+          scripts/build_test_all.sh -j4 ${{fromJson('["--with-qt", ""]')[matrix.qt_arch == '']}} "${{matrix.platform}}" "${{matrix.architecture}}" "."
