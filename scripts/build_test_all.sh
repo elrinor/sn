@@ -2,10 +2,11 @@
 
 # Parse args.
 POSITIONAL_ARGS=()
+QT_SUPPORT_DEFAULT="OFF"
 while [[ $# -gt 0 ]]; do
     case $1 in
     -h|--help)
-        echo "Usage: $(basename "$0") [-jTHREADS] [--qt PATH] BUILD_PLATFORM BUILD_ARCH REPO_DIR"
+        echo "Usage: $(basename "$0") [-jTHREADS] [--qt] BUILD_PLATFORM BUILD_ARCH REPO_DIR"
         exit 1
         ;;
     -j*)
@@ -13,8 +14,8 @@ while [[ $# -gt 0 ]]; do
         shift 1
         ;;
     --qt)
-        QT_PATH="$2"
-        shift 2
+        QT_SUPPORT_DEFAULT="ON"
+        shift 1;
         ;;
     -*|--*)
         echo "Unknown option $1"
@@ -44,13 +45,6 @@ fi
 
 # Echo on, fail on errors, fail on undefined var usage, fail on pipeline failure.
 set -euxo pipefail
-
-# Prepare default QT_SUPPORT value.
-if [[ "$QT_PATH" != "" ]]; then
-    QT_SUPPORT_DEFAULT="ON"
-else
-    QT_SUPPORT_DEFAULT="OFF"
-fi
 
 # Prepare cmake flags.
 ADDITIONAL_CMAKE_ARGS=()
@@ -106,10 +100,6 @@ elif [[ "$BUILD_PLATFORM" == "android" ]]; then
         "-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake"
         "-DANDROID_STL=c++_static"
     )
-
-    if [[ "$QT_PATH" != "" ]]; then
-        ADDITIONAL_CMAKE_ARGS+=("-DCMAKE_FIND_ROOT_PATH=$QT_PATH")
-    fi
 
     # This is a cross-compile, can't run tests.
     RUN_TESTS=false
