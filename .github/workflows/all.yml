@@ -125,4 +125,4 @@ jobs:
 
       - name: 'Build and test'
         run: |
-          scripts/build_test_all.sh -j4 ${{fromJson('["--with-qt", ""]')[matrix.qt_arch == '']}} "${{matrix.platform}}" "${{matrix.architecture}}" "."
+          scripts/build_test_all.sh -j4 --qt "${{env.QT_ROOT_DIR}}" "${{matrix.platform}}" "${{matrix.architecture}}" "."

@@ -1,34 +1,40 @@
 #!/bin/bash
 
 # Parse args.
-if [[ "$1" == "-h" ]]; then
-    echo "Usage: $(basename "$0") [-jTHREADS] [--with-qt] BUILD_PLATFORM BUILD_ARCH REPO_DIR"
-    exit 1
-fi
+POSITIONAL_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    -h|--help)
+        echo "Usage: $(basename "$0") [-jTHREADS] [--qt PATH] BUILD_PLATFORM BUILD_ARCH REPO_DIR"
+        exit 1
+        ;;
+    -j*)
+        THREADS_ARG="$1"
+        shift 1
+        ;;
+    --qt)
+        QT_PATH="$2"
+        shift 2
+        ;;
+    -*|--*)
+        echo "Unknown option $1"
+        exit 1
+        ;;
+    *)
+        POSITIONAL_ARGS+=("$1")
+        shift 1
+        ;;
+    esac
+done
 
-# TODO(elric): implement proper arg parsing
-
-THREADS_ARG=
-if [[ "$1" == -j* ]]; then
-    THREADS_ARG="$1"
-    shift 1
-fi
-
-if [[ "$1" == "--with-qt" ]]; then
-    WITH_QT="ON"
-    shift 1
-else
-    WITH_QT="OFF"
-fi
-
-if [[ "$#" != 3 ]]; then
+if [[ "${#POSITIONAL_ARGS[@]}" != 3 ]]; then
     echo "Three arguments required. Use -h for help."
     exit 1
 fi
 
-BUILD_PLATFORM="$1"
-BUILD_ARCH="$2"
-REPO_DIR="$3"
+BUILD_PLATFORM=${POSITIONAL_ARGS[0]}
+BUILD_ARCH=${POSITIONAL_ARGS[1]}
+REPO_DIR=${POSITIONAL_ARGS[2]}
 
 # Check ANDROID_NDK.
 if [[ "$BUILD_PLATFORM" == "android" && "$ANDROID_NDK" == "" ]]; then
@@ -38,6 +44,13 @@ fi
 
 # Echo on, fail on errors, fail on undefined var usage, fail on pipeline failure.
 set -euxo pipefail
+
+# Prepare default QT_SUPPORT value.
+if [[ "$QT_PATH" != "" ]]; then
+    QT_SUPPORT_DEFAULT="ON"
+else
+    QT_SUPPORT_DEFAULT="OFF"
+fi
 
 # Prepare cmake flags.
 ADDITIONAL_CMAKE_ARGS=()
@@ -94,6 +107,10 @@ elif [[ "$BUILD_PLATFORM" == "android" ]]; then
         "-DANDROID_STL=c++_static"
     )
 
+    if [[ "$QT_PATH" != "" ]]; then
+        ADDITIONAL_CMAKE_ARGS+=("-DCMAKE_FIND_ROOT_PATH=$QT_PATH")
+    fi
+
     # This is a cross-compile, can't run tests.
     RUN_TESTS=false
 fi
@@ -130,25 +147,25 @@ function build_test_one() {
 
 for BUILD_TYPE in "Debug" "Release"
 do
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-1" "fmt_bundled" "fast_float_bundled" "funcsig" "std" "$WITH_QT"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-1" "fmt_bundled" "fast_float_bundled" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
 
-    if [[ "$WITH_QT" == "ON" ]]; then
+    if [[ "$QT_SUPPORT_DEFAULT" == "ON" ]]; then
         build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-2" "fmt_bundled" "fast_float_bundled" "funcsig" "std" "OFF"
     fi
 
     # Only MSVC has <format>, unfortunately.
     if [[ "$BUILD_PLATFORM" == "windows" ]]; then
-        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "std" "fast_float_bundled" "funcsig" "std" "$WITH_QT"
+        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "std" "fast_float_bundled" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
     fi
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-4" "fmt_bundled" "strtof" "funcsig" "std" "$WITH_QT"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-4" "fmt_bundled" "strtof" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
 
     # AppleClang and Android clang don't have floating-point std::from_chars
     if [[ "$BUILD_PLATFORM" != "darwin" && "$BUILD_PLATFORM" != "android" ]]; then
-        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-5" "fmt_bundled" "from_chars" "funcsig" "std" "$WITH_QT"
+        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-5" "fmt_bundled" "from_chars" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
     fi
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-6" "fmt_bundled" "fast_float_bundled" "typeid" "std" "$WITH_QT"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-6" "fmt_bundled" "fast_float_bundled" "typeid" "std" "$QT_SUPPORT_DEFAULT"
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-7" "fmt_bundled" "fast_float_bundled" "funcsig" "frozen_bundled" "$WITH_QT"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-7" "fmt_bundled" "fast_float_bundled" "funcsig" "frozen_bundled" "$QT_SUPPORT_DEFAULT"
 done
