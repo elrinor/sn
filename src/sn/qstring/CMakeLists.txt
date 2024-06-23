@@ -10,6 +10,7 @@ if(SN_QT_SUPPORT)
         detail/ascii_qstring_functions.h
         detail/qstring_builtins.cpp
         detail/qstring_builtins.h
+        detail/qstring_dispatch.h
         detail/qstring_exceptions.cpp
         detail/qstring_exceptions.h
         detail/qstring_shortcuts.h

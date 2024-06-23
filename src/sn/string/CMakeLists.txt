@@ -11,6 +11,7 @@ set(SN_STRING_SOURCES
     detail/std_enum_table.h
     detail/string_builtins.cpp
     detail/string_builtins.h
+    detail/string_dispatch.h
     detail/string_exceptions.cpp
     detail/string_exceptions.h
     detail/string_shortcuts.h)
