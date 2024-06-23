@@ -22,6 +22,9 @@
  *
  * Unlike the `DECLARE_*` macros, this macro defines `@TYPE@` functions for `TYPE` that just ignore the provided `TAG`,
  * effectively shifting the tag sequence by a single position to the left.
+ *
+ * Note that this macro will only work when invoked from the `sn::detail::builtins` namespace because it's calling
+ * `@TYPE@` functions directly (e.g. calling `to_@LOWER@` instead of `sn::to_@LOWER@`).
  */
 #define _SN_DEFINE_INLINE_@UPPER@_TAG_EATING_FUNCTIONS(TYPE, TAG) \
     template<class... Tags> \

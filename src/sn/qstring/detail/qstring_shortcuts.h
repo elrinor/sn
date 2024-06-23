@@ -8,7 +8,6 @@
 class QString;
 class QStringView;
 
-
 /**
  * @internal
  *
@@ -26,6 +25,9 @@ class QStringView;
  *
  * Unlike the `DECLARE_*` macros, this macro defines `QString` functions for `TYPE` that just ignore the provided `TAG`,
  * effectively shifting the tag sequence by a single position to the left.
+ *
+ * Note that this macro will only work when invoked from the `sn::detail::builtins` namespace because it's calling
+ * `QString` functions directly (e.g. calling `to_qstring` instead of `sn::to_qstring`).
  */
 #define _SN_DEFINE_INLINE_QSTRING_TAG_EATING_FUNCTIONS(TYPE, TAG) \
     template<class... Tags> \
