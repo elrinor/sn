@@ -5,13 +5,54 @@
 
 #include "sn/core/tag.h"
 #include "sn/string/detail/string_builtins.h"
-#include "sn/detail/codegen/validation.h"
 
 #include "string_concepts.h"
 
 namespace sn::detail {
 
-_SN_DEFINE_VALIDATION_FUNCTIONS(string, std::string *dst, std::string_view src)
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_try_to_string() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::try_to_stringable<T>,
+                      "Type T is not supported, did you forget to declare `bool try_to_string(const T &src, std::string *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::try_to_stringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `bool try_to_string(const T &src, std::string *dst, Tags...)` in T's namespace?");
+    }
+}
+
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_to_string() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::to_stringable<T>,
+                      "Type T is not supported, did you forget to declare `void to_string(const T &src, std::string *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::to_stringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `void to_string(const T &src, std::string *dst, Tags...)` in T's namespace?");
+    }
+}
+
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_try_from_string() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::try_from_stringable<T>,
+                      "Type T is not supported, did you forget to declare `bool try_from_string(std::string_view src, T *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::try_from_stringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `bool try_from_string(std::string_view src, T *dst, Tags...)` in T's namespace?");
+    }
+}
+
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_from_string() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::from_stringable<T>,
+                      "Type T is not supported, did you forget to declare `void from_string(std::string_view src, T *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::from_stringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `void from_string(std::string_view src, T *dst, Tags...)` in T's namespace?");
+    }
+}
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {

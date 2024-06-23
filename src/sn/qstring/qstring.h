@@ -2,13 +2,54 @@
 
 #include "sn/core/tag.h"
 #include "sn/qstring/detail/qstring_builtins.h"
-#include "sn/detail/codegen/validation.h"
 
 #include "qstring_concepts.h"
 
 namespace sn::detail {
 
-_SN_DEFINE_VALIDATION_FUNCTIONS(qstring, QString *dst, QStringView src)
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_try_to_qstring() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::try_to_qstringable<T>,
+                      "Type T is not supported, did you forget to declare `bool try_to_qstring(const T &src, QString *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::try_to_qstringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `bool try_to_qstring(const T &src, QString *dst, Tags...)` in T's namespace?");
+    }
+}
+
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_to_qstring() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::to_qstringable<T>,
+                      "Type T is not supported, did you forget to declare `void to_qstring(const T &src, QString *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::to_qstringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `void to_qstring(const T &src, QString *dst, Tags...)` in T's namespace?");
+    }
+}
+
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_try_from_qstring() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::try_from_qstringable<T>,
+                      "Type T is not supported, did you forget to declare `bool try_from_qstring(QStringView src, T *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::try_from_qstringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `bool try_from_qstring(QStringView src, T *dst, Tags...)` in T's namespace?");
+    }
+}
+
+template<class T, sn::concepts::tag... Tags>
+consteval void validate_from_qstring() {
+    if constexpr (sizeof...(Tags) == 0) {
+        static_assert(sn::concepts::from_qstringable<T>,
+                      "Type T is not supported, did you forget to declare `void from_qstring(QStringView src, T *dst)` in T's namespace?");
+    } else {
+        static_assert(sn::concepts::from_qstringable<T, Tags...>,
+                      "Type T with provided Tags is not supported, did you forget to declare `void from_qstring(QStringView src, T *dst, Tags...)` in T's namespace?");
+    }
+}
 
 template<class T, sn::concepts::tag... Tags>
 [[nodiscard]] bool do_try_to_qstring(const T &src, QString *dst, Tags... tags) noexcept {
