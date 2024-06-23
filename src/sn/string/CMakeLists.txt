@@ -12,7 +12,8 @@ set(SN_STRING_SOURCES
     detail/string_builtins.cpp
     detail/string_builtins.h
     detail/string_exceptions.cpp
-    detail/string_exceptions.h)
+    detail/string_exceptions.h
+    detail/string_shortcuts.h)
 
 add_library(sn_string STATIC ${SN_STRING_SOURCES})
 add_library(sn::string ALIAS sn_string)

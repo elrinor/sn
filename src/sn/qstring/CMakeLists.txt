@@ -12,6 +12,7 @@ if(SN_QT_SUPPORT)
         detail/qstring_builtins.h
         detail/qstring_exceptions.cpp
         detail/qstring_exceptions.h
+        detail/qstring_shortcuts.h
         detail/std_qstring_enum_table.cpp
         detail/std_qstring_enum_table.h)
 

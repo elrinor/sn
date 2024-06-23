@@ -6,6 +6,8 @@
 #include "sn/qstring/qstring_fwd.h"
 #include "sn/qstring/qstring_tags.h"
 
+#include "qstring_shortcuts.h"
+
 namespace sn::detail::builtins {
 
 //

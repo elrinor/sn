@@ -6,6 +6,8 @@
 #include "sn/string/string_fwd.h"
 #include "sn/string/string_tags.h"
 
+#include "string_shortcuts.h"
+
 namespace sn::detail::builtins {
 
 //
