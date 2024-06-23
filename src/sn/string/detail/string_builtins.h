@@ -145,27 +145,13 @@ _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long, sn::tags::base_tag<16>)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(long long, sn::tags::base_tag<16>)
 _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::tags::base_tag<16>)
 
-#define _SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(TYPE, ... /* TAGS */)                                  \
-    inline bool try_to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept {                          \
-        return try_to_string(src, dst);                                                                                 \
-    }                                                                                                                   \
-    inline bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept {                   \
-        return try_from_string(src, dst);                                                                               \
-    }                                                                                                                   \
-    inline void to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__) {                                       \
-        to_string(src, dst);                                                                                            \
-    }                                                                                                                   \
-    inline void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) {                                \
-        from_string(src, dst);                                                                                          \
-    }
-
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(short, sn::tags::base_tag<10>)
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned short, sn::tags::base_tag<10>)
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(int, sn::tags::base_tag<10>)
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned int, sn::tags::base_tag<10>)
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(long, sn::tags::base_tag<10>)
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned long, sn::tags::base_tag<10>)
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(long long, sn::tags::base_tag<10>)
-_SN_DEFINE_TAG_IGNORING_INLINE_STRING_FUNCTIONS_BY_VALUE(unsigned long long, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(short, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(unsigned short, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(int, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(unsigned int, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(long, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(unsigned long, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(long long, sn::tags::base_tag<10>)
+_SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(unsigned long long, sn::tags::base_tag<10>)
 
 } // namespace sn::detail::builtins

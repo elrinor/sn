@@ -30,6 +30,30 @@
     void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
 
 /**
+ * @internal
+ *
+ * Unlike the `DECLARE_*` macros, this macro defines `std::string` functions for `TYPE` that just ignore the provided `TAG`,
+ * effectively shifting the tag sequence by a single position to the left.
+ */
+#define _SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(TYPE, TAG) \
+    template<class... Tags> \
+    [[nodiscard]] inline bool try_to_string(const TYPE &src, std::string *dst, TAG tag, Tags... tags) noexcept { \
+        return try_to_string(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    inline void to_string(const TYPE &src, std::string *dst, TAG tag, Tags... tags) { \
+        return to_string(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    [[nodiscard]] inline bool try_from_string(std::string_view src, TYPE *dst, TAG tag, Tags... tags) noexcept { \
+        return try_from_string(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    inline void from_string(std::string_view src, TYPE *dst, TAG tag, Tags... tags) { \
+        return from_string(src, dst, tags...); \
+    }
+
+/**
  * Generates `std::string` function declarations for `TYPE` with tag types passed in varargs.
  *
  * The following declarations will be generated:

@@ -27,6 +27,30 @@
     void from_@LOWER@(@SRC@, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
 
 /**
+ * @internal
+ *
+ * Unlike the `DECLARE_*` macros, this macro defines `@TYPE@` functions for `TYPE` that just ignore the provided `TAG`,
+ * effectively shifting the tag sequence by a single position to the left.
+ */
+#define _SN_DEFINE_INLINE_@UPPER@_TAG_EATING_FUNCTIONS(TYPE, TAG) \
+    template<class... Tags> \
+    [[nodiscard]] inline bool try_to_@LOWER@(const TYPE &src, @DST@, TAG tag, Tags... tags) noexcept { \
+        return try_to_@LOWER@(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    inline void to_@LOWER@(const TYPE &src, @DST@, TAG tag, Tags... tags) { \
+        return to_@LOWER@(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    [[nodiscard]] inline bool try_from_@LOWER@(@SRC@, TYPE *dst, TAG tag, Tags... tags) noexcept { \
+        return try_from_@LOWER@(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    inline void from_@LOWER@(@SRC@, TYPE *dst, TAG tag, Tags... tags) { \
+        return from_@LOWER@(src, dst, tags...); \
+    }
+
+/**
  * Generates `@TYPE@` function declarations for `TYPE` with tag types passed in varargs.
  *
  * The following declarations will be generated:

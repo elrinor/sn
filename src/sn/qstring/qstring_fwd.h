@@ -30,6 +30,30 @@ class QStringView;
     void from_qstring(QStringView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
 
 /**
+ * @internal
+ *
+ * Unlike the `DECLARE_*` macros, this macro defines `QString` functions for `TYPE` that just ignore the provided `TAG`,
+ * effectively shifting the tag sequence by a single position to the left.
+ */
+#define _SN_DEFINE_INLINE_QSTRING_TAG_EATING_FUNCTIONS(TYPE, TAG) \
+    template<class... Tags> \
+    [[nodiscard]] inline bool try_to_qstring(const TYPE &src, QString *dst, TAG tag, Tags... tags) noexcept { \
+        return try_to_qstring(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    inline void to_qstring(const TYPE &src, QString *dst, TAG tag, Tags... tags) { \
+        return to_qstring(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    [[nodiscard]] inline bool try_from_qstring(QStringView src, TYPE *dst, TAG tag, Tags... tags) noexcept { \
+        return try_from_qstring(src, dst, tags...); \
+    } \
+    template<class... Tags> \
+    inline void from_qstring(QStringView src, TYPE *dst, TAG tag, Tags... tags) { \
+        return from_qstring(src, dst, tags...); \
+    }
+
+/**
  * Generates `QString` function declarations for `TYPE` with tag types passed in varargs.
  *
  * The following declarations will be generated:
