@@ -19,7 +19,7 @@ void throw_number_from_string_error(std::string_view type_name, std::string_view
     if (error == std::errc::result_out_of_range)
         throw sn::exception("'{}' does not fit in the range of {}", value, type_name);
 
-    throw sn::exception("{}: {}", value, std::make_error_code(error).message());
+    throw sn::exception("{}: {}", value, std::make_error_code(error).message()); // TODO(elric): revisit error messages here.
 }
 
 } // namespace sn::detail
