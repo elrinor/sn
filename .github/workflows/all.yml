@@ -98,7 +98,7 @@ jobs:
         with:
           ndk-version: '${{env.NDK_REVISION}}'
           add-to-path: false
-          local-cache: true
+          local-cache: false # Restoring from cache breaks symlinks in NDK, see https://github.com/nttld/setup-ndk/issues/547.
           link-to-sdk: true
 
       - name: '[android] Set ANDROID_NDK'
