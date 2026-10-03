@@ -45,18 +45,16 @@ else()
     message(FATAL_ERROR "Unsupported value '${SN_FLOAT_LIB}' for SN_FLOAT_LIB")
 endif()
 
-if(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled" OR SN_ENUM_HASH_LIB STREQUAL "frozen_external")
-    if(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled")
-        FetchContent_Declare(frozen
-            GIT_REPOSITORY "https://github.com/serge-sans-paille/frozen.git"
-            GIT_TAG "${SN_BUNDLED_FROZEN_TAG}")
-        FetchContent_MakeAvailable(frozen)
-    endif()
-
-    target_link_libraries(sn_string INTERFACE frozen::frozen)
-else()
+if(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled")
+    FetchContent_Declare(frozen
+        GIT_REPOSITORY "https://github.com/serge-sans-paille/frozen.git"
+        GIT_TAG "${SN_BUNDLED_FROZEN_TAG}")
+    FetchContent_MakeAvailable(frozen)
+elseif(NOT SN_ENUM_HASH_LIB STREQUAL "frozen_external")
     message(FATAL_ERROR "Unsupported value '${SN_ENUM_HASH_LIB}' for SN_ENUM_HASH_LIB")
 endif()
+
+target_link_libraries(sn_string INTERFACE frozen::frozen)
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_STRING_SOURCES
