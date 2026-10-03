@@ -79,7 +79,8 @@ elif [[ "$BUILD_PLATFORM" == "android" ]]; then
         ANDROID_ARCH_ABI=x86_64
     fi
 
-    ANDROID_PLATFORM_VERSION=21
+    # Google benchmark is built with _FILE_OFFSET_BITS=64, and on 32-bit ABIs this requires API 24.
+    ANDROID_PLATFORM_VERSION=24
     ANDROID_TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64
 
     # These are derived from what gradle passes to cmake.
