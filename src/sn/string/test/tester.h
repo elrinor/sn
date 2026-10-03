@@ -8,6 +8,7 @@
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
 #include "sn/core/type_name.h"
+#include "sn/string/string.h"
 #include "sn/string/string_tags.h"
 #include "sn/detail/format/format.h"
 
@@ -32,48 +33,13 @@ inline std::string to_debug_string(Tags... tags) {
     return ((std::string(sn::type_name<Tags>()) + " ") + ...);
 }
 
-template<class Ops>
-class initializing_ops_wrapper {
-public:
-    explicit initializing_ops_wrapper(const Ops &base) : _base(base) {}
-
-    template<class T, class... Tags>
-    [[nodiscard]] bool try_to(const T &src, std::string *dst, Tags... tags) const noexcept {
-        *dst = "<uninitialized>";
-        return _base.try_to(src, dst, tags...);
-    }
-
-    template<class T, class... Tags>
-    void to(const T &src, std::string *dst, Tags... tags) const {
-        *dst = "<uninitialized>";
-        return _base.to(src, dst, tags...);
-    }
-
-    template<class T, class... Tags>
-    [[nodiscard]] bool try_from(std::string_view src, T *dst, Tags... tags) const noexcept {
-        *dst = T();
-        return _base.try_from(src, dst, tags...);
-    }
-
-    template<class T, class... Tags>
-    void from(std::string_view src, T *dst, Tags... tags) const {
-        *dst = T();
-        return _base.from(src, dst, tags...);
-    }
-
-private:
-    Ops _base;
-};
-
-template<class T, class Ops>
+template<class T>
 class tester {
 public:
-    explicit tester(const Ops &ops) : _ops(ops) {}
-
     template<class... Tags>
     void expect_throwing_to(const T &value, Tags... tags) {
-        EXPECT_ANY_THROW(_ops.to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
-        EXPECT_FALSE(_ops.try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_ANY_THROW(to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_FALSE(try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
     }
 
     template<class... Tags>
@@ -84,8 +50,8 @@ public:
 
     template<class... Tags>
     void expect_nonthrowing_to(const T &value, Tags... tags) {
-        EXPECT_NO_THROW(_ops.to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
-        EXPECT_TRUE(_ops.try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_NO_THROW(to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_TRUE(try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
     }
 
     template<class... Tags>
@@ -96,10 +62,10 @@ public:
 
     template<class... Tags>
     void expect_throwing_to_with_message(const T &value, std::string_view message, Tags... tags) {
-        EXPECT_ANY_THROW(_ops.to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
-        EXPECT_FALSE(_ops.try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_ANY_THROW(to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_FALSE(try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
         try {
-            (void) _ops.to(value, &_tmps, tags...);
+            (void) to(value, &_tmps, tags...);
         } catch (const std::exception &e) {
             EXPECT_NE(std::string_view(e.what()).find(message), std::string_view::npos) << "with e.what() = " << e.what() << ", message = " << message << " and tags = " << to_debug_string(tags...);
         }
@@ -113,8 +79,8 @@ public:
 
     template<class... Tags>
     void expect_throwing_from(std::string_view str, Tags... tags) {
-        EXPECT_ANY_THROW(_ops.from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
-        EXPECT_FALSE(_ops.try_from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
+        EXPECT_ANY_THROW(from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
+        EXPECT_FALSE(try_from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
     }
 
     template<class... Tags>
@@ -125,8 +91,8 @@ public:
 
     template<class... Tags>
     void expect_nonthrowing_from(std::string_view str, Tags... tags) {
-        EXPECT_NO_THROW(_ops.from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
-        EXPECT_TRUE(_ops.try_from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
+        EXPECT_NO_THROW(from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
+        EXPECT_TRUE(try_from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
     }
 
     template<class... Tags>
@@ -137,9 +103,9 @@ public:
 
     template<class... Tags>
     void expect_valid_from(std::string_view str, const T &value, Tags... tags) {
-        EXPECT_NO_THROW(_ops.from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
+        EXPECT_NO_THROW(from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmpv, value) << "with str = " << str;
-        EXPECT_TRUE(_ops.try_from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
+        EXPECT_TRUE(try_from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmpv, value) << "with str = " << str;
     }
 
@@ -151,9 +117,9 @@ public:
 
     template<class... Tags>
     void expect_valid_to(const T &value, std::string_view str, Tags... tags) {
-        EXPECT_NO_THROW(_ops.to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_NO_THROW(to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmps, str) << "with value = " << value;
-        EXPECT_TRUE(_ops.try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_TRUE(try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmps, str) << "with value = " << value;
     }
 
@@ -177,12 +143,12 @@ public:
 
     template<class... Tags>
     void expect_valid_roundtrip(const T &value, Tags... tags) {
-        EXPECT_NO_THROW(_ops.to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
-        EXPECT_NO_THROW(_ops.from(_tmps, &_tmpv, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_NO_THROW(to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_NO_THROW(from(_tmps, &_tmpv, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmpv, value) << "with value = " << value << " and tags = " << to_debug_string(tags...);
 
-        EXPECT_TRUE(_ops.try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
-        EXPECT_TRUE(_ops.try_from(_tmps, &_tmpv, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_TRUE(try_to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
+        EXPECT_TRUE(try_from(_tmps, &_tmpv, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmpv, value) << "with value = " << value << " and tags = " << to_debug_string(tags...);
     }
 
@@ -193,7 +159,31 @@ public:
     }
 
 private:
-    initializing_ops_wrapper<Ops> _ops;
+    template<class... Tags>
+    [[nodiscard]] static bool try_to(const T &src, std::string *dst, Tags... tags) noexcept {
+        *dst = "<uninitialized>";
+        return sn::try_to_string(src, dst, tags...);
+    }
+
+    template<class... Tags>
+    static void to(const T &src, std::string *dst, Tags... tags) {
+        *dst = "<uninitialized>";
+        sn::to_string(src, dst, tags...);
+    }
+
+    template<class... Tags>
+    [[nodiscard]] static bool try_from(std::string_view src, T *dst, Tags... tags) noexcept {
+        *dst = T();
+        return sn::try_from_string(src, dst, tags...);
+    }
+
+    template<class... Tags>
+    static void from(std::string_view src, T *dst, Tags... tags) {
+        *dst = T();
+        sn::from_string(src, dst, tags...);
+    }
+
+private:
     std::string _tmps;
     T _tmpv = {};
 };
