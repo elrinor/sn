@@ -32,20 +32,10 @@ template<class T, sn::concepts::tag... Tags>
 } // namespace sn
 
 
-// TODO(elric): #cpp23 the magic below with _class_reflection_container isn't needed in c++23, can just create a static
-//              constexpr variable inside the function once we have P2647.
-
 #define SN_DEFINE_CLASS_REFLECTION(T, CLASS_REFLECTION, ... /* TAGS */)                                                 \
-    template<class...>                                                                                                  \
-    struct _class_reflection_container;                                                                                 \
-                                                                                                                        \
-    template<>                                                                                                          \
-    struct _class_reflection_container<T __VA_OPT__(,) __VA_ARGS__> {                                                   \
-        static constexpr auto value = sn::class_reflection SN_PP_TUPLE_TRANSFORM(_SN_DEFINE_CLASS_REFLECTION_I, CLASS_REFLECTION); \
-    };                                                                                                                  \
-                                                                                                                        \
     [[nodiscard]] constexpr const auto &reflect_class(std::type_identity<T> __VA_OPT__(,) __VA_ARGS__) noexcept {       \
-        return _class_reflection_container<T __VA_OPT__(,) __VA_ARGS__>::value;                                         \
+        static constexpr auto value = sn::class_reflection SN_PP_TUPLE_TRANSFORM(_SN_DEFINE_CLASS_REFLECTION_I, CLASS_REFLECTION); \
+        return value;                                                                                                   \
     }
 
 #define _SN_DEFINE_CLASS_REFLECTION_I(FIELD_REFLECTION)                                                                 \

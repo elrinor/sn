@@ -26,18 +26,8 @@ template<class T, sn::concepts::tag... Tags>
 
 } // namespace sn
 
-// TODO(elric): #cpp23 the magic below with _enum_reflection_container isn't needed in c++23, can just create a static
-//              constexpr variable inside the function once we have P2647.
-
 #define SN_DEFINE_ENUM_REFLECTION(T, MAPPING, ... /* TAGS */)                                                           \
-    template<class...>                                                                                                  \
-    struct _enum_reflection_container;                                                                                  \
-                                                                                                                        \
-    template<>                                                                                                          \
-    struct _enum_reflection_container<T __VA_OPT__(,) __VA_ARGS__> {                                                    \
-        static constexpr auto value = std::to_array<std::pair<T, std::string_view>> MAPPING;                            \
-    };                                                                                                                  \
-                                                                                                                        \
     [[nodiscard]] constexpr const auto &reflect_enum(std::type_identity<T> __VA_OPT__(,) __VA_ARGS__) noexcept {        \
-        return _enum_reflection_container<T __VA_OPT__(,) __VA_ARGS__>::value;                                          \
+        static constexpr auto value = std::to_array<std::pair<T, std::string_view>> MAPPING;                            \
+        return value;                                                                                                   \
     }
