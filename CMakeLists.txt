@@ -2,35 +2,39 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 project("sn")
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(FetchContent)
 
 
 #
 # External settings
 #
 set(SN_BUILD_TESTS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tests")
+set(SN_BUILD_TOOLS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tools")
 set(SN_BUILD_BENCHMARKS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN benchmarks")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
+
+set(SN_QT_SUPPORT "OFF" CACHE BOOL "Build with Qt6 support")
+
 set(SN_FORMAT_LIB "fmt_bundled" CACHE STRING "Format library to use, 'std', 'fmt_bundled', or 'fmt_external'")
 set_property(CACHE SN_FORMAT_LIB PROPERTY STRINGS std fmt_bundled fmt_external)
 set(SN_FLOAT_LIB "fast_float_bundled" CACHE STRING "Float string functions to use, 'strtof', 'from_chars', 'fast_float_bundled', or 'fast_float_external'")
 set_property(CACHE SN_FLOAT_LIB PROPERTY STRINGS strtof from_chars fast_float_bundled fast_float_external)
 set(SN_TYPE_NAME_IMPL "funcsig" CACHE STRING "Implementation of sn::type_name to use, 'typeid' or 'funcsig'")
 set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
-set(SN_ENUM_HASH_LIB "std" CACHE STRING "Hash library to use for enum serialization hash maps, 'std', 'frozen_bundled', or 'frozen_external'")
+set(SN_ENUM_HASH_LIB "frozen_bundled" CACHE STRING "Hash library to use for enum serialization hash maps, 'std', 'frozen_bundled', or 'frozen_external'")
 set_property(CACHE SN_ENUM_HASH_LIB PROPERTY STRINGS std frozen_bundled frozen_external)
-
-set(SN_MAX_SMALL_BUFFER_SIZE 128 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase")
 
 set(SN_BUNDLED_FMT_TAG "10.1.1" CACHE STRING "Git tag for the bundled fmt library")
 set(SN_BUNDLED_FAST_FLOAT_TAG "v5.2.0" CACHE STRING "Git tag for the bundled fast_float library")
 set(SN_BUNDLED_FROZEN_TAG "dd1f58c5f6c97fbf0832cc4e84676663839b913e" CACHE STRING "Git tag for the bundled frozen library")
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.14.0" CACHE STRING "Git tag for the bundled google test library")
 set(SN_BUNDLED_GOOGLEBENCHMARK_TAG "v1.8.3" CACHE STRING "Git tag for the bundled google benchmark library")
-set(SN_BUNDLED_CPPLINT_TAG "b3fcac06919b83d3e9c8a3b6dc450eba02869092" CACHE STRING "Git tag for the bundled cpplint")
+set(SN_BUNDLED_CPPLINT_TAG "80e97a67b2a10643d764dad98cde723f8dd1f1cf" CACHE STRING "Git tag for the bundled cpplint")
 
-include(FetchContent)
+set(SN_MAX_SMALL_BUFFER_SIZE 256 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase, in bytes")
 
 
 #
@@ -38,6 +42,18 @@ include(FetchContent)
 #
 if(PROJECT_IS_TOP_LEVEL)
     set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+endif()
+
+
+#
+# Set up Qt.
+#
+if(SN_QT_SUPPORT)
+    find_package(Qt6 REQUIRED COMPONENTS Core)
+
+    if(PROJECT_IS_TOP_LEVEL)
+        add_compile_definitions(QT_NO_CAST_FROM_ASCII) # No implicit casts from char* into QString, use QStringLiteral.
+    endif()
 endif()
 
 
@@ -80,7 +96,7 @@ if(SN_CHECK_STYLE)
     find_package(Python COMPONENTS Interpreter)
 
     FetchContent_Declare(cpplint
-            GIT_REPOSITORY https://github.com/elrinor/cpplint.git
+            GIT_REPOSITORY https://github.com/cpplint/cpplint.git
             GIT_TAG "${SN_BUNDLED_CPPLINT_TAG}")
     FetchContent_MakeAvailable(cpplint)
 
@@ -133,10 +149,13 @@ if(PROJECT_IS_TOP_LEVEL)
         add_compile_options(/we4172) # Returning address of local variable or temporary.
         add_compile_options(/we26433) # Function should be marked with 'override'.
     endif()
+
+    add_compile_definitions(QT_NO_CAST_FROM_ASCII) # Don't auto-cast from const char * to QString.
 endif()
 
 
 #
 # Add sources.
 #
+add_subdirectory(tools)
 add_subdirectory(src)

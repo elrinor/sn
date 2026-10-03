@@ -17,7 +17,7 @@ on:
       - published
 
 env:
-  NDK_REVISION: r26-rc1
+  NDK_REVISION: r26d
 
 jobs:
   all:
@@ -36,21 +36,28 @@ jobs:
           - android_arm32
           - android_arm64
         include:
-          - {target: windows_x86,       platform: windows,  architecture: x86,        os: windows-2022, shell: 'msys2 {0}'}
-          - {target: windows_x86_64,    platform: windows,  architecture: x86_64,     os: windows-2022, shell: 'msys2 {0}'}
-          - {target: darwin_arm64,      platform: darwin,   architecture: arm64,      os: macos-13,     shell: bash}
-          - {target: darwin_x86_64,     platform: darwin,   architecture: x86_64,     os: macos-13,     shell: bash}
-          - {target: linux_x86,         platform: linux,    architecture: x86,        os: ubuntu-22.04, shell: bash}
-          - {target: linux_x86_64,      platform: linux,    architecture: x86_64,     os: ubuntu-22.04, shell: bash}
-          - {target: android_x86,       platform: android,  architecture: x86,        os: ubuntu-22.04, shell: bash}
-          - {target: android_x86_64,    platform: android,  architecture: x86_64,     os: ubuntu-22.04, shell: bash}
-          - {target: android_arm32,     platform: android,  architecture: arm32,      os: ubuntu-22.04, shell: bash}
-          - {target: android_arm64,     platform: android,  architecture: arm64,      os: ubuntu-22.04, shell: bash}
+          # We can enable Qt for android, but actually building with it is a terrible mess. So we don't.
+          - {target: windows_x86,       platform: windows,  architecture: x86,        os: windows-2022, shell: 'msys2 {0}', qt_arch: ''}
+          - {target: windows_x86_64,    platform: windows,  architecture: x86_64,     os: windows-2022, shell: 'msys2 {0}', qt_arch: 'win64_msvc2019_64'}
+          - {target: darwin_arm64,      platform: darwin,   architecture: arm64,      os: macos-13,     shell: bash,        qt_arch: ''}
+          - {target: darwin_x86_64,     platform: darwin,   architecture: x86_64,     os: macos-13,     shell: bash,        qt_arch: 'clang_64'}
+          - {target: linux_x86,         platform: linux,    architecture: x86,        os: ubuntu-22.04, shell: bash,        qt_arch: ''}
+          - {target: linux_x86_64,      platform: linux,    architecture: x86_64,     os: ubuntu-22.04, shell: bash,        qt_arch: 'gcc_64'}
+          - {target: android_x86,       platform: android,  architecture: x86,        os: ubuntu-22.04, shell: bash,        qt_arch: ''}
+          - {target: android_x86_64,    platform: android,  architecture: x86_64,     os: ubuntu-22.04, shell: bash,        qt_arch: ''}
+          - {target: android_arm32,     platform: android,  architecture: arm32,      os: ubuntu-22.04, shell: bash,        qt_arch: ''}
+          - {target: android_arm64,     platform: android,  architecture: arm64,      os: ubuntu-22.04, shell: bash,        qt_arch: ''}
     runs-on: ${{matrix.os}}
     defaults:
       run:
         shell: ${{matrix.shell}}
     steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ref: '${{inputs.myCommit}}'
+
       - name: '[windows] Setup msys'
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
@@ -59,12 +66,6 @@ jobs:
           install: make yasm zip
           path-type: inherit
           release: false # Reuse existing msys installation that's part of a runner image.
-
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          ref: '${{inputs.myCommit}}'
 
       - name: '[windows] Setup MSVC'
         if: matrix.platform == 'windows'
@@ -80,12 +81,16 @@ jobs:
           rm -rf /usr/bin/link.exe
           which link.exe
 
-      - name: '[linux-x86] Install Dependencies'
-        if: matrix.platform == 'linux' && matrix.architecture == 'x86'
+      - name: '[linux] Setup GCC'
+        if: matrix.platform == 'linux'
         run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install -y gcc-multilib g++-multilib
+          if [ "${{matrix.architecture}}" = "x86" ]; then
+            sudo dpkg --add-architecture i386
+            sudo apt-get update
+            sudo apt-get install -y gcc-12-multilib g++-12-multilib
+          fi
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
 
       - name: '[android] Setup NDK'
         if: matrix.platform == 'android'
@@ -102,6 +107,15 @@ jobs:
         run: |
           echo "ANDROID_NDK=${{steps.setup-ndk.outputs.ndk-path}}" >> $GITHUB_ENV          
 
+      - name: '[desktop-x64] Install Qt6'
+        if: matrix.qt_arch != ''
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.6.0
+          target: desktop
+          cache: true
+          arch: '${{matrix.qt_arch}}'
+
       # Re-linting on other platforms doesn't make sense, we don't have platform-specific source files.
       - name: '[linux-x86_64] Lint'
         if: matrix.platform == 'linux' && matrix.architecture == 'x86_64'
@@ -110,5 +124,6 @@ jobs:
           cmake --build build-lint --target lint_all
 
       - name: 'Build and test'
+        # Magical: https://stackoverflow.com/questions/73630573/how-to-write-conditional-expressions-in-github-actions
         run: |
-          scripts/build_test_all.sh -j4 "${{matrix.platform}}" "${{matrix.architecture}}" "."
+          scripts/build_test_all.sh -j4 ${{fromJson('["--qt", ""]')[matrix.qt_arch == '']}} "${{matrix.platform}}" "${{matrix.architecture}}" "."

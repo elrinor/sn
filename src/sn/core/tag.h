@@ -1,0 +1,27 @@
+#pragma once
+
+#include <type_traits>
+
+namespace sn::tags {
+
+/**
+ * Base class for all `sn` tags. Derive all your tags from `sn::tag`.
+ */
+struct tag {};
+
+} // namespace sn::tags
+
+namespace sn::concepts {
+
+/**
+ * Concept that recognizes `sn` tags.
+ *
+ * It's used in user-facing functions and classes in `sn` namespace to improve error reporting.
+ *
+ * For example, consider a call `sn::to_string(x, &s)`, where `s` is not `std::string`. This call will be matched to an
+ * overload that returns an `std::string` and assumes that the 2nd arg is a tag, which is definitely not what we want.
+ */
+template<class T>
+concept tag = std::is_base_of_v<sn::tags::tag, T>;
+
+} // namespace sn::concepts

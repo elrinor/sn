@@ -1,12 +1,12 @@
 #pragma once
 
-#include "type_name_builtins.h"
+#include "sn/core/detail/type_name_builtins.h"
 
 namespace sn::detail {
 
 template<class T>
 [[nodiscard]] std::string_view do_type_name() noexcept {
-    using sn::builtins::type_name;
+    using sn::detail::builtins::type_name;
     return type_name(std::type_identity<T>());
 }
 
