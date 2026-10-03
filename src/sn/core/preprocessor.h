@@ -18,6 +18,15 @@
 
 
 /**
+ * Macro expanding into its arguments.
+ *
+ * Note that this is different from `BOOST_PP_IDENTITY`, which expands into a macro that will then expand into the
+ * provided argument when invoked.
+ */
+#define SN_PP_IDENTITY(...) __VA_ARGS__
+
+
+/**
  * Concatenates two tokens together, performing macro substitution first.
  */
 #define SN_PP_CAT(L, R) _SN_PP_CAT_I(L, R)

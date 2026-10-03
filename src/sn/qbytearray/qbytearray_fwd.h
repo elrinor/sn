@@ -1,0 +1,68 @@
+//
+// This header is auto-generated using the headergen tool in /tools.
+//
+#pragma once
+
+#include "sn/core/preprocessor.h" // For __VA_OPT__.
+
+class QByteArray;
+class QByteArrayView;
+
+//
+// A note on implementation.
+//
+// We used to have a single _SN_DECLARE_FUNCTIONS macro that did it all, and the macros in all *fwd.h headers were just
+// invoking it. This was subsequently scrapped because we want the SN_DECLARE_* macros to be understandable for the
+// people using them. People will come here, copy-paste the macro body, then paste it into their cpp file, and start
+// implementing the functions.
+//
+
+/**
+ * @internal
+ *
+ * Same as `SN_DECLARE_QBYTEARRAY_FUNCTIONS`, but `to_qbytearray` and `try_to_qbytearray` take `TYPE` by value. This can result in
+ * better codegen on most architectures as the 1st arg can now be passed in registers.
+ */
+#define _SN_DECLARE_QBYTEARRAY_FUNCTIONS_BY_VALUE(TYPE, ... /* TAGS */) \
+    [[nodiscard]] bool try_to_qbytearray(TYPE src, QByteArray *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
+    void to_qbytearray(TYPE src, QByteArray *dst __VA_OPT__(,) __VA_ARGS__); \
+    [[nodiscard]] bool try_from_qbytearray(QByteArrayView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
+    void from_qbytearray(QByteArrayView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
+
+/**
+ * Generates `QByteArray` function declarations for `TYPE` with tag types passed in varargs.
+ *
+ * The following declarations will be generated:
+ * ```
+ * [[nodiscard]] bool try_to_qbytearray(const TYPE &src, QByteArray *dst) noexcept;
+ * void to_qbytearray(const TYPE &src, QByteArray *dst);
+ * [[nodiscard]] bool try_from_qbytearray(QByteArrayView src, TYPE *dst) noexcept;
+ * void from_qbytearray(QByteArrayView src, TYPE *dst);
+ * ```
+ *
+ * If you pass any tag types to this macro, they will be appended as additional arguments to the declared `QByteArray`
+ * functions. Note that tags are always passed by value.
+ *
+ * A typical way to use this macro is:
+ * - Invoke it in a header file for your type.
+ * - Implement all functions in the cpp file.
+ *
+ * @param TYPE                          Type to generate `QByteArray` function declarations for.
+ * @param ...                           Tags, if any.
+ */
+#define SN_DECLARE_QBYTEARRAY_FUNCTIONS(TYPE, ... /* TAGS */) \
+    [[nodiscard]] bool try_to_qbytearray(const TYPE &src, QByteArray *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
+    void to_qbytearray(const TYPE &src, QByteArray *dst __VA_OPT__(,) __VA_ARGS__); \
+    [[nodiscard]] bool try_from_qbytearray(QByteArrayView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
+    void from_qbytearray(QByteArrayView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
+
+/**
+ * Same as `SN_DECLARE_QBYTEARRAY_FUNCTIONS`, but declares friend functions. To be used inside a class definition.
+ *
+ * @see SN_DECLARE_QBYTEARRAY_FUNCTIONS
+ */
+#define SN_DECLARE_FRIEND_QBYTEARRAY_FUNCTIONS(TYPE, ... /* TAGS */) \
+    friend bool try_to_qbytearray(const TYPE &src, QByteArray *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
+    friend void to_qbytearray(const TYPE &src, QByteArray *dst __VA_OPT__(,) __VA_ARGS__); \
+    friend bool try_from_qbytearray(QByteArrayView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
+    friend void from_qbytearray(QByteArrayView src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
