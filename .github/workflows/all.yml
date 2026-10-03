@@ -17,7 +17,7 @@ on:
       - published
 
 env:
-  NDK_REVISION: r26d
+  NDK_REVISION: r30
 
 jobs:
   all:
@@ -52,7 +52,7 @@ jobs:
         shell: ${{matrix.shell}}
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           submodules: recursive
           ref: '${{inputs.myCommit}}'
@@ -94,7 +94,7 @@ jobs:
       - name: '[android] Setup NDK'
         if: matrix.platform == 'android'
         id: setup-ndk
-        uses: nttld/setup-ndk@v1.3.1
+        uses: nttld/setup-ndk@v1.6.0
         with:
           ndk-version: '${{env.NDK_REVISION}}'
           add-to-path: false
