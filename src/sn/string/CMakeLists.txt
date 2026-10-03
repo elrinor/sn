@@ -7,8 +7,6 @@ set(SN_STRING_SOURCES
     string_fwd.h
     string_tags.h
     detail/frozen_enum_table.h
-    detail/std_enum_table.cpp
-    detail/std_enum_table.h
     detail/string_builtins.cpp
     detail/string_builtins.h
     detail/string_dispatch.h
@@ -47,22 +45,16 @@ else()
     message(FATAL_ERROR "Unsupported value '${SN_FLOAT_LIB}' for SN_FLOAT_LIB")
 endif()
 
-if(SN_ENUM_HASH_LIB STREQUAL "std")
-    target_compile_definitions(sn_string INTERFACE SN_USE_STD_ENUM_HASH=1)
-elseif(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled" OR SN_ENUM_HASH_LIB STREQUAL "frozen_external")
-    target_compile_definitions(sn_string INTERFACE SN_USE_FROZEN_ENUM_HASH=1)
-
-    if(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled")
-        FetchContent_Declare(frozen
-            GIT_REPOSITORY "https://github.com/serge-sans-paille/frozen.git"
-            GIT_TAG "${SN_BUNDLED_FROZEN_TAG}")
-        FetchContent_MakeAvailable(frozen)
-    endif()
-
-    target_link_libraries(sn_string INTERFACE frozen::frozen)
-else()
+if(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled")
+    FetchContent_Declare(frozen
+        GIT_REPOSITORY "https://github.com/serge-sans-paille/frozen.git"
+        GIT_TAG "${SN_BUNDLED_FROZEN_TAG}")
+    FetchContent_MakeAvailable(frozen)
+elseif(NOT SN_ENUM_HASH_LIB STREQUAL "frozen_external")
     message(FATAL_ERROR "Unsupported value '${SN_ENUM_HASH_LIB}' for SN_ENUM_HASH_LIB")
 endif()
+
+target_link_libraries(sn_string INTERFACE frozen::frozen)
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_STRING_SOURCES
