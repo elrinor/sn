@@ -161,7 +161,8 @@ struct frozen_enum_table_traits {
 
 template<case_sensitivity mode, std::size_t to_string_size, std::size_t from_string_size>
 struct frozen_enum_table_base {
-    // TODO(elric): #cpp23 this one should be consteval, but requires P2564 to work, which is in C++23.
+    // TODO(elric): #cpp23 this one should be consteval, but requires P2564 to work, which is in C++23. GCC and clang
+    //              have it, but MSVC doesn't as of VS 2026 (14.51).
     constexpr frozen_enum_table_base(const to_string_array<to_string_size> &to_string_pairs, const from_string_array<from_string_size> &from_string_pairs) :
         to_string_map(to_string_pairs),
         from_string_map(from_string_pairs)
