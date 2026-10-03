@@ -1,6 +1,5 @@
-#include "string_ut.h"
-
 #include <string>
+#include <string_view>
 #include <functional> // For std::identity.
 
 #include <gtest/gtest.h> // NOLINT: not a C system header.
@@ -94,33 +93,23 @@ TEST(string, char) {
 }
 
 TEST(string, boolean) {
-    sn::detail::run_boolean_test_suite(sn::detail::string_ops());
-}
-
-template<class T>
-static void run_integer_tests() {
-    sn::detail::run_integer_test_suite<T>(sn::detail::string_ops());
+    sn::detail::run_boolean_test_suite();
 }
 
 TEST(string, ints) {
-    run_integer_tests<short>();
-    run_integer_tests<unsigned short>();
-    run_integer_tests<int>();
-    run_integer_tests<unsigned int>();
-    run_integer_tests<long>();
-    run_integer_tests<unsigned long>();
-    run_integer_tests<long long>();
-    run_integer_tests<unsigned long long>();
-}
-
-template<class T>
-static void run_float_tests() {
-    sn::detail::run_float_test_suite<T>(sn::detail::string_ops());
+    sn::detail::run_integer_test_suite<short>();
+    sn::detail::run_integer_test_suite<unsigned short>();
+    sn::detail::run_integer_test_suite<int>();
+    sn::detail::run_integer_test_suite<unsigned int>();
+    sn::detail::run_integer_test_suite<long>();
+    sn::detail::run_integer_test_suite<unsigned long>();
+    sn::detail::run_integer_test_suite<long long>();
+    sn::detail::run_integer_test_suite<unsigned long long>();
 }
 
 TEST(string, floats) {
-    run_float_tests<float>();
-    run_float_tests<double>();
+    sn::detail::run_float_test_suite<float>();
+    sn::detail::run_float_test_suite<double>();
 }
 
 namespace friendlyns {

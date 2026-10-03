@@ -7,9 +7,9 @@
 
 namespace sn::detail {
 
-template<class T, class Ops>
-inline void run_float_test_suite(const Ops &ops) {
-    tester<T, Ops> t(ops);
+template<class T>
+inline void run_float_test_suite() {
+    tester<T> t;
 
     t.expect_throwing_from({
         "+1",

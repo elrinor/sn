@@ -23,9 +23,9 @@ inline std::string prepend_zeros(int zeros, std::string_view number_string) {
     return result;
 }
 
-template<class T, class Ops>
-inline void run_integer_test_suite(const Ops &ops) {
-    tester<T, Ops> t(ops);
+template<class T>
+inline void run_integer_test_suite() {
+    tester<T> t;
 
     std::initializer_list<std::string_view> always_throwing = {
         "",

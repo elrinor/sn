@@ -5,14 +5,12 @@
 #include "sn/detail/test/enum_test_suite.h"
 #include "sn/string/enum_string.h"
 
-#include "string_ut.h"
-
 namespace sn::detail {
 SN_DEFINE_ENUM_STRING_FUNCTIONS(basic_test_enum, sn::case_sensitive)
 } // namespace sn::detail
 
 TEST(string_enum, basic) {
-    sn::detail::run_basic_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_basic_enum_test_suite();
 }
 
 namespace sn::detail {
@@ -20,7 +18,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(ci_test_enum, sn::case_insensitive)
 } // namespace sn::detail
 
 TEST(string_enum, case_insensitive) {
-    sn::detail::run_ci_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_ci_enum_test_suite();
 }
 
 namespace sn::detail {
@@ -28,7 +26,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(compat_ci_test_enum, sn::case_insensitive)
 } // namespace sn::detail
 
 TEST(string_enum, compatibility) {
-    sn::detail::run_compat_ci_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_compat_ci_enum_test_suite();
 }
 
 namespace sn::detail {
@@ -38,7 +36,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(int, sn::case_insensitive, first_test_tag, secon
 } // namespace sn::detail
 
 TEST(string_enum, tagged) {
-    sn::detail::run_tagged_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_tagged_enum_test_suite();
 }
 
 namespace sn::detail {
@@ -46,7 +44,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(char_test_enum, sn::case_insensitive)
 } // namespace sn::detail
 
 TEST(string_enum, char) {
-    sn::detail::run_char_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_char_enum_test_suite();
 }
 
 namespace sn::detail {
@@ -54,7 +52,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(schar_test_enum, sn::case_sensitive)
 } // namespace sn::detail
 
 TEST(string_enum, signed_char) {
-    sn::detail::run_schar_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_schar_enum_test_suite();
 }
 
 namespace sn::detail {
@@ -62,7 +60,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(utf8_test_enum, sn::case_insensitive)
 } // namespace sn::detail
 
 TEST(string_enum, utf8) {
-    sn::detail::run_utf8_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_utf8_enum_test_suite();
 }
 
 namespace sn::detail::adl_test_ns {
@@ -73,7 +71,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(adl_test_enum, sn::case_sensitive) // This shoul
 } // namespace sn::detail
 
 TEST(string_enum, namespaces) {
-    sn::detail::run_adl_enum_test_suite(sn::detail::string_ops());
+    sn::detail::run_adl_enum_test_suite();
 
     // sn::detail functions work and hook into the right reflection, despite being in the wrong namespace.
     sn::detail::adl_test_enum v = sn::detail::ADL_VALUE_0;

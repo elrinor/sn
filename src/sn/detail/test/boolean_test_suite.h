@@ -4,9 +4,8 @@
 
 namespace sn::detail {
 
-template<class Ops>
-inline void run_boolean_test_suite(const Ops &ops) {
-    tester<bool, Ops> t(ops);
+inline void run_boolean_test_suite() {
+    tester<bool> t;
 
     t.expect_throwing_from({
         "",
