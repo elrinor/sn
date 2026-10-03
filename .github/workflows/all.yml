@@ -36,16 +36,16 @@ jobs:
           - android_arm32
           - android_arm64
         include:
-          - {target: windows_x86,       platform: windows,  architecture: x86,        os: windows-2022, shell: 'msys2 {0}'}
-          - {target: windows_x86_64,    platform: windows,  architecture: x86_64,     os: windows-2022, shell: 'msys2 {0}'}
-          - {target: darwin_arm64,      platform: darwin,   architecture: arm64,      os: macos-15,     shell: bash}
-          - {target: darwin_x86_64,     platform: darwin,   architecture: x86_64,     os: macos-15,     shell: bash}
-          - {target: linux_x86,         platform: linux,    architecture: x86,        os: ubuntu-22.04, shell: bash}
-          - {target: linux_x86_64,      platform: linux,    architecture: x86_64,     os: ubuntu-22.04, shell: bash}
-          - {target: android_x86,       platform: android,  architecture: x86,        os: ubuntu-22.04, shell: bash}
-          - {target: android_x86_64,    platform: android,  architecture: x86_64,     os: ubuntu-22.04, shell: bash}
-          - {target: android_arm32,     platform: android,  architecture: arm32,      os: ubuntu-22.04, shell: bash}
-          - {target: android_arm64,     platform: android,  architecture: arm64,      os: ubuntu-22.04, shell: bash}
+          - {target: windows_x86,       platform: windows,  architecture: x86,        os: windows-2025, shell: 'msys2 {0}'}
+          - {target: windows_x86_64,    platform: windows,  architecture: x86_64,     os: windows-2025, shell: 'msys2 {0}'}
+          - {target: darwin_arm64,      platform: darwin,   architecture: arm64,      os: macos-26,     shell: bash}
+          - {target: darwin_x86_64,     platform: darwin,   architecture: x86_64,     os: macos-26,     shell: bash}
+          - {target: linux_x86,         platform: linux,    architecture: x86,        os: ubuntu-26.04, shell: bash}
+          - {target: linux_x86_64,      platform: linux,    architecture: x86_64,     os: ubuntu-26.04, shell: bash}
+          - {target: android_x86,       platform: android,  architecture: x86,        os: ubuntu-26.04, shell: bash}
+          - {target: android_x86_64,    platform: android,  architecture: x86_64,     os: ubuntu-26.04, shell: bash}
+          - {target: android_arm32,     platform: android,  architecture: arm32,      os: ubuntu-26.04, shell: bash}
+          - {target: android_arm64,     platform: android,  architecture: arm64,      os: ubuntu-26.04, shell: bash}
     runs-on: ${{matrix.os}}
     defaults:
       run:
@@ -86,10 +86,10 @@ jobs:
           if [ "${{matrix.architecture}}" = "x86" ]; then
             sudo dpkg --add-architecture i386
             sudo apt-get update
-            sudo apt-get install -y gcc-12-multilib g++-12-multilib
+            sudo apt-get install -y gcc-15-multilib g++-15-multilib
           fi
-          echo "CC=gcc-12" >> $GITHUB_ENV
-          echo "CXX=g++-12" >> $GITHUB_ENV
+          echo "CC=gcc-15" >> $GITHUB_ENV
+          echo "CXX=g++-15" >> $GITHUB_ENV
 
       - name: '[android] Setup NDK'
         if: matrix.platform == 'android'
