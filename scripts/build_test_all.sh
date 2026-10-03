@@ -2,20 +2,15 @@
 
 # Parse args.
 POSITIONAL_ARGS=()
-QT_SUPPORT_DEFAULT="OFF"
 while [[ $# -gt 0 ]]; do
     case $1 in
     -h|--help)
-        echo "Usage: $(basename "$0") [-jTHREADS] [--qt] BUILD_PLATFORM BUILD_ARCH REPO_DIR"
+        echo "Usage: $(basename "$0") [-jTHREADS] BUILD_PLATFORM BUILD_ARCH REPO_DIR"
         exit 1
         ;;
     -j*)
         THREADS_ARG="$1"
         shift 1
-        ;;
-    --qt)
-        QT_SUPPORT_DEFAULT="ON"
-        shift 1;
         ;;
     -*|--*)
         echo "Unknown option $1"
@@ -112,7 +107,6 @@ function build_test_one() {
     local FLOAT_LIB="$4"
     local TYPE_NAME_IMPL="$5"
     local ENUM_HASH_LIB="$6"
-    local QT_SUPPORT="$7"
 
     echo "================================================================================================"
 
@@ -124,7 +118,6 @@ function build_test_one() {
         "-DSN_FLOAT_LIB=$FLOAT_LIB" \
         "-DSN_TYPE_NAME_IMPL=$TYPE_NAME_IMPL" \
         "-DSN_ENUM_HASH_LIB=$ENUM_HASH_LIB" \
-        "-DSN_QT_SUPPORT=$QT_SUPPORT" \
         "-DSN_CHECK_STYLE=OFF" \
         "${ADDITIONAL_CMAKE_ARGS[@]}"
     cmake --build "$BUILD_DIR" $THREADS_ARG
@@ -137,25 +130,21 @@ function build_test_one() {
 
 for BUILD_TYPE in "Debug" "Release"
 do
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-1" "fmt_bundled" "fast_float_bundled" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
-
-    if [[ "$QT_SUPPORT_DEFAULT" == "ON" ]]; then
-        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-2" "fmt_bundled" "fast_float_bundled" "funcsig" "std" "OFF"
-    fi
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-1" "fmt_bundled" "fast_float_bundled" "funcsig" "std"
 
     # Only MSVC has <format>, unfortunately.
     if [[ "$BUILD_PLATFORM" == "windows" ]]; then
-        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "std" "fast_float_bundled" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
+        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-3" "std" "fast_float_bundled" "funcsig" "std"
     fi
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-4" "fmt_bundled" "strtof" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-4" "fmt_bundled" "strtof" "funcsig" "std"
 
     # AppleClang and Android clang don't have floating-point std::from_chars
     if [[ "$BUILD_PLATFORM" != "darwin" && "$BUILD_PLATFORM" != "android" ]]; then
-        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-5" "fmt_bundled" "from_chars" "funcsig" "std" "$QT_SUPPORT_DEFAULT"
+        build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-5" "fmt_bundled" "from_chars" "funcsig" "std"
     fi
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-6" "fmt_bundled" "fast_float_bundled" "typeid" "std" "$QT_SUPPORT_DEFAULT"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-6" "fmt_bundled" "fast_float_bundled" "typeid" "std"
 
-    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-7" "fmt_bundled" "fast_float_bundled" "funcsig" "frozen_bundled" "$QT_SUPPORT_DEFAULT"
+    build_test_one "$BUILD_TYPE" "build-$BUILD_TYPE-7" "fmt_bundled" "fast_float_bundled" "funcsig" "frozen_bundled"
 done
