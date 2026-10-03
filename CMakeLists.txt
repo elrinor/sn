@@ -16,8 +16,6 @@ set(SN_BUILD_TOOLS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tools")
 set(SN_BUILD_BENCHMARKS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN benchmarks")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
 
-set(SN_QT_SUPPORT "OFF" CACHE BOOL "Build with Qt6 support")
-
 set(SN_FORMAT_LIB "fmt_bundled" CACHE STRING "Format library to use, 'std', 'fmt_bundled', or 'fmt_external'")
 set_property(CACHE SN_FORMAT_LIB PROPERTY STRINGS std fmt_bundled fmt_external)
 set(SN_FLOAT_LIB "fast_float_bundled" CACHE STRING "Float string functions to use, 'strtof', 'from_chars', 'fast_float_bundled', or 'fast_float_external'")
@@ -42,18 +40,6 @@ set(SN_MAX_SMALL_BUFFER_SIZE 256 CACHE STRING "Maximal size of stack-allocated s
 #
 if(PROJECT_IS_TOP_LEVEL)
     set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
-endif()
-
-
-#
-# Set up Qt.
-#
-if(SN_QT_SUPPORT)
-    find_package(Qt6 REQUIRED COMPONENTS Core)
-
-    if(PROJECT_IS_TOP_LEVEL)
-        add_compile_definitions(QT_NO_CAST_FROM_ASCII) # No implicit casts from char* into QString, use QStringLiteral.
-    endif()
 endif()
 
 
@@ -149,8 +135,6 @@ if(PROJECT_IS_TOP_LEVEL)
         add_compile_options(/we4172) # Returning address of local variable or temporary.
         add_compile_options(/we26433) # Function should be marked with 'override'.
     endif()
-
-    add_compile_definitions(QT_NO_CAST_FROM_ASCII) # Don't auto-cast from const char * to QString.
 endif()
 
 

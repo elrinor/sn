@@ -1,6 +1,6 @@
 # Code Style
 ## Naming
-* Use `stl_snake_case` for everything, even for Qt-related functions.
+* Use `stl_snake_case` for everything.
 * Use `_field` for private fields. That's right, with the leading underscore.
 * Use `SNAKE_CASE_ALL_CAPS` for enums.
 * Use `SNAKE_CASE_ALL_CAPS` for macros and for macro parameters.
