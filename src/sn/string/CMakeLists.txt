@@ -70,10 +70,11 @@ if(SN_BUILD_TESTS)
         test/enum_string_multi_second_ut.cpp
         test/enum_string_multi_ut.h
         test/enum_string_ut.cpp
-        test/string_ut.cpp)
+        test/string_ut.cpp
+        test/tester.h)
 
     add_executable(test_sn_string ${TEST_SN_STRING_SOURCES})
-    target_link_libraries(test_sn_string PUBLIC sn_string sn_detail_test GTest::gtest GTest::gtest_main)
+    target_link_libraries(test_sn_string PUBLIC sn_string GTest::gtest GTest::gtest_main)
     lint_target(test_sn_string)
 
     add_custom_target(run_test_sn_string
