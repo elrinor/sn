@@ -48,7 +48,7 @@ if [[ "$BUILD_PLATFORM" == "darwin" ]]; then
     ADDITIONAL_CMAKE_ARGS+=(
         "-DCMAKE_OSX_ARCHITECTURES=$BUILD_ARCH"
     )
-    if [[ "$BUILD_ARCH" == "arm64" ]]; then
+    if [[ "$BUILD_ARCH" != "$(uname -m)" ]]; then
         # This is a cross-compile, can't run tests.
         RUN_TESTS=false
 
