@@ -188,23 +188,26 @@ static void benchmark_enum_from_string(benchmark::State &state) { // NOLINT
 
 // Random values are the worst case, the same value over and over again is the best case. Real workloads are somewhere
 // in between.
+//
+// There are a lot of benchmarks here, and they are run in CI for every build configuration, so they are given less
+// time than the default 0.5s. These are tight loops, and results are stable enough even with 0.1s.
 
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_8_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_8_tag, false);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_8_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_8_tag, false);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_64_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_64_tag, false);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_64_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_64_tag, false);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_800_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_800_tag, false);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_800_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_800_tag, false);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_8_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_8_tag, false)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_8_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_8_tag, false)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_64_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_64_tag, false)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_64_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_64_tag, false)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_800_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, dense_800_tag, false)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_800_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_to_string, sparse_800_tag, false)->MinTime(0.1);
 
-BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_8_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_8_tag, false);
-BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_64_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_64_tag, false);
-BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_800_tag, true);
-BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_800_tag, false);
+BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_8_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_8_tag, false)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_64_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_64_tag, false)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_800_tag, true)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_from_string, dense_800_tag, false)->MinTime(0.1);

@@ -51,14 +51,16 @@ static void benchmark_enum_table_hash_string(benchmark::State &state) { // NOLIN
     benchmark::DoNotOptimize(result);
 }
 
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_32);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_64);
+// See enum_string_benchmark.cpp for why min time is set here.
 
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 6);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 6);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 12);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 12);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 24);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 24);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 48);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 48);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_32)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_64)->MinTime(0.1);
+
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 6)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 6)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 12)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 12)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 24)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 24)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 48)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 48)->MinTime(0.1);
