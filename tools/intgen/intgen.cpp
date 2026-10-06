@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include <fmt/format.h> // NOLINT: not a C system header.
+#include <fmt/ranges.h> // NOLINT: not a C system header. For fmt::join.
 
 struct key {
     bool sign = false;
@@ -62,7 +63,7 @@ int main(int argc, char **argv) {
                 values.push_back(max_lengths[k]);
             }
             fmt::println("template<>");
-            fmt::println("static constexpr std::array<std::uint8_t, 35> max_integer_lengths<{}, {}> = {{{}}};",
+            fmt::println("constexpr std::array<std::uint8_t, 35> max_integer_lengths<{}, {}> = {{{}}};",
                          sign, size, fmt::join(values, ", "));
         }
     }

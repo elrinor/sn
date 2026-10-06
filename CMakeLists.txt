@@ -143,5 +143,9 @@ endif()
 #
 # Add sources.
 #
-add_subdirectory(tools)
+# Headergen goes first because it defines a function that's used in src. The rest of the tools go last because they
+# use targets that are defined in src.
+#
+add_subdirectory(tools/headergen)
 add_subdirectory(src)
+add_subdirectory(tools)
