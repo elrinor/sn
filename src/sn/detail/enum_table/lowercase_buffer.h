@@ -11,14 +11,10 @@ namespace sn::detail {
 class lowercase_buffer {
 public:
     explicit lowercase_buffer(std::string_view s) : _buffer(s.size()) {
-        _result = to_lower_ascii(s, static_cast<char *>(_buffer.data()));
+        _result = to_lower_ascii(s, _buffer.data());
     }
 
     operator std::string_view() const {
-        return _result;
-    }
-
-    std::string_view string_view() const {
         return _result;
     }
 
