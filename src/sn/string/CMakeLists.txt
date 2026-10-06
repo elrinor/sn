@@ -19,6 +19,13 @@ add_library(sn::string ALIAS sn_string)
 target_link_libraries(sn_string PUBLIC sn_core sn_reflection sn_detail_ascii sn_detail_enum_table sn_detail_codegen)
 lint_target(sn_string)
 
+add_generate_headers(sn_string_generate_headers
+    DIR ${CMAKE_CURRENT_SOURCE_DIR}
+    NAME "string"
+    TYPE "std::string"
+    VIEW "std::string_view"
+    INCLUDES "#include <string>\n#include <string_view>")
+
 if(SN_FLOAT_LIB STREQUAL "strtof")
     target_compile_definitions(sn_string PUBLIC SN_USE_STRTOF=1)
 elseif(SN_FLOAT_LIB STREQUAL "from_chars")
