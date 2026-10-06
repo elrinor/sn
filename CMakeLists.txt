@@ -24,6 +24,8 @@ set(SN_TYPE_NAME_IMPL "funcsig" CACHE STRING "Implementation of sn::type_name to
 set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
 set(SN_ENUM_HASH_LIB "frozen_bundled" CACHE STRING "Hash library to use for enum serialization hash maps, 'frozen_bundled' or 'frozen_external'")
 set_property(CACHE SN_ENUM_HASH_LIB PROPERTY STRINGS frozen_bundled frozen_external)
+set(SN_JSON_LIB "nlohmann_json_bundled" CACHE STRING "JSON library to use, 'nlohmann_json_bundled', 'nlohmann_json_external', or 'none' to build without JSON support")
+set_property(CACHE SN_JSON_LIB PROPERTY STRINGS nlohmann_json_bundled nlohmann_json_external none)
 
 # Note that fmt 12.2.0 doesn't compile for 32-bit x86 linux, and fmt 12.1.0 discards a [[nodiscard]] return value in
 # base.h, which is an error for us on MSVC. So we're staying on 12.0.0 until the next release.
@@ -33,6 +35,7 @@ set(SN_BUNDLED_FROZEN_TAG "1.2.0" CACHE STRING "Git tag for the bundled frozen l
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.18.0" CACHE STRING "Git tag for the bundled google test library")
 set(SN_BUNDLED_GOOGLEBENCHMARK_TAG "v1.9.5" CACHE STRING "Git tag for the bundled google benchmark library")
 set(SN_BUNDLED_CPPLINT_TAG "2.0.2" CACHE STRING "Git tag for the bundled cpplint")
+set(SN_BUNDLED_NLOHMANN_JSON_TAG "v3.12.0" CACHE STRING "Release tag for the bundled nlohmann_json library")
 
 set(SN_MAX_SMALL_BUFFER_SIZE 256 CACHE STRING "Maximal size of stack-allocated small buffers, used in enum-from-string conversions when converting the passed string to lowercase, in bytes")
 
