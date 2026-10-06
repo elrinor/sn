@@ -52,7 +52,7 @@ consteval auto make_unique_to_string_array(const to_string_array<size> &pairs) {
 
     // There is no std::transform_unique_copy, and we'd rather not include <ranges> or create temporaries.
     // So we just do a loop.
-    result[0] = pairs[0];
+    result[0] = {std::get<0>(tmp[0]), std::get<2>(tmp[0])};
     std::size_t ix = 1;
     for (std::size_t i0 = 0, i1 = 1; i1 < tmp.size(); i0++, i1++)
         if (std::get<0>(tmp[i0]) != std::get<0>(tmp[i1]))

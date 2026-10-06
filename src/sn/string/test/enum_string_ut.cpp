@@ -244,6 +244,76 @@ TEST(string_enum, signed_char) {
 
 
 //
+// Tests for reflections that don't list the smallest value first. All values should still be serializable, and the
+// first string listed for a value should be the one that's used in to_string.
+//
+
+enum class unordered_test_enum {
+    UNORDERED_VALUE_1 = 1,
+    UNORDERED_VALUE_2 = 2,
+    UNORDERED_VALUE_3 = 3,
+};
+using enum unordered_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(unordered_test_enum, ({
+    {UNORDERED_VALUE_3, "three"},
+    {UNORDERED_VALUE_1, "one"},
+    {UNORDERED_VALUE_2, "two"},
+    {UNORDERED_VALUE_1, "old_one"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(unordered_test_enum, sn::case_sensitive)
+
+TEST(string_enum, unordered) {
+    tester<unordered_test_enum> t;
+
+    t.expect_valid_fromto({
+        {"one", UNORDERED_VALUE_1},
+        {"two", UNORDERED_VALUE_2},
+        {"three", UNORDERED_VALUE_3},
+    });
+
+    t.expect_valid_from({
+        {"old_one", UNORDERED_VALUE_1},
+    });
+}
+
+
+//
+// Same as above but for negative values. Enum values are type-erased into std::uint64_t, so a negative value that's
+// listed first is not the smallest one after type erasure.
+//
+
+enum class negative_test_enum {
+    NEGATIVE_VALUE_MINUS_1 = -1,
+    NEGATIVE_VALUE_0 = 0,
+    NEGATIVE_VALUE_1 = 1,
+    NEGATIVE_UNSERIALIZABLE = -2,
+};
+using enum negative_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(negative_test_enum, ({
+    {NEGATIVE_VALUE_MINUS_1, "minus_one"},
+    {NEGATIVE_VALUE_0, "zero"},
+    {NEGATIVE_VALUE_1, "one"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(negative_test_enum, sn::case_sensitive)
+
+TEST(string_enum, negative) {
+    tester<negative_test_enum> t;
+
+    t.expect_throwing_to_with_message({
+        {NEGATIVE_UNSERIALIZABLE, "'-2'"}
+    });
+
+    t.expect_valid_fromto({
+        {"minus_one", NEGATIVE_VALUE_MINUS_1},
+        {"zero", NEGATIVE_VALUE_0},
+        {"one", NEGATIVE_VALUE_1},
+    });
+}
+
+
+//
 // Tests for utf8 strings. Check that our to_lower implementation only works for ascii chars.
 //
 
