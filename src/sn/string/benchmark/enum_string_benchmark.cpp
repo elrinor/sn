@@ -75,13 +75,14 @@ struct generated_strings {
 };
 
 /**
- * @return                              Strings "value_0", "value_1", etc.
+ * @return                              Strings "enum_value_0", "enum_value_1", etc. These are over 8 chars so that
+ *                                      copying them takes the same code paths as copying a typical enum string.
  */
 template<std::size_t size>
 constexpr generated_strings<size> generate_strings() {
     generated_strings<size> result;
     for (std::size_t i = 0; i < size; i++) {
-        std::string_view prefix = "value_";
+        std::string_view prefix = "enum_value_";
         std::size_t pos = 0;
         for (char c : prefix)
             result.data[i][pos++] = c;
@@ -100,7 +101,7 @@ constexpr generated_strings<size> generate_strings() {
 }
 
 /**
- * Reflection for `size` values, where i-th value is `i * step`, and its string is "value_<i>".
+ * Reflection for `size` values, where i-th value is `i * step`, and its string is "enum_value_<i>".
  */
 template<std::size_t size, int step>
 struct generated_reflection {

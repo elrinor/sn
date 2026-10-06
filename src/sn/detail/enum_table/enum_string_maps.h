@@ -177,6 +177,26 @@ using smallest_uint_t =
     std::conditional_t<(max_value <= 0xFFFFFFFFu), std::uint32_t, std::uint64_t>>>;
 
 /**
+ * Hides a string size from the optimizer.
+ *
+ * Offsets in `enum_table_strings` are narrow, and so a string size that's computed from them is known to be small.
+ * When GCC for x86 knows that a `memcpy` is at most several KB in size, it expands it inline into a `rep movs`
+ * instruction, and that one takes tens of cycles just to start. Copying a string out of an enum table then gets
+ * several times slower than with a call to `memcpy`, and this is why we're not letting GCC know.
+ *
+ * @param size                          String size.
+ * @return                              The same string size.
+ */
+[[nodiscard]] constexpr std::size_t hide_string_size(std::size_t size) noexcept {
+#if defined(__GNUC__) && !defined(__clang__) && (defined(__i386__) || defined(__x86_64__))
+    if !consteval {
+        __asm__("" : "+r"(size));
+    }
+#endif
+    return size;
+}
+
+/**
  * Strings of an enum table, concatenated in slot order. There is one offset per slot, and a string ends where the
  * string of the next slot begins, so an empty slot is the same thing as an empty string.
  *
@@ -212,7 +232,8 @@ public:
     }
 
     [[nodiscard]] constexpr std::string_view operator[](std::size_t slot) const noexcept {
-        return {_data.data() + _offsets[slot], static_cast<std::size_t>(_offsets[slot + 1] - _offsets[slot])};
+        std::size_t offset = _offsets[slot];
+        return {_data.data() + offset, hide_string_size(_offsets[slot + 1] - offset)};
     }
 
 private:
