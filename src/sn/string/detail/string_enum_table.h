@@ -13,19 +13,6 @@
 
 namespace sn::detail {
 
-struct string_enum_table_traits {
-    using string_type = std::string;
-    using string_view_type = std::string_view;
-
-    static void assign(std::string_view src, std::string *dst) {
-        dst->assign(src.data(), src.size());
-    }
-
-    static std::string_view to_std(std::string_view s) {
-        return s;
-    }
-};
-
 template<enum_table_spec spec, class T, std::size_t size>
 [[nodiscard]] consteval enum_to_string_map<spec> make_enum_to_string_map(const std::array<std::pair<T, std::string_view>, size> &reflection) {
     return enum_to_string_map<spec>(collect_to_string_pairs<spec.to_string_count>(reflection), spec.min_value);
@@ -93,4 +80,4 @@ private:
     static constexpr auto to_string_map = sn::detail::make_enum_to_string_map<table_spec>(REFLECTION_ARG);              \
     static constexpr auto from_string_map = sn::detail::make_string_to_enum_map<table_spec>(REFLECTION_ARG);            \
     static constexpr auto TABLE_NAME =                                                                                  \
-        sn::detail::enum_table<ENUM, sn::detail::string_enum_table_traits, sn::detail::string_enum_table_base<table_spec>>(to_string_map, from_string_map);
+        sn::detail::enum_table<ENUM, sn::detail::string_enum_table_base<table_spec>>(to_string_map, from_string_map);

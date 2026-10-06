@@ -25,31 +25,27 @@ constexpr bool is_signed_ex_v = std::is_signed_v<typename std::conditional_t<std
  * `universal_enum_table`, this class is just a wrapper.
  *
  * @tparam T                            Enum type.
- * @tparam Traits                       Table traits.
  * @tparam Base                         Base table to pass to `universal_enum_table`.
  */
-template<class T, class Traits, class Base>
+template<class T, class Base>
 class enum_table {
 public:
-    using string_type = typename Traits::string_type;
-    using string_view_type = typename Traits::string_view_type;
-
     template<class... Args>
     explicit constexpr enum_table(Args &&... args) : _table(&sn::type_name<T>, is_signed_ex_v<T>, std::forward<Args>(args)...) {}
 
-    void to_string(T src, string_type *dst) const {
+    void to_string(T src, std::string *dst) const {
         _table.to_string(static_cast<std::uint64_t>(src), dst);
     }
 
-    void from_string(string_view_type src, T *dst) const {
+    void from_string(std::string_view src, T *dst) const {
         *dst = static_cast<T>(_table.from_string(src));
     }
 
-    [[nodiscard]] bool try_to_string(T src, string_type *dst) const noexcept {
+    [[nodiscard]] bool try_to_string(T src, std::string *dst) const noexcept {
         return _table.try_to_string(static_cast<std::uint64_t>(src), dst);
     }
 
-    [[nodiscard]] bool try_from_string(string_view_type src, T *dst) const noexcept {
+    [[nodiscard]] bool try_from_string(std::string_view src, T *dst) const noexcept {
         auto result = _table.try_from_string(src);
         if (result.ok)
             *dst = static_cast<T>(result.value);
@@ -57,7 +53,7 @@ public:
     }
 
 private:
-    universal_enum_table<Traits, Base> _table;
+    universal_enum_table<Base> _table;
 };
 
 } // namespace sn::detail

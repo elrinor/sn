@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <concepts> // For std::convertible_to.
 #include <string>
 #include <string_view>
 #include <utility> // For std::forward.
@@ -12,25 +11,14 @@
 
 namespace sn::detail {
 
-template<class Traits>
-concept enum_table_traits = requires(typename Traits::string_type s, typename Traits::string_view_type sv) {
-    // There should also be void Traits::assign(sv, &s), but we can't express it easily.
-    { Traits::to_std(sv) } -> std::convertible_to<std::string_view>;
-}; // NOLINT
-
-
 /**
  * Type-erased enum table implementation. Uses `std::uint64_t` internally to store enum values.
  *
- * @tparam Traits                       Table traits.
  * @tparam Base                         Base table. Needs to expose `find_string` and `find_value` functions.
  */
-template<enum_table_traits Traits, class Base>
+template<class Base>
 struct universal_enum_table {
 public:
-    using string_type = typename Traits::string_type;
-    using string_view_type = typename Traits::string_view_type;
-
     // sn::type_name is not constexpr b/c it has typeid() as one of its backends. Thus, we cannot use type name as an
     // argument to a constexpr constructor. We can, however, use a pointer to a function doing what we need. This
     // won't be a performance problem b/c it's on the cold (exception-throwing) path.
@@ -51,10 +39,10 @@ public:
         bool ok = false;
     };
 
-    void to_string(std::uint64_t src, string_type *dst) const {
-        string_view_type string;
+    void to_string(std::uint64_t src, std::string *dst) const {
+        std::string_view string;
         if (_base.find_string(src, &string)) {
-            Traits::assign(string, dst);
+            dst->assign(string.data(), string.size());
         } else {
             if (_is_signed) {
                 // This static_cast relies on implementation-defined behavior, but it's symmetric to the type erasure
@@ -66,24 +54,24 @@ public:
         }
     }
 
-    [[nodiscard]] std::uint64_t from_string(string_view_type src) const {
+    [[nodiscard]] std::uint64_t from_string(std::string_view src) const {
         std::uint64_t result = 0;
         if (!_base.find_value(src, &result))
-            throw_enum_from_string_error(_type_name(), Traits::to_std(src));
+            throw_enum_from_string_error(_type_name(), src);
         return result;
     }
 
-    [[nodiscard]] bool try_to_string(std::uint64_t src, string_type *dst) const noexcept {
-        string_view_type string;
+    [[nodiscard]] bool try_to_string(std::uint64_t src, std::string *dst) const noexcept {
+        std::string_view string;
         if (_base.find_string(src, &string)) {
-            Traits::assign(string, dst);
+            dst->assign(string.data(), string.size());
             return true;
         } else {
             return false;
         }
     }
 
-    [[nodiscard]] try_from_string_result try_from_string(string_view_type src) const noexcept {
+    [[nodiscard]] try_from_string_result try_from_string(std::string_view src) const noexcept {
         try_from_string_result result;
         result.ok = _base.find_value(src, &result.value);
         return result;
