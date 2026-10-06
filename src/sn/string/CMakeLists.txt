@@ -30,7 +30,7 @@ if(SN_FLOAT_LIB STREQUAL "strtof")
     target_compile_definitions(sn_string PUBLIC SN_USE_STRTOF=1)
 elseif(SN_FLOAT_LIB STREQUAL "from_chars")
     target_compile_definitions(sn_string PUBLIC SN_USE_FROM_CHARS=1)
-elseif(SN_FLOAT_LIB STREQUAL "fast_float_bundled" OR SN_FORMAT_LIB STREQUAL "fast_float_external")
+elseif(SN_FLOAT_LIB STREQUAL "fast_float_bundled" OR SN_FLOAT_LIB STREQUAL "fast_float_external")
     target_compile_definitions(sn_string PUBLIC SN_USE_FAST_FLOAT=1)
 
     if(SN_FLOAT_LIB STREQUAL "fast_float_bundled")

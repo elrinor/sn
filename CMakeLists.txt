@@ -143,5 +143,9 @@ endif()
 #
 # Add sources.
 #
-add_subdirectory(tools)
+# Headergen goes first because it defines the add_generate_headers() cmake function, which is then called from
+# src/sn/string. The rest of the tools go last because they link to targets that are defined in src.
+#
+add_subdirectory(tools/headergen)
 add_subdirectory(src)
+add_subdirectory(tools)
