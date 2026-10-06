@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring> // For std::memcpy.
-#include <type_traits> // For std::conditional_t.
+#include <type_traits> // For std::conditional_t, std::is_unsigned_v.
 
 #if defined(_MSC_VER) && !defined(__SIZEOF_INT128__) && (defined(_M_X64) || defined(_M_ARM64))
 #   include <intrin.h> // For _umul128 and __umulh.
@@ -134,11 +134,14 @@ static_assert(std::endian::native == std::endian::little, "sn enum tables only s
  * just faster.
  *
  * `hash_string` hashes a string. It doesn't read outside the string, and it processes the string in words and not
- * char by char. The result is to be passed into `mix`.
+ * char by char. The result is a word, to be passed into `mix`.
  *
  * `mix` mixes a seed into a string hash, or into an integer key, producing the final hash. Different seeds produce
  * unrelated hashes, which is what `perfect_hash` relies on. This way a string is only traversed once even if it's
  * then hashed with several seeds.
+ *
+ * Keys that fit into a word are mixed with a single multiplication of two words, and that's what all of the above is
+ * built around. The only keys that don't fit are 64-bit integers on a 32-bit platform, these take twice the work.
  *
  * @tparam Word                         Machine word to use, `std::uint64_t` or `std::uint32_t`.
  */
@@ -151,14 +154,19 @@ struct basic_enum_table_hash {
      * @param seed                      Seed.
      * @return                          Hash of the key.
      */
-    [[nodiscard]] static constexpr hash_type mix(std::uint64_t key, std::uint64_t seed) noexcept {
+    template<class Key>
+    [[nodiscard]] static constexpr hash_type mix(Key key, hash_type seed) noexcept {
+        static_assert(std::is_unsigned_v<Key> && sizeof(Key) <= 8);
+
         if constexpr (sizeof(Word) == 8) {
-            return multiply_fold(key ^ (seed * 0x9E3779B97F4A7C15u), static_cast<std::uint64_t>(0xC2B2AE3D27D4EB4Fu));
+            return multiply_fold(static_cast<Word>(key ^ (seed * 0x9E3779B97F4A7C15u)), static_cast<Word>(0xC2B2AE3D27D4EB4Fu));
+        } else if constexpr (sizeof(Key) <= sizeof(Word)) {
+            return multiply_fold(static_cast<Word>(key ^ (seed * 0x9E3779B9u)), static_cast<Word>(0x85EBCA6Bu));
         } else {
-            std::uint32_t lo = static_cast<std::uint32_t>(key);
-            std::uint32_t hi = static_cast<std::uint32_t>(key >> 32);
-            std::uint32_t mixed_seed = static_cast<std::uint32_t>(seed) * 0x9E3779B9u;
-            return multiply_fold(multiply_fold(lo ^ mixed_seed, static_cast<std::uint32_t>(0x85EBCA6Bu)) ^ hi ^ 0x27D4EB2Fu, static_cast<std::uint32_t>(0xC2B2AE35u));
+            // The key is two words, so we mix it in one word at a time.
+            Word lo = static_cast<Word>(key);
+            Word hi = static_cast<Word>(key >> 32);
+            return multiply_fold(static_cast<Word>(mix(lo, seed) ^ hi ^ 0x27D4EB2Fu), static_cast<Word>(0xC2B2AE35u));
         }
     }
 
@@ -170,7 +178,7 @@ struct basic_enum_table_hash {
      *                                  are realistic only for 32-bit hashes.
      * @return                          Hash of the string, to be passed into `mix`.
      */
-    [[nodiscard]] static constexpr std::uint64_t hash_string(const char *p, std::size_t size, bool fold_case, std::uint64_t seed) noexcept {
+    [[nodiscard]] static constexpr hash_type hash_string(const char *p, std::size_t size, bool fold_case, hash_type seed) noexcept {
         constexpr Word k0 = static_cast<Word>(0x9E3779B97F4A7C15u);
         constexpr Word k1 = static_cast<Word>(0xC2B2AE3D27D4EB4Fu);
         constexpr Word k2 = static_cast<Word>(0xA0761D6478BD642Fu);
@@ -184,7 +192,7 @@ struct basic_enum_table_hash {
         // overlap.
         Word a = 0;
         Word b = 0;
-        Word state = k0 + static_cast<Word>(seed) * k4;
+        Word state = k0 + seed * k4;
         if (size <= 2 * word_size) {
             if (size >= word_size) {
                 a = load_word(p);

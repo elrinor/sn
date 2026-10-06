@@ -29,15 +29,16 @@ namespace sn::detail {
  *
  * @tparam size                         Number of buckets. Must be a power of two.
  * @tparam Hash                         Hash functions to use.
+ * @tparam Key                          Type of the keys, an unsigned integer.
  * @tparam key_count                    Number of keys.
  */
-template<std::size_t size, class Hash, std::size_t key_count>
+template<std::size_t size, class Hash, class Key, std::size_t key_count>
 struct hash_buckets {
     std::array<std::size_t, size + 1> start = {{}};
     std::array<std::size_t, key_count> order = {{}};
     std::size_t max_bucket_size = 0;
 
-    constexpr hash_buckets(const std::array<std::uint64_t, key_count> &keys, std::uint32_t seed) {
+    constexpr hash_buckets(const std::array<Key, key_count> &keys, std::uint32_t seed) {
         std::array<std::size_t, key_count> bucket_of = {{}};
         for (std::size_t i = 0; i < key_count; i++) {
             bucket_of[i] = static_cast<std::size_t>(Hash::mix(keys[i], seed) & (size - 1));
@@ -61,10 +62,10 @@ struct hash_buckets {
  * @param keys                          Keys to check.
  * @return                              For each key, whether there are no equal keys before it.
  */
-template<std::size_t key_count>
-[[nodiscard]] constexpr std::array<bool, key_count> find_first_occurrences(const std::array<std::uint64_t, key_count> &keys) {
+template<class Key, std::size_t key_count>
+[[nodiscard]] constexpr std::array<bool, key_count> find_first_occurrences(const std::array<Key, key_count> &keys) {
     constexpr std::size_t size = perfect_hash_size(key_count);
-    hash_buckets<size, enum_table_hash, key_count> buckets(keys, 1);
+    hash_buckets<size, enum_table_hash, Key, key_count> buckets(keys, 1);
 
     std::array<bool, key_count> result = {{}};
     for (std::size_t b = 0; b < size; b++) {
@@ -84,8 +85,8 @@ template<std::size_t key_count>
  * @param[out] second                   Index of the second of two equal keys, if there are any.
  * @return                              Whether some of the keys are equal.
  */
-template<std::size_t key_count>
-[[nodiscard]] constexpr bool find_duplicate_keys(const std::array<std::uint64_t, key_count> &keys, std::size_t *first, std::size_t *second) {
+template<class Key, std::size_t key_count>
+[[nodiscard]] constexpr bool find_duplicate_keys(const std::array<Key, key_count> &keys, std::size_t *first, std::size_t *second) {
     std::array<bool, key_count> is_first = find_first_occurrences(keys);
     for (std::size_t i = 0; i < key_count; i++) {
         if (is_first[i])
@@ -102,15 +103,15 @@ template<std::size_t key_count>
     return false;
 }
 
-template<std::size_t key_count>
-[[nodiscard]] constexpr bool has_duplicate_keys(const std::array<std::uint64_t, key_count> &keys) {
+template<class Key, std::size_t key_count>
+[[nodiscard]] constexpr bool has_duplicate_keys(const std::array<Key, key_count> &keys) {
     std::size_t first = 0;
     std::size_t second = 0;
     return find_duplicate_keys(keys, &first, &second);
 }
 
 /**
- * Perfect hash function for a fixed set of 64-bit keys, built at compile time. Maps every key from the set into its
+ * Perfect hash function for a fixed set of integer keys, built at compile time. Maps every key from the set into its
  * own slot in `[0, size)`. Keys that are not in the set also get mapped into some slot, so the caller has to check
  * what's actually stored there.
  *
@@ -120,14 +121,16 @@ template<std::size_t key_count>
  * Keys are either integers, or string hashes, see `basic_enum_table_hash`.
  *
  * @tparam size                         Number of slots, and also the number of buckets. Must be a power of two.
+ * @tparam Key                          Type of the keys, an unsigned integer. Lookups are the fastest when it's
+ *                                      `Hash::hash_type`, or smaller.
  * @tparam Hash                         Hash functions to use.
  */
-template<std::size_t size, class Hash = enum_table_hash>
+template<std::size_t size, class Key, class Hash = enum_table_hash>
 struct perfect_hash {
     std::uint32_t first_seed = 0;
     std::array<std::uint8_t, size> seeds = {{}};
 
-    [[nodiscard]] constexpr std::size_t slot(std::uint64_t key) const noexcept {
+    [[nodiscard]] constexpr std::size_t slot(Key key) const noexcept {
         std::size_t bucket = static_cast<std::size_t>(Hash::mix(key, first_seed) & (size - 1));
         return static_cast<std::size_t>(Hash::mix(key, seeds[bucket]) & (size - 1));
     }
@@ -143,12 +146,12 @@ inline constexpr std::size_t max_perfect_hash_bucket_size = 32;
  * @param[out] result                   Resulting perfect hash. In unspecified state if the function fails.
  * @return                              Whether the perfect hash was built.
  */
-template<std::size_t size, class Hash, std::size_t key_count>
-[[nodiscard]] constexpr bool try_make_perfect_hash(const std::array<std::uint64_t, key_count> &keys, std::uint32_t first_seed, perfect_hash<size, Hash> *result) {
-    *result = perfect_hash<size, Hash>();
+template<std::size_t size, class Key, class Hash, std::size_t key_count>
+[[nodiscard]] constexpr bool try_make_perfect_hash(const std::array<Key, key_count> &keys, std::uint32_t first_seed, perfect_hash<size, Key, Hash> *result) {
+    *result = perfect_hash<size, Key, Hash>();
     result->first_seed = first_seed;
 
-    hash_buckets<size, Hash, key_count> buckets(keys, first_seed);
+    hash_buckets<size, Hash, Key, key_count> buckets(keys, first_seed);
     if (buckets.max_bucket_size > max_perfect_hash_bucket_size)
         return false;
 
@@ -192,8 +195,8 @@ template<std::size_t size, class Hash, std::size_t key_count>
  * @param[out] result                   Resulting perfect hash. In unspecified state if the function fails.
  * @return                              Whether the perfect hash was built.
  */
-template<std::size_t size, class Hash, std::size_t key_count>
-[[nodiscard]] constexpr bool try_make_perfect_hash(const std::array<std::uint64_t, key_count> &keys, perfect_hash<size, Hash> *result) {
+template<std::size_t size, class Key, class Hash, std::size_t key_count>
+[[nodiscard]] constexpr bool try_make_perfect_hash(const std::array<Key, key_count> &keys, perfect_hash<size, Key, Hash> *result) {
     static_assert(std::has_single_bit(size) && size > key_count);
 
     // Each first-level seed gives a completely different distribution of keys into buckets, so if one doesn't work
@@ -211,13 +214,13 @@ template<std::size_t size, class Hash, std::size_t key_count>
  * @tparam Hash                         Hash functions to use.
  * @param keys                          Keys to build the perfect hash for. All keys must be different.
  */
-template<std::size_t size, class Hash = enum_table_hash, std::size_t key_count = 0>
-[[nodiscard]] constexpr perfect_hash<size, Hash> make_perfect_hash(const std::array<std::uint64_t, key_count> &keys) {
+template<std::size_t size, class Hash = enum_table_hash, class Key = std::uint64_t, std::size_t key_count = 0>
+[[nodiscard]] constexpr perfect_hash<size, Key, Hash> make_perfect_hash(const std::array<Key, key_count> &keys) {
     // Two equal keys can never be separated, so we have to check for them upfront.
     if (has_duplicate_keys(keys))
         throw std::logic_error("Duplicate keys passed to make_perfect_hash");
 
-    perfect_hash<size, Hash> result;
+    perfect_hash<size, Key, Hash> result;
     if (!try_make_perfect_hash(keys, &result))
         throw std::logic_error("Failed to build a perfect hash");
     return result;

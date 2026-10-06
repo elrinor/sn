@@ -92,22 +92,41 @@ TEST(enum_table_hash, to_lower_ascii_word) {
     }
 }
 
-TYPED_TEST(enum_table_hash_test, mix) {
-    using hash = TypeParam;
+template<class Hash, class Key>
+static void run_mix_test() {
+    constexpr Key high_bit = static_cast<Key>(static_cast<Key>(1) << (8 * sizeof(Key) - 1));
 
     // Changing the seed should change the hash, for any key.
     std::uint64_t state = 1;
     for (std::size_t i = 0; i < 1000; i++) {
-        std::uint64_t key = next_random(&state);
-        EXPECT_NE(hash::mix(key, 1), hash::mix(key, 2)) << "with key = " << key;
-        EXPECT_NE(hash::mix(key, 1), hash::mix(key + 1, 1)) << "with key = " << key;
-        EXPECT_NE(hash::mix(key, 1), hash::mix(key ^ (static_cast<std::uint64_t>(1) << 63), 1)) << "with key = " << key;
+        Key key = static_cast<Key>(next_random(&state));
+        EXPECT_NE(Hash::mix(key, 1), Hash::mix(key, 2)) << "with key = " << key;
+        EXPECT_NE(Hash::mix(key, 1), Hash::mix(static_cast<Key>(key + 1), 1)) << "with key = " << key;
+        EXPECT_NE(Hash::mix(key, 1), Hash::mix(static_cast<Key>(key ^ high_bit), 1)) << "with key = " << key;
     }
 
     // Hashes computed at compile time should be the same as the ones computed at run time.
-    static constexpr auto expected = hash::mix(0x0123456789ABCDEFu, 123);
-    volatile std::uint64_t runtime_key = 0x0123456789ABCDEFu; // Volatile so that the call below is not constant-evaluated.
-    EXPECT_EQ(hash::mix(runtime_key, 123), expected);
+    static constexpr Key constexpr_key = static_cast<Key>(0x0123456789ABCDEFu);
+    static constexpr auto expected = Hash::mix(constexpr_key, 123);
+    volatile Key runtime_key = constexpr_key; // Volatile so that the call below is not constant-evaluated.
+    EXPECT_EQ(Hash::mix(static_cast<Key>(runtime_key), 123), expected);
+}
+
+TYPED_TEST(enum_table_hash_test, mix) {
+    // Keys that fit into a machine word and keys that don't are hashed differently, so we check both.
+    run_mix_test<TypeParam, std::uint64_t>();
+    run_mix_test<TypeParam, std::uint32_t>();
+}
+
+TYPED_TEST(enum_table_hash_test, mix_narrow_keys) {
+    using hash = TypeParam;
+    using hash_type = typename hash::hash_type;
+
+    // Keys that are narrower than a machine word should hash the same as machine words.
+    for (std::uint32_t key : {0u, 1u, 200u, 255u}) {
+        EXPECT_EQ(hash::mix(static_cast<std::uint8_t>(key), 7), hash::mix(static_cast<hash_type>(key), 7)) << "with key = " << key;
+        EXPECT_EQ(hash::mix(static_cast<std::uint16_t>(key), 7), hash::mix(static_cast<hash_type>(key), 7)) << "with key = " << key;
+    }
 }
 
 TYPED_TEST(enum_table_hash_test, hash_string_constexpr) {
@@ -116,10 +135,11 @@ TYPED_TEST(enum_table_hash_test, hash_string_constexpr) {
     static constexpr std::string_view string = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     static constexpr auto expected = [] {
-        std::array<std::array<std::uint64_t, 2>, 64> result = {{}};
+        std::array<std::array<typename hash::hash_type, 2>, 64> result = {{}};
         for (std::size_t size = 0; size < string.size(); size++) {
-            result[size][0] = hash::hash_string(string.data(), size, false, size);
-            result[size][1] = hash::hash_string(string.data(), size, true, size);
+            auto seed = static_cast<typename hash::hash_type>(size);
+            result[size][0] = hash::hash_string(string.data(), size, false, seed);
+            result[size][1] = hash::hash_string(string.data(), size, true, seed);
         }
         return result;
     }();
@@ -127,8 +147,9 @@ TYPED_TEST(enum_table_hash_test, hash_string_constexpr) {
     // Copy into a std::string so that hashing is done at run time, and so that reading past the end is detectable.
     for (std::size_t size = 0; size < string.size(); size++) {
         std::string tmp(string.substr(0, size));
-        EXPECT_EQ(hash::hash_string(tmp.data(), tmp.size(), false, size), expected[size][0]) << "with size = " << size;
-        EXPECT_EQ(hash::hash_string(tmp.data(), tmp.size(), true, size), expected[size][1]) << "with size = " << size;
+        auto seed = static_cast<typename hash::hash_type>(size);
+        EXPECT_EQ(hash::hash_string(tmp.data(), tmp.size(), false, seed), expected[size][0]) << "with size = " << size;
+        EXPECT_EQ(hash::hash_string(tmp.data(), tmp.size(), true, seed), expected[size][1]) << "with size = " << size;
     }
 }
 
@@ -138,7 +159,7 @@ TYPED_TEST(enum_table_hash_test, hash_string_sensitivity) {
     // Changing any char should change the hash, for any string size.
     for (std::size_t size = 1; size <= 70; size++) {
         std::string string = make_test_string(size, size);
-        std::uint64_t value = hash::hash_string(string.data(), string.size(), false, 0);
+        auto value = hash::hash_string(string.data(), string.size(), false, 0);
 
         for (std::size_t pos = 0; pos < size; pos++) {
             std::string changed = string;
@@ -159,7 +180,7 @@ TYPED_TEST(enum_table_hash_test, hash_string_fold_case) {
 
     for (std::size_t size = 1; size <= 70; size++) {
         std::string lower = make_test_string(size, size);
-        std::uint64_t value = hash::hash_string(lower.data(), lower.size(), true, 0);
+        auto value = hash::hash_string(lower.data(), lower.size(), true, 0);
 
         for (std::size_t pos = 0; pos < size; pos++) {
             std::string mixed = lower;

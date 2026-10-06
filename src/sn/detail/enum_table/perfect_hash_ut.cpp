@@ -26,13 +26,13 @@ class perfect_hash_test : public testing::Test {};
 using hash_types = testing::Types<enum_table_hash_64, enum_table_hash_32>;
 TYPED_TEST_SUITE(perfect_hash_test, hash_types);
 
-template<class Hash, std::size_t key_count>
-static void expect_perfect(const std::array<std::uint64_t, key_count> &keys, const char *description) {
+template<class Hash, class Key, std::size_t key_count>
+static void expect_perfect(const std::array<Key, key_count> &keys, const char *description) {
     constexpr std::size_t size = perfect_hash_size(key_count);
-    perfect_hash<size, Hash> hash = make_perfect_hash<size, Hash>(keys);
+    perfect_hash<size, Key, Hash> hash = make_perfect_hash<size, Hash>(keys);
 
     std::vector<bool> used(size);
-    for (std::uint64_t key : keys) {
+    for (Key key : keys) {
         std::size_t slot = hash.slot(key);
         ASSERT_LT(slot, size) << "with key_count = " << key_count << " for " << description;
         EXPECT_FALSE(used[slot]) << "with key_count = " << key_count << " for " << description;
@@ -40,32 +40,42 @@ static void expect_perfect(const std::array<std::uint64_t, key_count> &keys, con
     }
 }
 
-template<class Hash, std::size_t key_count>
+template<class Hash, class Key, std::size_t key_count>
 static void run_perfect_hash_tests() {
-    std::array<std::uint64_t, key_count> keys = {{}};
+    std::array<Key, key_count> keys = {{}};
 
     for (std::size_t i = 0; i < key_count; i++)
-        keys[i] = i;
+        keys[i] = static_cast<Key>(i);
     expect_perfect<Hash>(keys, "sequential keys");
 
-    for (std::size_t i = 0; i < key_count; i++)
-        keys[i] = static_cast<std::uint64_t>(i) << 32;
-    expect_perfect<Hash>(keys, "keys that only differ in high bits");
+    if constexpr (sizeof(Key) == 8) {
+        for (std::size_t i = 0; i < key_count; i++)
+            keys[i] = static_cast<Key>(i) << 32;
+        expect_perfect<Hash>(keys, "keys that only differ in high bits");
+    }
 
     for (std::size_t i = 0; i < key_count; i++)
-        keys[i] = static_cast<std::uint64_t>(i) * 0x10000u + 0xFFFFu;
+        keys[i] = static_cast<Key>(static_cast<Key>(i) * 0x10000u + 0xFFFFu);
     expect_perfect<Hash>(keys, "keys with the same low bits");
 
     for (std::size_t i = 0; i < key_count; i++)
-        keys[i] = static_cast<std::uint64_t>(0) - i;
+        keys[i] = static_cast<Key>(static_cast<Key>(0) - static_cast<Key>(i));
     expect_perfect<Hash>(keys, "negative keys");
 
     for (std::uint64_t seed = 1; seed <= 10; seed++) {
         std::uint64_t state = seed;
         for (std::size_t i = 0; i < key_count; i++)
-            keys[i] = next_random(&state);
+            keys[i] = static_cast<Key>(next_random(&state));
         expect_perfect<Hash>(keys, "random keys");
     }
+}
+
+// Keys that fit into a machine word and keys that don't are hashed differently, so we check both for each of the
+// hash implementations.
+template<class Hash, std::size_t key_count>
+static void run_perfect_hash_tests() {
+    run_perfect_hash_tests<Hash, std::uint64_t, key_count>();
+    run_perfect_hash_tests<Hash, std::uint32_t, key_count>();
 }
 
 TEST(perfect_hash, size) {
@@ -105,22 +115,33 @@ TYPED_TEST(perfect_hash_test, powers_of_two) {
     for (std::size_t i = 0; i < keys.size(); i++)
         keys[i] = static_cast<std::uint64_t>(1) << i;
     expect_perfect<TypeParam>(keys, "powers of two");
+
+    std::array<std::uint32_t, 32> narrow_keys = {{}};
+    for (std::size_t i = 0; i < narrow_keys.size(); i++)
+        narrow_keys[i] = static_cast<std::uint32_t>(1) << i;
+    expect_perfect<TypeParam>(narrow_keys, "powers of two");
 }
 
-TYPED_TEST(perfect_hash_test, constexpr_hash) {
-    static constexpr std::array<std::uint64_t, 5> keys = {{1, 100, 10000, 1000000, 100000000}};
-    static constexpr perfect_hash<8, TypeParam> hash = make_perfect_hash<8, TypeParam>(keys);
+template<class Hash, class Key>
+static void run_constexpr_hash_test() {
+    static constexpr std::array<Key, 5> keys = {{1, 100, 10000, 1000000, 100000000}};
+    static constexpr perfect_hash<8, Key, Hash> hash = make_perfect_hash<8, Hash>(keys);
     static_assert(hash.slot(1) != hash.slot(100));
 
     // Hash built at compile time should work at run time.
     std::vector<bool> used(8);
-    for (std::uint64_t key : keys) {
-        volatile std::uint64_t runtime_key = key; // Volatile so that the call below is not constant-evaluated.
+    for (Key key : keys) {
+        volatile Key runtime_key = key; // Volatile so that the call below is not constant-evaluated.
         std::size_t slot = hash.slot(runtime_key);
         ASSERT_LT(slot, 8u);
         EXPECT_FALSE(used[slot]);
         used[slot] = true;
     }
+}
+
+TYPED_TEST(perfect_hash_test, constexpr_hash) {
+    run_constexpr_hash_test<TypeParam, std::uint64_t>();
+    run_constexpr_hash_test<TypeParam, std::uint32_t>();
 }
 
 TYPED_TEST(perfect_hash_test, duplicate_keys) {

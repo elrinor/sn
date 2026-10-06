@@ -303,23 +303,23 @@ public:
      */
     template<std::size_t count>
     constexpr hashed_enum_string_map(const std::array<std::pair<std::uint64_t, std::string_view>, count> &pairs, std::uint64_t min_value) : _min_value(min_value) {
-        std::array<std::uint64_t, count> values = {{}};
+        std::array<hash_key, count> keys = {{}};
         for (std::size_t i = 0; i < count; i++)
-            values[i] = pairs[i].first;
-        _hash = make_perfect_hash<slot_count>(values);
+            keys[i] = static_cast<hash_key>(pairs[i].first);
+        _hash = make_perfect_hash<slot_count>(keys);
 
         std::array<std::string_view, count> strings = {{}};
         std::array<std::size_t, count> slots = {{}};
         for (std::size_t i = 0; i < count; i++) {
             strings[i] = pairs[i].second;
-            slots[i] = _hash.slot(pairs[i].first);
+            slots[i] = _hash.slot(keys[i]);
             _keys[slots[i]] = static_cast<Key>(pairs[i].first - min_value);
         }
         _strings = enum_table_strings<slot_count, data_size>(strings, slots, false);
     }
 
     [[nodiscard]] constexpr bool find(std::uint64_t value, std::string_view *result) const noexcept {
-        std::size_t slot = _hash.slot(value);
+        std::size_t slot = _hash.slot(static_cast<hash_key>(value));
         std::string_view string = _strings[slot];
 
         // The stored key is widened for the comparison, and not the other way around. Values outside the range of
@@ -332,8 +332,14 @@ public:
     }
 
 private:
+    // Hashing a machine word is cheaper than hashing a 64-bit value on a 32-bit platform, so we hash values as machine
+    // words when we can. If `Key` fits into a machine word, then so does the difference between any two values of
+    // this map. Truncating the values to a machine word then still leaves them all different, and this is all that
+    // a perfect hash needs. Values that are not in the map are rejected in `find` in any case.
+    using hash_key = std::conditional_t<(sizeof(Key) <= sizeof(enum_table_hash::hash_type)), enum_table_hash::hash_type, std::uint64_t>;
+
     std::uint64_t _min_value;
-    perfect_hash<slot_count> _hash;
+    perfect_hash<slot_count, hash_key> _hash;
     std::array<Key, slot_count> _keys = {{}};
     enum_table_strings<slot_count, data_size> _strings;
 };
@@ -358,7 +364,7 @@ public:
     constexpr hashed_string_enum_map(const std::array<std::pair<std::string_view, std::uint64_t>, count> &pairs, std::uint64_t min_value) : _min_value(min_value) {
         // Different strings can have the same hash. That's only a theoretical possibility for 64-bit hashes, but it
         // does happen for 32-bit ones if the enum is large. When it does, we just try another seed.
-        std::array<std::uint64_t, count> hashes = {{}};
+        std::array<enum_table_hash::hash_type, count> hashes = {{}};
         bool built = false;
         for (std::uint32_t seed = 0; seed < 16 && !built; seed++) {
             for (std::size_t i = 0; i < count; i++)
@@ -408,7 +414,7 @@ private:
      */
     template<std::size_t count>
     [[nodiscard]] static constexpr bool has_hash_collisions(const std::array<std::pair<std::string_view, std::uint64_t>, count> &pairs,
-                                                            const std::array<std::uint64_t, count> &hashes) {
+                                                            const std::array<enum_table_hash::hash_type, count> &hashes) {
         std::size_t first = 0;
         std::size_t second = 0;
         if (!find_duplicate_keys(hashes, &first, &second))
@@ -427,7 +433,7 @@ private:
 private:
     std::uint64_t _min_value;
     std::uint32_t _seed = 0;
-    perfect_hash<slot_count> _hash;
+    perfect_hash<slot_count, enum_table_hash::hash_type> _hash;
     std::array<Value, slot_count> _values = {{}};
     enum_table_strings<slot_count, data_size> _strings;
 };

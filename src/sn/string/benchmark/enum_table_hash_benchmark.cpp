@@ -15,12 +15,12 @@
 
 constexpr std::size_t benchmark_input_size = 4096;
 
-template<class Hash>
+template<class Hash, class Key>
 static void benchmark_enum_table_hash_mix(benchmark::State &state) { // NOLINT
     std::mt19937_64 rng(12345); // NOLINT: fixed seed is intended.
-    std::vector<std::uint64_t> keys;
+    std::vector<Key> keys;
     for (std::size_t i = 0; i < benchmark_input_size; i++)
-        keys.push_back(rng());
+        keys.push_back(static_cast<Key>(rng()));
 
     std::uint64_t result = 0;
     std::size_t i = 0;
@@ -53,8 +53,11 @@ static void benchmark_enum_table_hash_string(benchmark::State &state) { // NOLIN
 
 // See enum_string_benchmark.cpp for why min time is set here.
 
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_32)->MinTime(0.1);
-BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_64)->MinTime(0.1);
+// Tables hash machine words, and that's what the first two benchmarks are for. The only exception is an enum with
+// values that are more than 2^32 apart on a 32-bit platform, and that's the third one.
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_32, std::uint32_t)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_64, std::uint64_t)->MinTime(0.1);
+BENCHMARK_TEMPLATE(benchmark_enum_table_hash_mix, sn::detail::enum_table_hash_32, std::uint64_t)->MinTime(0.1);
 
 BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_32, 6)->MinTime(0.1);
 BENCHMARK_TEMPLATE(benchmark_enum_table_hash_string, sn::detail::enum_table_hash_64, 6)->MinTime(0.1);
