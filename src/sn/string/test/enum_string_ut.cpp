@@ -301,6 +301,12 @@ SN_DEFINE_ENUM_REFLECTION(negative_test_enum, ({
 }))
 SN_DEFINE_ENUM_STRING_FUNCTIONS(negative_test_enum, sn::case_sensitive)
 
+// The table should only cover values from -1 to 1. If the range of values was computed after type erasure, it would
+// have been 2^64 values wide, and the table would have been a hashed one.
+static_assert(_enum_table_container<negative_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<negative_test_enum>::table_spec.to_string_slots == 3);
+static_assert(_enum_table_container<negative_test_enum>::table_spec.max_delta == 2);
+
 TEST(string_enum, negative) {
     tester<negative_test_enum> t;
 
