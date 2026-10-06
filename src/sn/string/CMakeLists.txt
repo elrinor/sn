@@ -69,6 +69,7 @@ endif()
 if(SN_BUILD_BENCHMARKS)
     set(BENCHMARK_SN_STRING_SOURCES
         benchmark/enum_string_benchmark.cpp
+        benchmark/enum_table_hash_benchmark.cpp
         benchmark/int_string_benchmark.cpp)
 
     add_executable(benchmark_sn_string ${BENCHMARK_SN_STRING_SOURCES})
