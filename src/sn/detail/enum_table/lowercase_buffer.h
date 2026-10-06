@@ -1,29 +1,26 @@
 #pragma once
 
+#include <string_view>
+
+#include "sn/detail/ascii/ascii_functions.h"
+
 #include "overwrite_buffer.h"
 
 namespace sn::detail {
 
-template<class Traits>
 class lowercase_buffer {
-    using value_type = typename Traits::string_type::value_type;
-    using string_view_type = typename Traits::string_view_type;
 public:
-    explicit lowercase_buffer(string_view_type s) : _buffer(Traits::to_lower_size(s)) {
-        _result = Traits::to_lower(s, static_cast<value_type *>(_buffer.data()));
+    explicit lowercase_buffer(std::string_view s) : _buffer(s.size()) {
+        _result = to_lower_ascii(s, _buffer.data());
     }
 
-    operator string_view_type() const {
-        return _result;
-    }
-
-    string_view_type string_view() const {
+    operator std::string_view() const {
         return _result;
     }
 
 private:
     overwrite_buffer<SN_MAX_SMALL_BUFFER_SIZE> _buffer;
-    string_view_type _result;
+    std::string_view _result;
 };
 
 } // namespace sn::detail
