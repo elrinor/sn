@@ -13,7 +13,7 @@
 #include <fast_float/fast_float.h>
 #endif
 
-#include "sn/detail/codegen/tuple_types.h"
+#include "sn/detail/codegen/forwarding.h"
 #include "sn/detail/format/format.h"
 
 #include "string_exceptions.h"
@@ -249,23 +249,7 @@ inline void from_string(std::string_view src, T *dst) {
 #endif // SN_USE_FAST_FLOAT
 
 #define _SN_DEFINE_FORWARDING_STRING_FUNCTIONS(TYPE, FROM_STRING_NAMESPACE, ... /* TAGS */)                             \
-    _SN_DEFINE_FORWARDING_STRING_FUNCTIONS_I(TYPE, FROM_STRING_NAMESPACE,                                               \
-                                             _SN_PP_TUPLE_TYPES_TO_DECL_PARAMS(tag, (__VA_ARGS__)),                     \
-                                             _SN_PP_TUPLE_TYPES_TO_CALL_PARAMS(tag, (__VA_ARGS__)))
-
-#define _SN_DEFINE_FORWARDING_STRING_FUNCTIONS_I(TYPE, FROM_STRING_NAMESPACE, DECL_TAGS, CALL_TAGS)                     \
-    bool try_to_string(TYPE src, std::string *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_TAGS)) noexcept {                      \
-        return detail_to_chars::try_to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_TAGS));                           \
-    }                                                                                                                   \
-    void to_string(TYPE src, std::string *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_TAGS)) {                                   \
-        detail_to_chars::to_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_TAGS));                                      \
-    }                                                                                                                   \
-    bool try_from_string(std::string_view src, TYPE *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_TAGS)) noexcept {               \
-        return FROM_STRING_NAMESPACE::try_from_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_TAGS));                   \
-    }                                                                                                                   \
-    void from_string(std::string_view src, TYPE *dst SN_PP_TUPLE_ENUM_TRAILING(DECL_TAGS)) {                            \
-        FROM_STRING_NAMESPACE::from_string(src, dst SN_PP_TUPLE_ENUM_TRAILING(CALL_TAGS));                              \
-    }
+    _SN_DEFINE_FORWARDING_FUNCTIONS(string, TYPE, std::string *, std::string_view, TYPE *, detail_to_chars, FROM_STRING_NAMESPACE, (__VA_ARGS__))
 
 #if SN_USE_STRTOF
 #   define SN_FLOAT_FROM_STRING_NAMESPACE detail_strtofd
