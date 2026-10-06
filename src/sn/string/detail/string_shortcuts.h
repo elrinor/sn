@@ -1,6 +1,3 @@
-//
-// This header is auto-generated using the headergen tool in /tools.
-//
 #pragma once
 
 #include <string>
