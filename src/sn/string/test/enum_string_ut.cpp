@@ -1,3 +1,6 @@
+#include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <ostream>
 #include <string>
 #include <type_traits>
@@ -310,6 +313,363 @@ TEST(string_enum, negative) {
         {"zero", NEGATIVE_VALUE_0},
         {"one", NEGATIVE_VALUE_1},
     });
+}
+
+
+//
+// Tests for enums with gaps between values. Such enums still use a flat table, and the gaps should not be
+// serializable.
+//
+
+enum class gap_test_enum {
+    GAP_VALUE_0 = 0,
+    GAP_VALUE_1 = 1,
+    GAP_VALUE_3 = 3,
+    GAP_VALUE_7 = 7,
+};
+using enum gap_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(gap_test_enum, ({
+    {GAP_VALUE_0, "zero"},
+    {GAP_VALUE_1, "one"},
+    {GAP_VALUE_3, "three"},
+    {GAP_VALUE_7, "seven"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(gap_test_enum, sn::case_sensitive)
+
+static_assert(_enum_table_container<gap_test_enum>::table_spec.flat);
+
+TEST(string_enum, gaps) {
+    tester<gap_test_enum> t;
+
+    t.expect_throwing_to({
+        static_cast<gap_test_enum>(-1),
+        static_cast<gap_test_enum>(2),
+        static_cast<gap_test_enum>(4),
+        static_cast<gap_test_enum>(5),
+        static_cast<gap_test_enum>(6),
+        static_cast<gap_test_enum>(8),
+    });
+
+    t.expect_valid_fromto({
+        {"zero", GAP_VALUE_0},
+        {"one", GAP_VALUE_1},
+        {"three", GAP_VALUE_3},
+        {"seven", GAP_VALUE_7},
+    });
+}
+
+
+//
+// Tests for enums with values that are far apart. These use a hash table.
+//
+
+enum class sparse_test_enum : std::uint32_t {
+    SPARSE_VALUE_1 = 1,
+    SPARSE_VALUE_1000 = 1000,
+    SPARSE_VALUE_100000 = 100000,
+    SPARSE_VALUE_MAX = 0xFFFFFFFFu,
+};
+using enum sparse_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(sparse_test_enum, ({
+    {SPARSE_VALUE_1, "one"},
+    {SPARSE_VALUE_1000, "thousand"},
+    {SPARSE_VALUE_100000, "hundred_thousand"},
+    {SPARSE_VALUE_MAX, "max"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(sparse_test_enum, sn::case_sensitive)
+
+static_assert(!_enum_table_container<sparse_test_enum>::table_spec.flat);
+
+TEST(string_enum, sparse) {
+    tester<sparse_test_enum> t;
+
+    t.expect_throwing_to({
+        static_cast<sparse_test_enum>(0),
+        static_cast<sparse_test_enum>(2),
+        static_cast<sparse_test_enum>(999),
+        static_cast<sparse_test_enum>(1001),
+        static_cast<sparse_test_enum>(0xFFFFFFFEu),
+    });
+
+    t.expect_valid_fromto({
+        {"one", SPARSE_VALUE_1},
+        {"thousand", SPARSE_VALUE_1000},
+        {"hundred_thousand", SPARSE_VALUE_100000},
+        {"max", SPARSE_VALUE_MAX},
+    });
+}
+
+
+//
+// Tests for 64-bit enums that use the whole range of the underlying type.
+//
+
+enum class int64_test_enum : std::int64_t {
+    INT64_VALUE_MIN = std::numeric_limits<std::int64_t>::min(),
+    INT64_VALUE_0 = 0,
+    INT64_VALUE_MAX = std::numeric_limits<std::int64_t>::max(),
+};
+using enum int64_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(int64_test_enum, ({
+    {INT64_VALUE_MIN, "min"},
+    {INT64_VALUE_0, "zero"},
+    {INT64_VALUE_MAX, "max"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(int64_test_enum, sn::case_sensitive)
+
+enum class uint64_test_enum : std::uint64_t {
+    UINT64_VALUE_0 = 0,
+    UINT64_VALUE_BIG = 0x10000000000u,
+    UINT64_VALUE_MAX = std::numeric_limits<std::uint64_t>::max(),
+};
+using enum uint64_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(uint64_test_enum, ({
+    {UINT64_VALUE_0, "zero"},
+    {UINT64_VALUE_BIG, "big"},
+    {UINT64_VALUE_MAX, "max"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(uint64_test_enum, sn::case_sensitive)
+
+TEST(string_enum, int64) {
+    tester<int64_test_enum> t1;
+    t1.expect_throwing_to({static_cast<int64_test_enum>(1), static_cast<int64_test_enum>(-1)});
+    t1.expect_valid_fromto({
+        {"min", INT64_VALUE_MIN},
+        {"zero", INT64_VALUE_0},
+        {"max", INT64_VALUE_MAX},
+    });
+
+    tester<uint64_test_enum> t2;
+    t2.expect_throwing_to({static_cast<uint64_test_enum>(1), static_cast<uint64_test_enum>(0x10000000001u)});
+    t2.expect_valid_fromto({
+        {"zero", UINT64_VALUE_0},
+        {"big", UINT64_VALUE_BIG},
+        {"max", UINT64_VALUE_MAX},
+    });
+}
+
+
+//
+// Tests for strings of different sizes. Strings are hashed and compared in machine words, so we want to check sizes
+// around the word boundaries, and strings that only differ in a single char.
+//
+
+enum class size_test_enum {
+    SIZE_VALUE_1,
+    SIZE_VALUE_3,
+    SIZE_VALUE_4,
+    SIZE_VALUE_7,
+    SIZE_VALUE_8,
+    SIZE_VALUE_9,
+    SIZE_VALUE_15,
+    SIZE_VALUE_16,
+    SIZE_VALUE_17,
+    SIZE_VALUE_32,
+    SIZE_VALUE_33,
+    SIZE_VALUE_70,
+    SIZE_VALUE_70_OTHER,
+};
+using enum size_test_enum;
+
+struct size_ci_test_tag : sn::tags::tag {};
+
+#define SIZE_TEST_ENUM_REFLECTION ({                                                                                    \
+    {SIZE_VALUE_1, "a"},                                                                                                \
+    {SIZE_VALUE_3, "abc"},                                                                                              \
+    {SIZE_VALUE_4, "abcd"},                                                                                             \
+    {SIZE_VALUE_7, "abcdefg"},                                                                                          \
+    {SIZE_VALUE_8, "abcdefgh"},                                                                                         \
+    {SIZE_VALUE_9, "abcdefghi"},                                                                                        \
+    {SIZE_VALUE_15, "abcdefghijklmno"},                                                                                 \
+    {SIZE_VALUE_16, "abcdefghijklmnop"},                                                                                \
+    {SIZE_VALUE_17, "abcdefghijklmnopq"},                                                                               \
+    {SIZE_VALUE_32, "abcdefghijklmnopqrstuvwxyz012345"},                                                                \
+    {SIZE_VALUE_33, "abcdefghijklmnopqrstuvwxyz0123456"},                                                               \
+    {SIZE_VALUE_70, "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefg"},                          \
+    {SIZE_VALUE_70_OTHER, "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJ_LMNOPQRSTUVWXYZ_abcdefg"},                    \
+})
+
+SN_DEFINE_ENUM_REFLECTION(size_test_enum, SIZE_TEST_ENUM_REFLECTION)
+SN_DEFINE_ENUM_REFLECTION(size_test_enum, SIZE_TEST_ENUM_REFLECTION, size_ci_test_tag)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(size_test_enum, sn::case_sensitive)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(size_test_enum, sn::case_insensitive, size_ci_test_tag)
+
+TEST(string_enum, string_sizes) {
+    tester<size_test_enum> t;
+
+    for (const auto &[value, string] : sn::reflect_enum<size_test_enum>()) {
+        t.expect_valid_fromto(string, value);
+        t.expect_valid_fromto(string, value, size_ci_test_tag());
+
+        // Changing a single char should make the string unrecognizable, wherever the char is.
+        for (std::size_t i = 0; i < string.size(); i++) {
+            std::string changed(string);
+            changed[i] = '#';
+            t.expect_throwing_from(changed);
+            t.expect_throwing_from(changed, size_ci_test_tag());
+        }
+
+        // Changing case should only work in case-insensitive mode. Only the last string has uppercase chars.
+        for (std::size_t i = 0; i < string.size(); i++) {
+            std::string changed(string);
+            if (changed[i] >= 'a' && changed[i] <= 'z') {
+                changed[i] = static_cast<char>(changed[i] - 'a' + 'A');
+            } else if (changed[i] >= 'A' && changed[i] <= 'Z') {
+                changed[i] = static_cast<char>(changed[i] - 'A' + 'a');
+            } else {
+                continue;
+            }
+
+            if (value != SIZE_VALUE_70 && value != SIZE_VALUE_70_OTHER) {
+                t.expect_throwing_from(changed);
+                t.expect_valid_from(changed, value, size_ci_test_tag());
+            }
+        }
+
+        // And so should adding a char.
+        t.expect_throwing_from(std::string(string) + "_");
+        t.expect_throwing_from(std::string(string) + "_", size_ci_test_tag());
+    }
+
+    t.expect_throwing_from({"", "ab", "abcde", "abcdefghijklmnopqrstuvwxyz"});
+}
+
+
+//
+// Tests for empty strings. An empty string is a valid string for an enum value.
+//
+
+enum class empty_test_enum {
+    EMPTY_VALUE_NONE = 0,
+    EMPTY_VALUE_1 = 1,
+    EMPTY_VALUE_2 = 2,
+};
+using enum empty_test_enum;
+
+struct empty_alias_test_tag : sn::tags::tag {};
+
+SN_DEFINE_ENUM_REFLECTION(empty_test_enum, ({
+    {EMPTY_VALUE_NONE, ""},
+    {EMPTY_VALUE_1, "one"},
+    {EMPTY_VALUE_2, "two"},
+}))
+SN_DEFINE_ENUM_REFLECTION(empty_test_enum, ({
+    {EMPTY_VALUE_1, "one"},
+    {EMPTY_VALUE_1, ""},
+    {EMPTY_VALUE_2, "two"},
+}), empty_alias_test_tag)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(empty_test_enum, sn::case_sensitive)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(empty_test_enum, sn::case_insensitive, empty_alias_test_tag)
+
+TEST(string_enum, empty_string) {
+    tester<empty_test_enum> t;
+
+    t.expect_valid_fromto({
+        {"", EMPTY_VALUE_NONE},
+        {"one", EMPTY_VALUE_1},
+        {"two", EMPTY_VALUE_2},
+    });
+
+    // If an empty string is not the first string for a value, then it's only accepted as input.
+    t.expect_throwing_to({EMPTY_VALUE_NONE}, empty_alias_test_tag());
+    t.expect_valid_from({{"", EMPTY_VALUE_1}}, empty_alias_test_tag());
+    t.expect_valid_fromto({
+        {"one", EMPTY_VALUE_1},
+        {"two", EMPTY_VALUE_2},
+    }, empty_alias_test_tag());
+
+    // And if there is no empty string in the reflection, then it's not accepted.
+    tester<gap_test_enum> t2;
+    t2.expect_throwing_from({""});
+}
+
+
+//
+// Tests for explicitly specified table kinds. The results should be the same for all table kinds.
+//
+
+enum class kind_test_enum {
+    KIND_VALUE_0 = 0,
+    KIND_VALUE_1 = 1,
+    KIND_VALUE_2 = 2,
+    KIND_VALUE_1000 = 1000,
+};
+using enum kind_test_enum;
+
+struct flat_test_tag : sn::tags::tag {};
+struct hashed_test_tag : sn::tags::tag {};
+
+#define KIND_TEST_ENUM_REFLECTION ({                                                                                    \
+    {KIND_VALUE_0, "zero"},                                                                                             \
+    {KIND_VALUE_1, "one"},                                                                                              \
+    {KIND_VALUE_2, "two"},                                                                                              \
+    {KIND_VALUE_1000, "thousand"},                                                                                      \
+})
+
+SN_DEFINE_ENUM_REFLECTION(kind_test_enum, KIND_TEST_ENUM_REFLECTION)
+SN_DEFINE_ENUM_REFLECTION(kind_test_enum, KIND_TEST_ENUM_REFLECTION, flat_test_tag)
+SN_DEFINE_ENUM_REFLECTION(kind_test_enum, KIND_TEST_ENUM_REFLECTION, hashed_test_tag)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(kind_test_enum, sn::case_sensitive)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(kind_test_enum, sn::case_sensitive | sn::flat_enum_table, flat_test_tag)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(kind_test_enum, sn::hashed_enum_table | sn::case_insensitive, hashed_test_tag)
+
+static_assert(!_enum_table_container<kind_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<kind_test_enum, flat_test_tag>::table_spec.flat);
+static_assert(!_enum_table_container<kind_test_enum, hashed_test_tag>::table_spec.flat);
+static_assert(!_enum_table_container<kind_test_enum, flat_test_tag>::table_spec.fold_case);
+static_assert(_enum_table_container<kind_test_enum, hashed_test_tag>::table_spec.fold_case);
+
+// A table that would be flat by default can also be forced into being a hash table.
+struct hashed_gap_test_tag : sn::tags::tag {};
+SN_DEFINE_ENUM_REFLECTION(gap_test_enum, ({
+    {GAP_VALUE_0, "zero"},
+    {GAP_VALUE_1, "one"},
+    {GAP_VALUE_3, "three"},
+    {GAP_VALUE_7, "seven"},
+}), hashed_gap_test_tag)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(gap_test_enum, sn::case_sensitive | sn::hashed_enum_table, hashed_gap_test_tag)
+
+static_assert(!_enum_table_container<gap_test_enum, hashed_gap_test_tag>::table_spec.flat);
+
+TEST(string_enum, table_kinds) {
+    tester<kind_test_enum> t;
+
+    auto run = [&] (auto... tags) {
+        t.expect_throwing_to({
+            static_cast<kind_test_enum>(-1),
+            static_cast<kind_test_enum>(3),
+            static_cast<kind_test_enum>(999),
+            static_cast<kind_test_enum>(1001),
+        }, tags...);
+
+        t.expect_valid_fromto({
+            {"zero", KIND_VALUE_0},
+            {"one", KIND_VALUE_1},
+            {"two", KIND_VALUE_2},
+            {"thousand", KIND_VALUE_1000},
+        }, tags...);
+    };
+
+    run();
+    run(flat_test_tag());
+    run(hashed_test_tag());
+
+    t.expect_throwing_from({"ZERO"});
+    t.expect_throwing_from({"ZERO"}, flat_test_tag());
+    t.expect_valid_from({{"ZERO", KIND_VALUE_0}}, hashed_test_tag());
+
+    tester<gap_test_enum> t2;
+    t2.expect_throwing_to({static_cast<gap_test_enum>(-1), static_cast<gap_test_enum>(2), static_cast<gap_test_enum>(8)}, hashed_gap_test_tag());
+    t2.expect_valid_fromto({
+        {"zero", GAP_VALUE_0},
+        {"one", GAP_VALUE_1},
+        {"three", GAP_VALUE_3},
+        {"seven", GAP_VALUE_7},
+    }, hashed_gap_test_tag());
 }
 
 
