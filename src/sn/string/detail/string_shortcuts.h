@@ -8,6 +8,19 @@
 
 #include "sn/core/preprocessor.h" // For __VA_OPT__.
 
+namespace sn::detail {
+
+/**
+ * @internal
+ *
+ * Forward declaration of `string_dispatcher`, so that builtins can use it. It's defined at the end of
+ * `string_dispatch.h`.
+ */
+template<class T, class... Tags>
+struct string_dispatcher;
+
+} // namespace sn::detail
+
 /**
  * @internal
  *
