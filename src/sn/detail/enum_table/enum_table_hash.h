@@ -190,6 +190,10 @@ struct basic_enum_table_hash {
         // as chars [0, 8) and [2, 10). That's OK because the size is hashed in too, and for a given size this is
         // injective. Longer strings are hashed two words at a time, and the last two words are again loaded with
         // overlap.
+        //
+        // The state goes into both sides of each multiplication. A product is zero whenever one side is zero, and if
+        // only the second side depended on the seed then a string with the right word at the right place would hash
+        // the same for all seeds, and two such strings could never be told apart.
         Word a = 0;
         Word b = 0;
         Word state = k0 + seed * k4;
@@ -210,7 +214,7 @@ struct basic_enum_table_hash {
                     w0 = to_lower_ascii_word(w0);
                     w1 = to_lower_ascii_word(w1);
                 }
-                state = multiply_fold(static_cast<Word>(w0 ^ k1), static_cast<Word>(w1 ^ state));
+                state = multiply_fold(static_cast<Word>(w0 ^ k1 ^ state), static_cast<Word>(w1 ^ state));
             }
             a = load_word(p + size - 2 * word_size);
             b = load_word(p + size - word_size);
@@ -219,7 +223,7 @@ struct basic_enum_table_hash {
             a = to_lower_ascii_word(a);
             b = to_lower_ascii_word(b);
         }
-        Word result = multiply_fold(static_cast<Word>(a ^ k1), static_cast<Word>(b ^ state));
+        Word result = multiply_fold(static_cast<Word>(a ^ k1 ^ state), static_cast<Word>(b ^ state));
         return multiply_fold(static_cast<Word>(result ^ k2), static_cast<Word>(static_cast<Word>(size) ^ k3));
     }
 

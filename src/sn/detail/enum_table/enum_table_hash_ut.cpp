@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
@@ -62,6 +63,16 @@ TEST(enum_table_hash, multiply_fold_portable) {
         std::uint64_t b = next_random(&state);
         EXPECT_EQ(multiply_fold(a, b), multiply_fold_portable(a, b)) << "with a = " << a << " and b = " << b;
     }
+
+    // Values around the powers of two are where the carries between the halves of the product are.
+    std::vector<std::uint64_t> edges = {0, 1, 2};
+    for (int bit = 0; bit < 64; bit++) {
+        std::uint64_t value = static_cast<std::uint64_t>(1) << bit;
+        edges.insert(edges.end(), {value - 1, value, value + 1, ~value, ~(value - 1)});
+    }
+    for (std::uint64_t a : edges)
+        for (std::uint64_t b : edges)
+            EXPECT_EQ(multiply_fold(a, b), multiply_fold_portable(a, b)) << "with a = " << a << " and b = " << b;
 }
 
 TEST(enum_table_hash, multiply_fold_constexpr) {
@@ -172,6 +183,24 @@ TYPED_TEST(enum_table_hash_test, hash_string_sensitivity) {
         EXPECT_NE(hash::hash_string(longer.data(), longer.size(), false, 0), value) << "with size = " << size;
         EXPECT_NE(hash::hash_string(string.data(), string.size() - 1, false, 0), value) << "with size = " << size;
         EXPECT_NE(hash::hash_string(string.data(), string.size(), false, 1), value) << "with size = " << size;
+    }
+}
+
+TYPED_TEST(enum_table_hash_test, hash_string_seeds) {
+    using hash = TypeParam;
+
+    // No string should hash the same for all seeds, not even one that contains the constants of the hash function.
+    // These strings consist of the little-endian bytes of the multiplier that's xored into the first word.
+    std::string_view word64 = "\x4F\xEB\xD4\x27\x3D\xAE\xB2\xC2";
+    std::string_view word32 = "\x4F\xEB\xD4\x27";
+    for (std::string_view word : {word64, word32}) {
+        for (std::string_view tail : {"x", "abcdefg", "12345678tail-A-tail"}) {
+            std::string string = std::string(word) + std::string(tail);
+            std::size_t same = 0;
+            for (std::uint32_t seed = 1; seed < 64; seed++)
+                same += hash::hash_string(string.data(), string.size(), false, seed) == hash::hash_string(string.data(), string.size(), false, 0);
+            EXPECT_LT(same, 2u) << "with string = " << string;
+        }
     }
 }
 

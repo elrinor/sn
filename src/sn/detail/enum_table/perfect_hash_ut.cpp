@@ -144,6 +144,45 @@ TYPED_TEST(perfect_hash_test, constexpr_hash) {
     run_constexpr_hash_test<TypeParam, std::uint32_t>();
 }
 
+// Hash that puts all keys into one bucket with first-level seed 1, and works normally with other seeds.
+struct overflowing_hash : enum_table_hash_64 {
+    template<class Key>
+    [[nodiscard]] static constexpr hash_type mix(Key key, hash_type seed) noexcept {
+        return seed == 1 ? 0 : enum_table_hash_64::mix(key, seed);
+    }
+};
+
+// Hash that maps every key to zero with every seed, so that no perfect hash can be built.
+struct constant_hash : enum_table_hash_64 {
+    template<class Key>
+    [[nodiscard]] static constexpr hash_type mix(Key, hash_type) noexcept {
+        return 0;
+    }
+};
+
+TEST(perfect_hash, first_seed_retry) {
+    // A few keys fit into one bucket, and are then placed with the second-level seeds.
+    std::array<std::uint64_t, 4> small_keys = {{}};
+    for (std::size_t i = 0; i < small_keys.size(); i++)
+        small_keys[i] = i * 10;
+    perfect_hash<64, std::uint64_t, overflowing_hash> small_hash = make_perfect_hash<64, overflowing_hash>(small_keys);
+    EXPECT_EQ(small_hash.first_seed, 1u);
+    expect_perfect<overflowing_hash>(small_keys, "keys in one bucket");
+
+    // More keys than that don't, and the first-level seed is retried.
+    std::array<std::uint64_t, max_perfect_hash_bucket_size + 1> big_keys = {{}};
+    for (std::size_t i = 0; i < big_keys.size(); i++)
+        big_keys[i] = i * 10;
+    perfect_hash<64, std::uint64_t, overflowing_hash> big_hash = make_perfect_hash<64, overflowing_hash>(big_keys);
+    EXPECT_EQ(big_hash.first_seed, 2u);
+    expect_perfect<overflowing_hash>(big_keys, "keys that overflow one bucket");
+}
+
+TEST(perfect_hash, unbuildable) {
+    std::array<std::uint64_t, 3> keys = {{1, 2, 3}};
+    EXPECT_THROW((void) (make_perfect_hash<4, constant_hash>(keys)), std::logic_error);
+}
+
 TYPED_TEST(perfect_hash_test, duplicate_keys) {
     std::array<std::uint64_t, 3> keys = {{1, 2, 1}};
     EXPECT_TRUE(has_duplicate_keys(keys));

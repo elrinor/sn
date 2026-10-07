@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm> // For std::max.
 #include <array>
 #include <bit> // For std::bit_ceil, std::has_single_bit.
 #include <cstddef>
@@ -14,7 +13,7 @@ namespace sn::detail {
 /**
  * @param key_count                     Number of keys.
  * @return                              Number of slots that `perfect_hash` uses for this number of keys. Always a
- *                                      power of two, with at least 25% of the slots left empty.
+ *                                      power of two, with at least 20% of the slots left empty.
  */
 [[nodiscard]] constexpr std::size_t perfect_hash_size(std::size_t key_count) noexcept {
     return std::bit_ceil(key_count + key_count / 4 + 1);
@@ -45,7 +44,7 @@ struct hash_buckets {
             start[bucket_of[i] + 1]++;
         }
         for (std::size_t b = 0; b < size; b++) {
-            max_bucket_size = std::max(max_bucket_size, start[b + 1]);
+            max_bucket_size = start[b + 1] > max_bucket_size ? start[b + 1] : max_bucket_size;
             start[b + 1] += start[b];
         }
         std::array<std::size_t, size> filled = {{}};
