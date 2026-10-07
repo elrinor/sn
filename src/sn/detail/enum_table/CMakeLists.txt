@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_DETAIL_ENUM_TABLE_SOURCES
     enum_table.h
-    enum_table_exceptions.h
-    enum_table_exceptions.cpp
+    enum_table_errors.h
+    enum_table_errors.cpp
     lowercase_buffer.h
     overwrite_buffer.h
     universal_enum_table.h)

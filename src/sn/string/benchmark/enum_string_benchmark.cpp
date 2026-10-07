@@ -28,24 +28,24 @@ SN_DEFINE_ENUM_REFLECTION(BenchEnum, ({
 }))
 SN_DEFINE_ENUM_STRING_FUNCTIONS(BenchEnum, sn::case_insensitive)
 
-BENCHMARK_NOINLINE static bool do_try_from_string(std::string_view src, BenchEnum *dst) {
-    return sn::try_from_string(src, dst);
+BENCHMARK_NOINLINE static bool do_from_string(std::string_view src, BenchEnum *dst) {
+    return sn::from_string(src, dst, nullptr);
 }
 
 static void benchmark_string_to_enum(benchmark::State &state) { // NOLINT: Google linter complains about the API in Google's own benchmark lib. Doh.
     std::size_t result = 0;
     for (auto _ : state) {
         BenchEnum value;
-        result += do_try_from_string("dDdDd", &value);
-        result += do_try_from_string("aaaaa", &value);
-        result += do_try_from_string("ccccC", &value);
-        result += do_try_from_string("eeeee", &value);
-        result += do_try_from_string("aAAaa", &value);
-        result += do_try_from_string("bBbbB", &value);
-        result += do_try_from_string("aAAAA", &value);
-        result += do_try_from_string("aaAaa", &value);
-        result += do_try_from_string("bbbBB", &value);
-        result += do_try_from_string("ddddd", &value);
+        result += do_from_string("dDdDd", &value);
+        result += do_from_string("aaaaa", &value);
+        result += do_from_string("ccccC", &value);
+        result += do_from_string("eeeee", &value);
+        result += do_from_string("aAAaa", &value);
+        result += do_from_string("bBbbB", &value);
+        result += do_from_string("aAAAA", &value);
+        result += do_from_string("aaAaa", &value);
+        result += do_from_string("bbbBB", &value);
+        result += do_from_string("ddddd", &value);
     }
     benchmark::DoNotOptimize(result);
 }

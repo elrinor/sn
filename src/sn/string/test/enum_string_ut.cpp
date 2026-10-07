@@ -53,9 +53,9 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(basic_test_enum, sn::case_sensitive)
 TEST(string_enum, basic) {
     sn::detail::tester<basic_test_enum> tester;
 
-    tester.expect_throwing_to({BASIC_UNSERIALIZABLE});
+    tester.expect_failing_to({BASIC_UNSERIALIZABLE});
 
-    tester.expect_throwing_from({
+    tester.expect_failing_from({
         "AAA",
         "ccc",
         "1",
@@ -68,6 +68,7 @@ TEST(string_enum, basic) {
         "aaa\t",
         "\taaa\t",
     });
+    tester.expect_failing_from_with_message("AAA", "Cannot deserialize 'AAA' as ");
 
     tester.expect_valid_fromto({
         {"aaa", BASIC_VALUE_1},
@@ -98,6 +99,9 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(ci_test_enum, sn::case_insensitive)
 
 TEST(string_enum, case_insensitive) {
     tester<ci_test_enum> t;
+
+    // Error message should have the original string, not the lowercased one.
+    t.expect_failing_from_with_message("XyZ", "Cannot deserialize 'XyZ' as ");
 
     t.expect_valid_fromto({
         {"AAA", CI_VALUE_1},
@@ -173,22 +177,22 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(int, sn::case_insensitive, first_test_tag, secon
 TEST(string_enum, tagged) {
     tester<int> t;
 
-    t.expect_throwing_to({100, 3}, gl1_test_tag());
-    t.expect_throwing_from({"GL_100"}, gl1_test_tag());
+    t.expect_failing_to({100, 3}, gl1_test_tag());
+    t.expect_failing_from({"GL_100"}, gl1_test_tag());
     t.expect_valid_fromto({
         {"GL_1", 1},
         {"GL_2", 2}
     }, gl1_test_tag());
 
-    t.expect_throwing_to({1, 300}, gl2_test_tag());
-    t.expect_throwing_from({"GL_1"}, gl2_test_tag());
+    t.expect_failing_to({1, 300}, gl2_test_tag());
+    t.expect_failing_from({"GL_1"}, gl2_test_tag());
     t.expect_valid_fromto({
         {"GL_100", 100},
         {"GL_200", 200}
     }, gl2_test_tag());
 
-    t.expect_throwing_to({1}, first_test_tag(), second_test_tag());
-    t.expect_throwing_from({"GL_1"}, first_test_tag(), second_test_tag());
+    t.expect_failing_to({1}, first_test_tag(), second_test_tag());
+    t.expect_failing_from({"GL_1"}, first_test_tag(), second_test_tag());
     t.expect_valid_fromto({{"GL_0", 0}}, first_test_tag(), second_test_tag());
 }
 
@@ -209,7 +213,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(char_test_enum, sn::case_insensitive)
 TEST(string_enum, char) {
     tester<char_test_enum> t;
 
-    t.expect_throwing_to_with_message({{CHAR_VALUE_UNK, "'64'"}});
+    t.expect_failing_to_with_message({{CHAR_VALUE_UNK, "'64'"}});
 
     t.expect_valid_fromto({
         {"CHAR_1", CHAR_VALUE_1},
@@ -233,7 +237,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(schar_test_enum, sn::case_sensitive)
 TEST(string_enum, signed_char) {
     tester<schar_test_enum> t;
 
-    t.expect_throwing_to_with_message({
+    t.expect_failing_to_with_message({
         {SCHAR_VALUE_UNK, "'-100'"}
     });
 
@@ -301,7 +305,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(negative_test_enum, sn::case_sensitive)
 TEST(string_enum, negative) {
     tester<negative_test_enum> t;
 
-    t.expect_throwing_to_with_message({
+    t.expect_failing_to_with_message({
         {NEGATIVE_UNSERIALIZABLE, "'-2'"}
     });
 
@@ -331,7 +335,7 @@ SN_DEFINE_ENUM_STRING_FUNCTIONS(utf8_test_enum, sn::case_insensitive)
 TEST(string_enum, utf8) {
     tester<utf8_test_enum> t;
 
-    t.expect_throwing_from({
+    t.expect_failing_from({
         "\xd0\xb4\xd0\xbe\xd0\xbc" // "dom" (house) in Russian.
     });
 
@@ -381,16 +385,17 @@ TEST(string_enum, namespaces) {
     // sn::detail functions work and hook into the right reflection, despite being in the wrong namespace.
     sn::detail::adl_test_enum v = sn::detail::ADL_VALUE_0;
     std::string s;
-    EXPECT_TRUE(sn::detail::try_from_string("_1", &v));
+    EXPECT_TRUE(sn::detail::from_string("_1", &v, nullptr));
     EXPECT_EQ(v, sn::detail::ADL_VALUE_1);
-    EXPECT_TRUE(sn::detail::try_to_string(sn::detail::ADL_VALUE_1, &s));
+    EXPECT_TRUE(sn::detail::to_string(sn::detail::ADL_VALUE_1, &s, nullptr));
     EXPECT_EQ(s, "_1");
 
     v = sn::detail::ADL_VALUE_0;
     s.clear();
-    EXPECT_NO_THROW(sn::detail::from_string("_1", &v));
+    sn::error error;
+    EXPECT_TRUE(sn::detail::from_string("_1", &v, &error));
     EXPECT_EQ(v, sn::detail::ADL_VALUE_1);
-    EXPECT_NO_THROW(sn::detail::to_string(sn::detail::ADL_VALUE_1, &s));
+    EXPECT_TRUE(sn::detail::to_string(sn::detail::ADL_VALUE_1, &s, &error));
     EXPECT_EQ(s, "_1");
 }
 

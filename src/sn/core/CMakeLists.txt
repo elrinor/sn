@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 set(SN_CORE_SOURCES
-    exception.h
+    error.h
+    error_fwd.h
+    expected.h
     globals.h
     preprocessor.h
     tag.h
@@ -29,6 +31,8 @@ endif()
 
 if(SN_BUILD_TESTS)
     set(TEST_SN_CORE_SOURCES
+        test/error_ut.cpp
+        test/expected_ut.cpp
         test/preprocessor_ut.cpp
         test/type_name_ut.cpp)
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 
+#include "sn/core/error_fwd.h"
 #include "sn/core/preprocessor.h"
 #include "sn/reflection/enum_reflection.h"
 #include "sn/detail/codegen/tuple_types.h"
@@ -24,20 +25,12 @@
         _SN_DEFINE_ENUM_STRING_TABLE(value, ENUM, CASE_SENSITIVITY, reflection)                                         \
     };                                                                                                                  \
                                                                                                                         \
-    [[nodiscard]] ATTRIBUTES bool try_to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept { \
-        return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_to_string(src, dst);                    \
+    [[nodiscard]] ATTRIBUTES bool to_string(const ENUM &src, std::string *dst, sn::error *err __VA_OPT__(,) __VA_ARGS__) { \
+        return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.to_string(src, dst, err);                  \
     }                                                                                                                   \
                                                                                                                         \
-    ATTRIBUTES void to_string(const ENUM &src, std::string *dst __VA_OPT__(,) __VA_ARGS__) {                            \
-        _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.to_string(src, dst);                               \
-    }                                                                                                                   \
-                                                                                                                        \
-    [[nodiscard]] ATTRIBUTES bool try_from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) noexcept { \
-        return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.try_from_string(src, dst);                  \
-    }                                                                                                                   \
-                                                                                                                        \
-    ATTRIBUTES void from_string(std::string_view src, ENUM *dst __VA_OPT__(,) __VA_ARGS__) {                            \
-        _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.from_string(src, dst);                             \
+    [[nodiscard]] ATTRIBUTES bool from_string(std::string_view src, ENUM *dst, sn::error *err __VA_OPT__(,) __VA_ARGS__) { \
+        return _enum_table_container<ENUM __VA_OPT__(,) __VA_ARGS__>::value.from_string(src, dst, err);                \
     }
 
 #define SN_DEFINE_ENUM_STRING_FUNCTIONS(ENUM, CASE_SENSITIVITY, ... /* TAGS */)                                         \

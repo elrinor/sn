@@ -6,19 +6,18 @@
 #include <string>
 #include <string_view>
 
+#include "sn/core/error_fwd.h"
 #include "sn/core/preprocessor.h" // For __VA_OPT__.
 
 /**
  * @internal
  *
- * Same as `SN_DECLARE_STRING_FUNCTIONS`, but `to_string` and `try_to_string` take `TYPE` by value. This can result in
- * better codegen on most architectures as the 1st arg can now be passed in registers.
+ * Same as `SN_DECLARE_STRING_FUNCTIONS`, but `to_string` takes `TYPE` by value. This can result in better codegen on
+ * most architectures as the 1st arg can now be passed in registers.
  */
 #define _SN_DECLARE_STRING_FUNCTIONS_BY_VALUE(TYPE, ... /* TAGS */) \
-    [[nodiscard]] bool try_to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
-    void to_string(TYPE src, std::string *dst __VA_OPT__(,) __VA_ARGS__); \
-    [[nodiscard]] bool try_from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
-    void from_string(std::string_view src, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
+    [[nodiscard]] bool to_string(TYPE src, std::string *dst, sn::error *err __VA_OPT__(,) __VA_ARGS__); \
+    [[nodiscard]] bool from_string(std::string_view src, TYPE *dst, sn::error *err __VA_OPT__(,) __VA_ARGS__);
 
 /**
  * @internal
@@ -31,18 +30,10 @@
  */
 #define _SN_DEFINE_INLINE_STRING_TAG_EATING_FUNCTIONS(TYPE, TAG) \
     template<class... Tags> \
-    [[nodiscard]] inline bool try_to_string(const TYPE &src, std::string *dst, TAG tag, Tags... tags) noexcept { \
-        return try_to_string(src, dst, tags...); \
+    [[nodiscard]] inline bool to_string(const TYPE &src, std::string *dst, sn::error *err, TAG, Tags... tags) { \
+        return to_string(src, dst, err, tags...); \
     } \
     template<class... Tags> \
-    inline void to_string(const TYPE &src, std::string *dst, TAG tag, Tags... tags) { \
-        return to_string(src, dst, tags...); \
-    } \
-    template<class... Tags> \
-    [[nodiscard]] inline bool try_from_string(std::string_view src, TYPE *dst, TAG tag, Tags... tags) noexcept { \
-        return try_from_string(src, dst, tags...); \
-    } \
-    template<class... Tags> \
-    inline void from_string(std::string_view src, TYPE *dst, TAG tag, Tags... tags) { \
-        return from_string(src, dst, tags...); \
+    [[nodiscard]] inline bool from_string(std::string_view src, TYPE *dst, sn::error *err, TAG, Tags... tags) { \
+        return from_string(src, dst, err, tags...); \
     }

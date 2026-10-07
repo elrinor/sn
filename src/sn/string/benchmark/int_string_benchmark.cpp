@@ -7,14 +7,16 @@
 template<class Tag>
 static void benchmark_int_to_string(benchmark::State &state, Tag tag) { // NOLINT
     std::string tmp;
+    std::size_t result = 0;
     for (auto _ : state) {
-        sn::to_string(10, &tmp, tag);
-        sn::to_string(1000, &tmp, tag);
-        sn::to_string(100000, &tmp, tag);
-        sn::to_string(10000000, &tmp, tag);
-        sn::to_string(1000000000, &tmp, tag);
+        result += sn::to_string(10, &tmp, nullptr, tag);
+        result += sn::to_string(1000, &tmp, nullptr, tag);
+        result += sn::to_string(100000, &tmp, nullptr, tag);
+        result += sn::to_string(10000000, &tmp, nullptr, tag);
+        result += sn::to_string(1000000000, &tmp, nullptr, tag);
     }
     benchmark::DoNotOptimize(tmp);
+    benchmark::DoNotOptimize(result);
 }
 
 static void benchmark_int_to_string_base2(benchmark::State &state) { // NOLINT

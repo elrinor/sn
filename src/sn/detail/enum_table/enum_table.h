@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 
+#include "sn/core/error_fwd.h"
 #include "sn/core/type_name.h"
 #include "sn/core/globals.h"
 
@@ -33,20 +34,12 @@ public:
     template<class... Args>
     explicit constexpr enum_table(Args &&... args) : _table(mode, &sn::type_name<T>, is_signed_ex_v<T>, std::forward<Args>(args)...) {}
 
-    void to_string(T src, std::string *dst) const {
-        _table.to_string(static_cast<std::uint64_t>(src), dst);
+    [[nodiscard]] bool to_string(T src, std::string *dst, sn::error *err) const {
+        return _table.to_string(static_cast<std::uint64_t>(src), dst, err);
     }
 
-    void from_string(std::string_view src, T *dst) const {
-        *dst = static_cast<T>(_table.template from_string<mode>(src));
-    }
-
-    [[nodiscard]] bool try_to_string(T src, std::string *dst) const noexcept {
-        return _table.try_to_string(static_cast<std::uint64_t>(src), dst);
-    }
-
-    [[nodiscard]] bool try_from_string(std::string_view src, T *dst) const noexcept {
-        auto result = _table.template try_from_string<mode>(src);
+    [[nodiscard]] bool from_string(std::string_view src, T *dst, sn::error *err) const {
+        auto result = _table.template from_string<mode>(src, err);
         if (result.ok)
             *dst = static_cast<T>(result.value);
         return result.ok;

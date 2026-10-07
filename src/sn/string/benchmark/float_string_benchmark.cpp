@@ -6,14 +6,16 @@
 
 static void benchmark_double_to_string(benchmark::State &state) {
     std::string tmp;
+    std::size_t result = 0;
     for (auto _ : state) {
-        sn::to_string(0.5, &tmp);
-        sn::to_string(3.14159, &tmp);
-        sn::to_string(123.456, &tmp);
-        sn::to_string(1e10, &tmp);
-        sn::to_string(-0.001, &tmp);
+        result += sn::to_string(0.5, &tmp, nullptr);
+        result += sn::to_string(3.14159, &tmp, nullptr);
+        result += sn::to_string(123.456, &tmp, nullptr);
+        result += sn::to_string(1e10, &tmp, nullptr);
+        result += sn::to_string(-0.001, &tmp, nullptr);
     }
     benchmark::DoNotOptimize(tmp);
+    benchmark::DoNotOptimize(result);
 }
 
 static void benchmark_double_to_new_string(benchmark::State &state) {

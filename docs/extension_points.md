@@ -41,3 +41,7 @@ calling `sn::to_string(bool)`. Several ways around this issue were considered:
 
 Drawback of this approach is that the user can still ADL-invoke string functions (using `to_string` instead of
 `sn::to_string`) to bypass all the checks. Can't do anything about it w/o changing the extension point signatures.
+
+Note that ADL also looks into the namespaces of all argument types, including the `sn::error *` that every extension
+point takes. This is why `sn::error` is declared in `sn::errors` and not in `sn`, see
+[error_handling.md](error_handling.md#why-snerror-is-declared-in-snerrors).

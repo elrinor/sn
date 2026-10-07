@@ -3,42 +3,81 @@
 #include <string>
 #include <string_view>
 
+#include <expected> // For std::unexpected.
+#include <utility> // For std::move.
+
+#include "sn/core/error.h"
+#include "sn/core/expected.h"
 #include "sn/core/tag.h"
 #include "sn/string/detail/string_dispatch.h"
 
 namespace sn {
 
+/**
+ * Serializes `src` into `*dst`.
+ *
+ * This is also the signature of the extension point that you implement for your types, so it's what you call when
+ * serializing nested values.
+ *
+ * @param src                           Value to serialize.
+ * @param dst                           Output. Unspecified on failure.
+ * @param err                           Error output, can be `nullptr`. Written only on failure, so a single
+ *                                      `sn::error` can be reused across calls.
+ * @param tags                          Tags, if any.
+ * @return                              Whether serialization succeeded.
+ */
 template<class T, sn::concepts::tag... Tags>
-[[nodiscard]] bool try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
-    return sn::detail::do_try_to_string(src, dst, tags...);
+[[nodiscard]] bool to_string(const T &src, std::string *dst, sn::error *err, Tags... tags) {
+    return sn::detail::do_to_string(src, dst, err, tags...);
 }
 
+/**
+ * Serializes `src`.
+ *
+ * @param src                           Value to serialize.
+ * @param tags                          Tags, if any.
+ * @return                              Serialized value, or an error.
+ */
 template<class T, sn::concepts::tag... Tags>
-void to_string(const T &src, std::string *dst, Tags... tags) {
-    sn::detail::do_to_string(src, dst, tags...);
-}
-
-template<class T, sn::concepts::tag... Tags>
-[[nodiscard]] std::string to_string(const T &src, Tags... tags) {
+[[nodiscard]] sn::expected<std::string> to_string(const T &src, Tags... tags) {
     std::string result;
-    sn::detail::do_to_string(src, &result, tags...);
+    sn::error error;
+    if (!sn::detail::do_to_string(src, &result, &error, tags...))
+        return std::unexpected(std::move(error));
     return result;
 }
 
+/**
+ * Deserializes `src` into `*dst`.
+ *
+ * This is also the signature of the extension point that you implement for your types, so it's what you call when
+ * deserializing nested values. Pass `nullptr` as `err` for speculative parsing, it never allocates.
+ *
+ * @param src                           Value to deserialize.
+ * @param dst                           Output. Unspecified on failure.
+ * @param err                           Error output, can be `nullptr`. Written only on failure, so a single
+ *                                      `sn::error` can be reused across calls.
+ * @param tags                          Tags, if any.
+ * @return                              Whether deserialization succeeded.
+ */
 template<class T, sn::concepts::tag... Tags>
-[[nodiscard]] bool try_from_string(std::string_view src, T *dst, Tags... tags) noexcept {
-    return sn::detail::do_try_from_string(src, dst, tags...);
+[[nodiscard]] bool from_string(std::string_view src, T *dst, sn::error *err, Tags... tags) {
+    return sn::detail::do_from_string(src, dst, err, tags...);
 }
 
+/**
+ * Deserializes `src` as `T`.
+ *
+ * @param src                           Value to deserialize.
+ * @param tags                          Tags, if any.
+ * @return                              Deserialized value, or an error.
+ */
 template<class T, sn::concepts::tag... Tags>
-void from_string(std::string_view src, T *dst, Tags... tags) {
-    sn::detail::do_from_string(src, dst, tags...);
-}
-
-template<class T, sn::concepts::tag... Tags>
-[[nodiscard]] T from_string(std::string_view src, Tags... tags) {
+[[nodiscard]] sn::expected<T> from_string(std::string_view src, Tags... tags) {
     T result;
-    sn::detail::do_from_string(src, &result, tags...);
+    sn::error error;
+    if (!sn::detail::do_from_string(src, &result, &error, tags...))
+        return std::unexpected(std::move(error));
     return result;
 }
 

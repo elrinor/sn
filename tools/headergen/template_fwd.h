@@ -3,6 +3,7 @@
 //
 #pragma once
 @INCLUDES@
+#include "sn/core/error_fwd.h"
 #include "sn/core/preprocessor.h" // For __VA_OPT__.
 @DECLS@
 //
@@ -19,11 +20,13 @@
  *
  * The following declarations will be generated:
  * ```
- * [[nodiscard]] bool try_to_@LOWER@(const TYPE &src, @DST@) noexcept;
- * void to_@LOWER@(const TYPE &src, @DST@);
- * [[nodiscard]] bool try_from_@LOWER@(@SRC@, TYPE *dst) noexcept;
- * void from_@LOWER@(@SRC@, TYPE *dst);
+ * [[nodiscard]] bool to_@LOWER@(const TYPE &src, @DST@, sn::error *err);
+ * [[nodiscard]] bool from_@LOWER@(@SRC@, TYPE *dst, sn::error *err);
  * ```
+ *
+ * Both functions should return `true` on success. On failure, they should return `false`, and if `err` is not null,
+ * write a description of the problem into `*err`. `*err` must not be touched on success. `err` should be passed through
+ * when (de)serializing nested values.
  *
  * If you pass any tag types to this macro, they will be appended as additional arguments to the declared `@TYPE@`
  * functions. Note that tags are always passed by value.
@@ -36,10 +39,8 @@
  * @param ...                           Tags, if any.
  */
 #define SN_DECLARE_@UPPER@_FUNCTIONS(TYPE, ... /* TAGS */) \
-    [[nodiscard]] bool try_to_@LOWER@(const TYPE &src, @DST@ __VA_OPT__(,) __VA_ARGS__) noexcept; \
-    void to_@LOWER@(const TYPE &src, @DST@ __VA_OPT__(,) __VA_ARGS__); \
-    [[nodiscard]] bool try_from_@LOWER@(@SRC@, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
-    void from_@LOWER@(@SRC@, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
+    [[nodiscard]] bool to_@LOWER@(const TYPE &src, @DST@, sn::error *err __VA_OPT__(,) __VA_ARGS__); \
+    [[nodiscard]] bool from_@LOWER@(@SRC@, TYPE *dst, sn::error *err __VA_OPT__(,) __VA_ARGS__);
 
 /**
  * Same as `SN_DECLARE_@UPPER@_FUNCTIONS`, but declares friend functions. To be used inside a class definition.
@@ -47,7 +48,5 @@
  * @see SN_DECLARE_@UPPER@_FUNCTIONS
  */
 #define SN_DECLARE_FRIEND_@UPPER@_FUNCTIONS(TYPE, ... /* TAGS */) \
-    friend bool try_to_@LOWER@(const TYPE &src, @DST@ __VA_OPT__(,) __VA_ARGS__) noexcept; \
-    friend void to_@LOWER@(const TYPE &src, @DST@ __VA_OPT__(,) __VA_ARGS__); \
-    friend bool try_from_@LOWER@(@SRC@, TYPE *dst __VA_OPT__(,) __VA_ARGS__) noexcept; \
-    friend void from_@LOWER@(@SRC@, TYPE *dst __VA_OPT__(,) __VA_ARGS__);
+    friend bool to_@LOWER@(const TYPE &src, @DST@, sn::error *err __VA_OPT__(,) __VA_ARGS__); \
+    friend bool from_@LOWER@(@SRC@, TYPE *dst, sn::error *err __VA_OPT__(,) __VA_ARGS__);

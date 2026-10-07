@@ -11,8 +11,8 @@ set(SN_STRING_SOURCES
     detail/string_builtins.cpp
     detail/string_builtins.h
     detail/string_dispatch.h
-    detail/string_exceptions.cpp
-    detail/string_exceptions.h
+    detail/string_errors.cpp
+    detail/string_errors.h
     detail/string_shortcuts.h)
 
 add_library(sn_string STATIC ${SN_STRING_SOURCES})
