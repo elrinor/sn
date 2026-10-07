@@ -5,19 +5,6 @@
 @INCLUDES@
 #include "sn/core/preprocessor.h" // For __VA_OPT__.
 @DECLS@
-namespace sn::detail {
-
-/**
- * @internal
- *
- * Forward declaration of `@LOWER@_dispatcher`, so that builtins can use it. It's defined at the end of
- * `@LOWER@_dispatch.h`.
- */
-template<class T, class... Tags>
-struct @LOWER@_dispatcher;
-
-} // namespace sn::detail
-
 /**
  * @internal
  *

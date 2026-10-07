@@ -82,49 +82,4 @@ void do_from_string(std::string_view src, T *dst, Tags... tags) {
     from_string(src, dst, tags...);
 }
 
-/**
- * @internal
- *
- * Gives builtins access to the concepts and functions above.
- *
- * Builtins are declared before the concepts, so they can't name them, and they can't call `sn::to_string` either.
- * Builtins for templates like `std::vector<T>` need both - to check that `T` is supported, and to convert the
- * elements. Names used inside a class template are looked up when it's instantiated, and by then this whole header is
- * visible. So such builtins go through this class instead.
- */
-template<class T, class... Tags>
-struct string_dispatcher {
-    [[nodiscard]] static consteval bool is_try_to_stringable() {
-        return sn::concepts::try_to_stringable<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_to_stringable() {
-        return sn::concepts::to_stringable<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_try_from_stringable() {
-        return sn::concepts::try_from_stringable<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_from_stringable() {
-        return sn::concepts::from_stringable<T, Tags...>;
-    }
-
-    [[nodiscard]] static bool try_to_string(const T &src, std::string *dst, Tags... tags) noexcept {
-        return do_try_to_string(src, dst, tags...);
-    }
-
-    static void to_string(const T &src, std::string *dst, Tags... tags) {
-        do_to_string(src, dst, tags...);
-    }
-
-    [[nodiscard]] static bool try_from_string(std::string_view src, T *dst, Tags... tags) noexcept {
-        return do_try_from_string(src, dst, tags...);
-    }
-
-    static void from_string(std::string_view src, T *dst, Tags... tags) {
-        do_from_string(src, dst, tags...);
-    }
-};
-
 } // namespace sn::detail

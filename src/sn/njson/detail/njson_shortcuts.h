@@ -7,19 +7,6 @@
 
 #include "sn/core/preprocessor.h" // For __VA_OPT__.
 
-namespace sn::detail {
-
-/**
- * @internal
- *
- * Forward declaration of `njson_dispatcher`, so that builtins can use it. It's defined at the end of
- * `njson_dispatch.h`.
- */
-template<class T, class... Tags>
-struct njson_dispatcher;
-
-} // namespace sn::detail
-
 /**
  * @internal
  *

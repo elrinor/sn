@@ -79,49 +79,4 @@ void do_from_@LOWER@(@SRC@, T *dst, Tags... tags) {
     from_@LOWER@(src, dst, tags...);
 }
 
-/**
- * @internal
- *
- * Gives builtins access to the concepts and functions above.
- *
- * Builtins are declared before the concepts, so they can't name them, and they can't call `sn::to_@LOWER@` either.
- * Builtins for templates like `std::vector<T>` need both - to check that `T` is supported, and to convert the
- * elements. Names used inside a class template are looked up when it's instantiated, and by then this whole header is
- * visible. So such builtins go through this class instead.
- */
-template<class T, class... Tags>
-struct @LOWER@_dispatcher {
-    [[nodiscard]] static consteval bool is_try_to_@LOWER@able() {
-        return sn::concepts::try_to_@LOWER@able<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_to_@LOWER@able() {
-        return sn::concepts::to_@LOWER@able<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_try_from_@LOWER@able() {
-        return sn::concepts::try_from_@LOWER@able<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_from_@LOWER@able() {
-        return sn::concepts::from_@LOWER@able<T, Tags...>;
-    }
-
-    [[nodiscard]] static bool try_to_@LOWER@(const T &src, @DST@, Tags... tags) noexcept {
-        return do_try_to_@LOWER@(src, dst, tags...);
-    }
-
-    static void to_@LOWER@(const T &src, @DST@, Tags... tags) {
-        do_to_@LOWER@(src, dst, tags...);
-    }
-
-    [[nodiscard]] static bool try_from_@LOWER@(@SRC@, T *dst, Tags... tags) noexcept {
-        return do_try_from_@LOWER@(src, dst, tags...);
-    }
-
-    static void from_@LOWER@(@SRC@, T *dst, Tags... tags) {
-        do_from_@LOWER@(src, dst, tags...);
-    }
-};
-
 } // namespace sn::detail

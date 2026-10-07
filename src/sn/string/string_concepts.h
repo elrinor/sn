@@ -42,6 +42,27 @@ concept from_stringable =
 
 } // namespace sn::detail::concepts
 
+namespace sn::detail {
+
+//
+// Same as the concepts above, but variable templates can be declared before they're defined, and concepts can't. So
+// builtins for templates like std::vector<T> can forward-declare these to check that T is supported.
+//
+
+template<class T, class... Tags>
+constexpr bool is_try_to_stringable_v = sn::detail::concepts::try_to_stringable<T, Tags...>;
+
+template<class T, class... Tags>
+constexpr bool is_to_stringable_v = sn::detail::concepts::to_stringable<T, Tags...>;
+
+template<class T, class... Tags>
+constexpr bool is_try_from_stringable_v = sn::detail::concepts::try_from_stringable<T, Tags...>;
+
+template<class T, class... Tags>
+constexpr bool is_from_stringable_v = sn::detail::concepts::from_stringable<T, Tags...>;
+
+} // namespace sn::detail
+
 namespace sn::concepts {
 
 using sn::detail::concepts::try_to_stringable;

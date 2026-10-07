@@ -42,6 +42,27 @@ concept from_@LOWER@able =
 
 } // namespace sn::detail::concepts
 
+namespace sn::detail {
+
+//
+// Same as the concepts above, but variable templates can be declared before they're defined, and concepts can't. So
+// builtins for templates like std::vector<T> can forward-declare these to check that T is supported.
+//
+
+template<class T, class... Tags>
+constexpr bool is_try_to_@LOWER@able_v = sn::detail::concepts::try_to_@LOWER@able<T, Tags...>;
+
+template<class T, class... Tags>
+constexpr bool is_to_@LOWER@able_v = sn::detail::concepts::to_@LOWER@able<T, Tags...>;
+
+template<class T, class... Tags>
+constexpr bool is_try_from_@LOWER@able_v = sn::detail::concepts::try_from_@LOWER@able<T, Tags...>;
+
+template<class T, class... Tags>
+constexpr bool is_from_@LOWER@able_v = sn::detail::concepts::from_@LOWER@able<T, Tags...>;
+
+} // namespace sn::detail
+
 namespace sn::concepts {
 
 using sn::detail::concepts::try_to_@LOWER@able;

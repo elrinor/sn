@@ -81,49 +81,4 @@ void do_from_njson(const nlohmann::json &src, T *dst, Tags... tags) {
     from_njson(src, dst, tags...);
 }
 
-/**
- * @internal
- *
- * Gives builtins access to the concepts and functions above.
- *
- * Builtins are declared before the concepts, so they can't name them, and they can't call `sn::to_njson` either.
- * Builtins for templates like `std::vector<T>` need both - to check that `T` is supported, and to convert the
- * elements. Names used inside a class template are looked up when it's instantiated, and by then this whole header is
- * visible. So such builtins go through this class instead.
- */
-template<class T, class... Tags>
-struct njson_dispatcher {
-    [[nodiscard]] static consteval bool is_try_to_njsonable() {
-        return sn::concepts::try_to_njsonable<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_to_njsonable() {
-        return sn::concepts::to_njsonable<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_try_from_njsonable() {
-        return sn::concepts::try_from_njsonable<T, Tags...>;
-    }
-
-    [[nodiscard]] static consteval bool is_from_njsonable() {
-        return sn::concepts::from_njsonable<T, Tags...>;
-    }
-
-    [[nodiscard]] static bool try_to_njson(const T &src, nlohmann::json *dst, Tags... tags) noexcept {
-        return do_try_to_njson(src, dst, tags...);
-    }
-
-    static void to_njson(const T &src, nlohmann::json *dst, Tags... tags) {
-        do_to_njson(src, dst, tags...);
-    }
-
-    [[nodiscard]] static bool try_from_njson(const nlohmann::json &src, T *dst, Tags... tags) noexcept {
-        return do_try_from_njson(src, dst, tags...);
-    }
-
-    static void from_njson(const nlohmann::json &src, T *dst, Tags... tags) {
-        do_from_njson(src, dst, tags...);
-    }
-};
-
 } // namespace sn::detail
