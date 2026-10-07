@@ -606,6 +606,7 @@ enum class kind_test_enum {
 };
 using enum kind_test_enum;
 
+struct auto_test_tag : sn::tags::tag {};
 struct flat_test_tag : sn::tags::tag {};
 struct hashed_test_tag : sn::tags::tag {};
 
@@ -617,13 +618,16 @@ struct hashed_test_tag : sn::tags::tag {};
 })
 
 SN_DEFINE_ENUM_REFLECTION(kind_test_enum, KIND_TEST_ENUM_REFLECTION)
+SN_DEFINE_ENUM_REFLECTION(kind_test_enum, KIND_TEST_ENUM_REFLECTION, auto_test_tag)
 SN_DEFINE_ENUM_REFLECTION(kind_test_enum, KIND_TEST_ENUM_REFLECTION, flat_test_tag)
 SN_DEFINE_ENUM_REFLECTION(kind_test_enum, KIND_TEST_ENUM_REFLECTION, hashed_test_tag)
 SN_DEFINE_ENUM_STRING_FUNCTIONS(kind_test_enum, sn::case_sensitive)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(kind_test_enum, sn::case_sensitive | sn::auto_enum_table, auto_test_tag)
 SN_DEFINE_ENUM_STRING_FUNCTIONS(kind_test_enum, sn::case_sensitive | sn::flat_enum_table, flat_test_tag)
 SN_DEFINE_ENUM_STRING_FUNCTIONS(kind_test_enum, sn::hashed_enum_table | sn::case_insensitive, hashed_test_tag)
 
 static_assert(!_enum_table_container<kind_test_enum>::table_spec.flat);
+static_assert(!_enum_table_container<kind_test_enum, auto_test_tag>::table_spec.flat); // Same as the default.
 static_assert(_enum_table_container<kind_test_enum, flat_test_tag>::table_spec.flat);
 static_assert(!_enum_table_container<kind_test_enum, hashed_test_tag>::table_spec.flat);
 static_assert(!_enum_table_container<kind_test_enum, flat_test_tag>::table_spec.fold_case);
@@ -661,10 +665,12 @@ TEST(string_enum, table_kinds) {
     };
 
     run();
+    run(auto_test_tag());
     run(flat_test_tag());
     run(hashed_test_tag());
 
     t.expect_throwing_from({"ZERO"});
+    t.expect_throwing_from({"ZERO"}, auto_test_tag());
     t.expect_throwing_from({"ZERO"}, flat_test_tag());
     t.expect_valid_from({{"ZERO", KIND_VALUE_0}}, hashed_test_tag());
 

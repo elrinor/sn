@@ -76,7 +76,7 @@ private:
 // which matters for enums with hundreds of values.
 
 #define _SN_DEFINE_ENUM_STRING_TABLE(TABLE_NAME, ENUM, OPTIONS, REFLECTION_ARG)                                         \
-    static constexpr auto table_spec = sn::detail::make_enum_table_spec(REFLECTION_ARG, sn::detail::to_enum_table_options(OPTIONS)); \
+    static constexpr auto table_spec = sn::detail::make_enum_table_spec(REFLECTION_ARG, OPTIONS);                       \
     static constexpr auto to_string_map = sn::detail::make_enum_to_string_map<table_spec>(REFLECTION_ARG);              \
     static constexpr auto from_string_map = sn::detail::make_string_to_enum_map<table_spec>(REFLECTION_ARG);            \
     static constexpr auto TABLE_NAME =                                                                                  \

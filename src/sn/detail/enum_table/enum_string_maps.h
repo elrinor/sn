@@ -122,9 +122,9 @@ template<class T, std::size_t size>
     // A flat table is used if it's small in absolute terms, or if it's at most 4x larger than the number of strings
     // that it stores. A slot in a flat table is 1-2 bytes for most enums.
     bool can_be_flat = result.max_delta < max_flat_enum_table_size;
-    if (options.kind == enum_table_kind_option::automatic) {
+    if (options.kind == auto_enum_table) {
         result.flat = result.max_delta < 256 || (can_be_flat && result.max_delta < 4 * static_cast<std::uint64_t>(result.to_string_count));
-    } else if (options.kind == enum_table_kind_option::flat) {
+    } else if (options.kind == flat_enum_table) {
         if (!can_be_flat)
             throw std::logic_error("Range of enum values is too large for sn::flat_enum_table");
         result.flat = true;

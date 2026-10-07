@@ -125,7 +125,7 @@ static void run_generated_table_test() {
 
 constexpr enum_table_options flat_options = sn::case_sensitive | sn::flat_enum_table;
 constexpr enum_table_options hashed_options = sn::case_sensitive | sn::hashed_enum_table;
-constexpr enum_table_options ci_options = to_enum_table_options(sn::case_insensitive);
+constexpr enum_table_options ci_options = sn::case_insensitive;
 
 // Sequential values always go into a flat table.
 static_assert(generated_table<1, 0, 1>::spec.flat);

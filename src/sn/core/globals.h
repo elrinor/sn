@@ -14,6 +14,9 @@ using enum case_sensitivity;
  * `sn::case_sensitive | sn::flat_enum_table`.
  */
 enum class enum_table_kind {
+    /** Pick a table kind automatically. This is the default. */
+    auto_enum_table,
+
     /** Array of strings indexed by enum value. The fastest one, but its size depends on the range of enum values. */
     flat_enum_table,
 
