@@ -14,13 +14,18 @@
 #include "sn/detail/ascii/ascii_functions.h"
 
 #include "enum_table_hash.h"
-#include "enum_table_options.h"
+#include "enum_type_traits.h"
 #include "perfect_hash.h"
 
 namespace sn::detail {
 
-/** Maximal number of slots in a flat enum table. Only matters when a flat table is explicitly requested. */
-inline constexpr std::uint64_t max_flat_enum_table_size = 1u << 20;
+/**
+ * Maximal number of slots in a flat enum table. Tables are built at compile time, and compilers limit the number of
+ * steps in a single constant evaluation. With default limits a flat table of 2^16 slots still builds everywhere, and
+ * one of 2^17 slots already doesn't on clang. In practice this only matters for `sn::flat_enum_table` being requested
+ * explicitly for an enum with a huge range of values.
+ */
+inline constexpr std::uint64_t max_flat_enum_table_size = 1u << 16;
 
 /**
  * Everything that's needed to pick types for the lookup tables of an enum. Computed from an enum reflection by
@@ -81,7 +86,7 @@ template<class T, std::size_t size>
  * @return                              Spec for the lookup tables for the provided reflection.
  */
 template<class T, std::size_t size>
-[[nodiscard]] consteval enum_table_spec make_enum_table_spec(const std::array<std::pair<T, std::string_view>, size> &reflection, enum_table_options options) {
+[[nodiscard]] constexpr enum_table_spec make_enum_table_spec(const std::array<std::pair<T, std::string_view>, size> &reflection, enum_table_options options) {
     enum_table_spec result;
     result.fold_case = options.mode == case_insensitive;
     if (size == 0)
@@ -89,7 +94,7 @@ template<class T, std::size_t size>
 
     // Min and max are computed in terms of the original type so that the range of values is as narrow as possible.
     // E.g. for values -1 and 1 this gives us a range of 3 values instead of 2^64 values.
-    using value_type = typename std::conditional_t<std::is_enum_v<T>, std::underlying_type<T>, std::type_identity<T>>::type;
+    using value_type = underlying_type_ex_t<T>;
     value_type min = static_cast<value_type>(reflection[0].first);
     value_type max = min;
 
@@ -258,7 +263,8 @@ public:
      * @param min_value                 Smallest value.
      */
     template<std::size_t count>
-    constexpr flat_enum_string_map(const std::array<std::pair<std::uint64_t, std::string_view>, count> &pairs, std::uint64_t min_value) : _min_value(min_value) {
+    constexpr flat_enum_string_map(const std::array<std::pair<std::uint64_t, std::string_view>, count> &pairs,
+                                   std::uint64_t min_value) : _min_value(min_value) {
         std::array<std::string_view, count> strings = {{}};
         std::array<std::size_t, count> slots = {{}};
         for (std::size_t i = 0; i < count; i++) {
@@ -292,8 +298,9 @@ private:
  * @tparam slot_count                   Number of slots, `perfect_hash_size` of the number of values.
  * @tparam data_size                    Total size of all strings.
  * @tparam Key                          Type to store `value - min_value` in.
+ * @tparam Hash                         Hash functions to use.
  */
-template<std::size_t slot_count, std::size_t data_size, class Key>
+template<std::size_t slot_count, std::size_t data_size, class Key, class Hash = enum_table_hash>
 class hashed_enum_string_map {
 public:
     /**
@@ -302,11 +309,12 @@ public:
      * @param min_value                 Smallest value.
      */
     template<std::size_t count>
-    constexpr hashed_enum_string_map(const std::array<std::pair<std::uint64_t, std::string_view>, count> &pairs, std::uint64_t min_value) : _min_value(min_value) {
+    constexpr hashed_enum_string_map(const std::array<std::pair<std::uint64_t, std::string_view>, count> &pairs,
+                                     std::uint64_t min_value) : _min_value(min_value) {
         std::array<hash_key, count> keys = {{}};
         for (std::size_t i = 0; i < count; i++)
             keys[i] = static_cast<hash_key>(pairs[i].first);
-        _hash = make_perfect_hash<slot_count>(keys);
+        _hash = make_perfect_hash<slot_count, Hash>(keys);
 
         std::array<std::string_view, count> strings = {{}};
         std::array<std::size_t, count> slots = {{}};
@@ -336,10 +344,10 @@ private:
     // words when we can. If `Key` fits into a machine word, then so does the difference between any two values of
     // this map. Truncating the values to a machine word then still leaves them all different, and this is all that
     // a perfect hash needs. Values that are not in the map are rejected in `find` in any case.
-    using hash_key = std::conditional_t<(sizeof(Key) <= sizeof(enum_table_hash::hash_type)), enum_table_hash::hash_type, std::uint64_t>;
+    using hash_key = std::conditional_t<(sizeof(Key) <= sizeof(typename Hash::hash_type)), typename Hash::hash_type, std::uint64_t>;
 
     std::uint64_t _min_value;
-    perfect_hash<slot_count, hash_key> _hash;
+    perfect_hash<slot_count, hash_key, Hash> _hash;
     std::array<Key, slot_count> _keys = {{}};
     enum_table_strings<slot_count, data_size> _strings;
 };
@@ -351,8 +359,9 @@ private:
  * @tparam data_size                    Total size of all strings.
  * @tparam Value                        Type to store `value - min_value` in.
  * @tparam fold_case                    Whether lookups should ignore case of ascii letters.
+ * @tparam Hash                         Hash functions to use.
  */
-template<std::size_t slot_count, std::size_t data_size, class Value, bool fold_case>
+template<std::size_t slot_count, std::size_t data_size, class Value, bool fold_case, class Hash = enum_table_hash>
 class hashed_string_enum_map {
 public:
     /**
@@ -361,14 +370,15 @@ public:
      * @param min_value                 Smallest value.
      */
     template<std::size_t count>
-    constexpr hashed_string_enum_map(const std::array<std::pair<std::string_view, std::uint64_t>, count> &pairs, std::uint64_t min_value) : _min_value(min_value) {
+    constexpr hashed_string_enum_map(const std::array<std::pair<std::string_view, std::uint64_t>, count> &pairs,
+                                     std::uint64_t min_value) : _min_value(min_value) {
         // Different strings can have the same hash. That's only a theoretical possibility for 64-bit hashes, but it
         // does happen for 32-bit ones if the enum is large. When it does, we just try another seed.
-        std::array<enum_table_hash::hash_type, count> hashes = {{}};
+        std::array<typename Hash::hash_type, count> hashes = {{}};
         bool built = false;
         for (std::uint32_t seed = 0; seed < 16 && !built; seed++) {
             for (std::size_t i = 0; i < count; i++)
-                hashes[i] = enum_table_hash::hash_string(pairs[i].first.data(), pairs[i].first.size(), fold_case, seed);
+                hashes[i] = Hash::hash_string(pairs[i].first.data(), pairs[i].first.size(), fold_case, seed);
             if (has_hash_collisions(pairs, hashes))
                 continue;
 
@@ -396,7 +406,7 @@ public:
     [[nodiscard]] constexpr bool find(std::string_view string, std::uint64_t *result) const noexcept {
         assert(!string.empty()); // Would match an empty slot.
 
-        std::size_t slot = _hash.slot(enum_table_hash::hash_string(string.data(), string.size(), fold_case, _seed));
+        std::size_t slot = _hash.slot(Hash::hash_string(string.data(), string.size(), fold_case, _seed));
         std::string_view stored = _strings[slot];
         if (stored.size() != string.size() || !equal_strings(string.data(), stored.data(), string.size(), fold_case))
             return false;
@@ -414,7 +424,7 @@ private:
      */
     template<std::size_t count>
     [[nodiscard]] static constexpr bool has_hash_collisions(const std::array<std::pair<std::string_view, std::uint64_t>, count> &pairs,
-                                                            const std::array<enum_table_hash::hash_type, count> &hashes) {
+                                                            const std::array<typename Hash::hash_type, count> &hashes) {
         std::size_t first = 0;
         std::size_t second = 0;
         if (!find_duplicate_keys(hashes, &first, &second))
@@ -433,19 +443,19 @@ private:
 private:
     std::uint64_t _min_value;
     std::uint32_t _seed = 0;
-    perfect_hash<slot_count, enum_table_hash::hash_type> _hash;
+    perfect_hash<slot_count, typename Hash::hash_type, Hash> _hash;
     std::array<Value, slot_count> _values = {{}};
     enum_table_strings<slot_count, data_size> _strings;
 };
 
-template<enum_table_spec spec>
+template<enum_table_spec spec, class Hash = enum_table_hash>
 using enum_to_string_map = std::conditional_t<
     spec.flat,
     flat_enum_string_map<spec.to_string_slots, spec.to_string_data_size>,
-    hashed_enum_string_map<spec.to_string_slots, spec.to_string_data_size, smallest_uint_t<spec.max_delta>>
+    hashed_enum_string_map<spec.to_string_slots, spec.to_string_data_size, smallest_uint_t<spec.max_delta>, Hash>
 >;
 
-template<enum_table_spec spec>
-using string_to_enum_map = hashed_string_enum_map<spec.from_string_slots, spec.from_string_data_size, smallest_uint_t<spec.max_delta>, spec.fold_case>;
+template<enum_table_spec spec, class Hash = enum_table_hash>
+using string_to_enum_map = hashed_string_enum_map<spec.from_string_slots, spec.from_string_data_size, smallest_uint_t<spec.max_delta>, spec.fold_case, Hash>;
 
 } // namespace sn::detail

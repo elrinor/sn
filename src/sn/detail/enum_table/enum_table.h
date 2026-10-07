@@ -1,24 +1,16 @@
 #pragma once
 
 #include <cstdint>
-#include <type_traits>
 #include <utility> // For std::forward.
 #include <string>
 #include <string_view>
 
 #include "sn/core/type_name.h"
 
+#include "enum_type_traits.h"
 #include "universal_enum_table.h"
 
 namespace sn::detail {
-
-/**
- * Same as `std::is_signed_v`, but also works for enums.
- *
- * @tparam T                            Type to check.
- */
-template<class T>
-constexpr bool is_signed_ex_v = std::is_signed_v<typename std::conditional_t<std::is_enum_v<T>, std::underlying_type<T>, std::type_identity<T>>::type>;
 
 /**
  * Enum table to be used by different enum table implementations. All the actual work is done in the type-erased

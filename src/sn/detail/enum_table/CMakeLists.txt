@@ -6,7 +6,7 @@ set(SN_DETAIL_ENUM_TABLE_SOURCES
     enum_table_exceptions.h
     enum_table_exceptions.cpp
     enum_table_hash.h
-    enum_table_options.h
+    enum_type_traits.h
     perfect_hash.h
     universal_enum_table.h)
 

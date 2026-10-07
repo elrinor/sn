@@ -25,4 +25,30 @@ enum class enum_table_kind {
 };
 using enum enum_table_kind;
 
+/**
+ * Options for enum string functions, this is what the second argument of `SN_DEFINE_ENUM_STRING_FUNCTIONS` is. Either
+ * a `case_sensitivity` alone, or a `case_sensitivity` combined with an `enum_table_kind` using `operator|`.
+ */
+struct enum_table_options {
+    constexpr enum_table_options(case_sensitivity sensitivity = case_sensitive, // NOLINT: implicit conversion is intended.
+                                 enum_table_kind table_kind = auto_enum_table) noexcept :
+        mode(sensitivity),
+        kind(table_kind)
+    {}
+
+    /** Table kind alone is not enough, case sensitivity always has to be specified. */
+    enum_table_options(enum_table_kind) = delete; // NOLINT: deleted, so it's not converting anything.
+
+    case_sensitivity mode;
+    enum_table_kind kind;
+};
+
+[[nodiscard]] constexpr enum_table_options operator|(case_sensitivity mode, enum_table_kind kind) noexcept {
+    return {mode, kind};
+}
+
+[[nodiscard]] constexpr enum_table_options operator|(enum_table_kind kind, case_sensitivity mode) noexcept {
+    return {mode, kind};
+}
+
 } // namespace sn
