@@ -440,6 +440,40 @@ SN_DEFINE_ENUM_REFLECTION(uint64_test_enum, ({
 }))
 SN_DEFINE_ENUM_STRING_FUNCTIONS(uint64_test_enum, sn::case_sensitive)
 
+// Values at the edges of the underlying type, with flat tables. Subtracting the smallest value wraps around here.
+enum class int64_edge_test_enum : std::int64_t {
+    INT64_EDGE_VALUE_MIN = std::numeric_limits<std::int64_t>::min(),
+    INT64_EDGE_VALUE_MIN_1 = std::numeric_limits<std::int64_t>::min() + 1,
+};
+using enum int64_edge_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(int64_edge_test_enum, ({
+    {INT64_EDGE_VALUE_MIN, "min"},
+    {INT64_EDGE_VALUE_MIN_1, "min_1"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(int64_edge_test_enum, sn::case_sensitive)
+
+enum class uint64_edge_test_enum : std::uint64_t {
+    UINT64_EDGE_VALUE_MAX_1 = std::numeric_limits<std::uint64_t>::max() - 1,
+    UINT64_EDGE_VALUE_MAX = std::numeric_limits<std::uint64_t>::max(),
+};
+using enum uint64_edge_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(uint64_edge_test_enum, ({
+    {UINT64_EDGE_VALUE_MAX_1, "max_1"},
+    {UINT64_EDGE_VALUE_MAX, "max"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(uint64_edge_test_enum, sn::case_sensitive)
+
+static_assert(!_enum_table_container<int64_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<int64_test_enum>::table_spec.max_delta == std::numeric_limits<std::uint64_t>::max());
+static_assert(!_enum_table_container<uint64_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<uint64_test_enum>::table_spec.max_delta == std::numeric_limits<std::uint64_t>::max());
+static_assert(_enum_table_container<int64_edge_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<int64_edge_test_enum>::table_spec.to_string_slots == 2);
+static_assert(_enum_table_container<uint64_edge_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<uint64_edge_test_enum>::table_spec.to_string_slots == 2);
+
 TEST(string_enum, int64) {
     tester<int64_test_enum> t1;
     t1.expect_throwing_to({static_cast<int64_test_enum>(1), static_cast<int64_test_enum>(-1)});
@@ -455,6 +489,86 @@ TEST(string_enum, int64) {
         {"zero", UINT64_VALUE_0},
         {"big", UINT64_VALUE_BIG},
         {"max", UINT64_VALUE_MAX},
+    });
+
+    tester<int64_edge_test_enum> t3;
+    t3.expect_throwing_to({
+        static_cast<int64_edge_test_enum>(std::numeric_limits<std::int64_t>::min() + 2),
+        static_cast<int64_edge_test_enum>(std::numeric_limits<std::int64_t>::max()),
+        static_cast<int64_edge_test_enum>(0),
+        static_cast<int64_edge_test_enum>(-1),
+    });
+    t3.expect_valid_fromto({
+        {"min", INT64_EDGE_VALUE_MIN},
+        {"min_1", INT64_EDGE_VALUE_MIN_1},
+    });
+
+    tester<uint64_edge_test_enum> t4;
+    t4.expect_throwing_to({
+        static_cast<uint64_edge_test_enum>(std::numeric_limits<std::uint64_t>::max() - 2),
+        static_cast<uint64_edge_test_enum>(0),
+        static_cast<uint64_edge_test_enum>(1),
+    });
+    t4.expect_valid_fromto({
+        {"max_1", UINT64_EDGE_VALUE_MAX_1},
+        {"max", UINT64_EDGE_VALUE_MAX},
+    });
+}
+
+
+//
+// Tests for enums with a small underlying type that use its whole range.
+//
+
+enum class int8_test_enum : std::int8_t {
+    INT8_VALUE_MIN = -128,
+    INT8_VALUE_MAX = 127,
+};
+using enum int8_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(int8_test_enum, ({
+    {INT8_VALUE_MIN, "min"},
+    {INT8_VALUE_MAX, "max"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(int8_test_enum, sn::case_sensitive)
+
+enum class uint8_test_enum : std::uint8_t {
+    UINT8_VALUE_0 = 0,
+    UINT8_VALUE_255 = 255,
+};
+using enum uint8_test_enum;
+
+SN_DEFINE_ENUM_REFLECTION(uint8_test_enum, ({
+    {UINT8_VALUE_0, "zero"},
+    {UINT8_VALUE_255, "max"},
+}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(uint8_test_enum, sn::case_sensitive)
+
+static_assert(_enum_table_container<int8_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<int8_test_enum>::table_spec.to_string_slots == 256);
+static_assert(_enum_table_container<uint8_test_enum>::table_spec.flat);
+static_assert(_enum_table_container<uint8_test_enum>::table_spec.to_string_slots == 256);
+
+TEST(string_enum, int8) {
+    tester<int8_test_enum> t1;
+    t1.expect_throwing_to_with_message({
+        {static_cast<int8_test_enum>(-127), "'-127'"},
+        {static_cast<int8_test_enum>(0), "'0'"},
+        {static_cast<int8_test_enum>(126), "'126'"},
+    });
+    t1.expect_valid_fromto({
+        {"min", INT8_VALUE_MIN},
+        {"max", INT8_VALUE_MAX},
+    });
+
+    tester<uint8_test_enum> t2;
+    t2.expect_throwing_to_with_message({
+        {static_cast<uint8_test_enum>(1), "'1'"},
+        {static_cast<uint8_test_enum>(254), "'254'"},
+    });
+    t2.expect_valid_fromto({
+        {"zero", UINT8_VALUE_0},
+        {"max", UINT8_VALUE_255},
     });
 }
 
@@ -519,7 +633,7 @@ TEST(string_enum, string_sizes) {
             t.expect_throwing_from(changed, size_ci_test_tag());
         }
 
-        // Changing case should only work in case-insensitive mode. Only the last string has uppercase chars.
+        // Changing case should only work in case-insensitive mode. Only the two 70-char strings have uppercase chars.
         for (std::size_t i = 0; i < string.size(); i++) {
             std::string changed(string);
             if (changed[i] >= 'a' && changed[i] <= 'z') {
@@ -557,6 +671,8 @@ enum class empty_test_enum {
 using enum empty_test_enum;
 
 struct empty_alias_test_tag : sn::tags::tag {};
+struct empty_primary_test_tag : sn::tags::tag {};
+struct empty_only_test_tag : sn::tags::tag {};
 
 SN_DEFINE_ENUM_REFLECTION(empty_test_enum, ({
     {EMPTY_VALUE_NONE, ""},
@@ -568,8 +684,27 @@ SN_DEFINE_ENUM_REFLECTION(empty_test_enum, ({
     {EMPTY_VALUE_1, ""},
     {EMPTY_VALUE_2, "two"},
 }), empty_alias_test_tag)
+SN_DEFINE_ENUM_REFLECTION(empty_test_enum, ({
+    {EMPTY_VALUE_NONE, ""},
+    {EMPTY_VALUE_NONE, "none"},
+    {EMPTY_VALUE_1, "one"},
+}), empty_primary_test_tag)
+SN_DEFINE_ENUM_REFLECTION(empty_test_enum, ({
+    {EMPTY_VALUE_2, ""},
+}), empty_only_test_tag)
 SN_DEFINE_ENUM_STRING_FUNCTIONS(empty_test_enum, sn::case_sensitive)
 SN_DEFINE_ENUM_STRING_FUNCTIONS(empty_test_enum, sn::case_insensitive, empty_alias_test_tag)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(empty_test_enum, sn::case_sensitive, empty_primary_test_tag)
+SN_DEFINE_ENUM_STRING_FUNCTIONS(empty_test_enum, sn::case_sensitive, empty_only_test_tag)
+
+static_assert(_enum_table_container<empty_test_enum>::table_spec.has_empty_string);
+static_assert(_enum_table_container<empty_test_enum>::table_spec.empty_string_is_primary);
+static_assert(_enum_table_container<empty_test_enum, empty_alias_test_tag>::table_spec.has_empty_string);
+static_assert(!_enum_table_container<empty_test_enum, empty_alias_test_tag>::table_spec.empty_string_is_primary);
+static_assert(_enum_table_container<empty_test_enum, empty_primary_test_tag>::table_spec.empty_string_is_primary);
+static_assert(_enum_table_container<empty_test_enum, empty_only_test_tag>::table_spec.has_empty_string);
+static_assert(_enum_table_container<empty_test_enum, empty_only_test_tag>::table_spec.to_string_count == 0);
+static_assert(_enum_table_container<empty_test_enum, empty_only_test_tag>::table_spec.from_string_count == 0);
 
 TEST(string_enum, empty_string) {
     tester<empty_test_enum> t;
@@ -587,6 +722,20 @@ TEST(string_enum, empty_string) {
         {"one", EMPTY_VALUE_1},
         {"two", EMPTY_VALUE_2},
     }, empty_alias_test_tag());
+
+    // If it's the first one, then the other strings for the same value are only accepted as input.
+    t.expect_valid_fromto({
+        {"", EMPTY_VALUE_NONE},
+        {"one", EMPTY_VALUE_1},
+    }, empty_primary_test_tag());
+    t.expect_valid_from({{"none", EMPTY_VALUE_NONE}}, empty_primary_test_tag());
+    t.expect_throwing_to({EMPTY_VALUE_2}, empty_primary_test_tag());
+    t.expect_throwing_from({"two", "NONE"}, empty_primary_test_tag());
+
+    // A reflection can also consist of an empty string alone.
+    t.expect_valid_fromto({{"", EMPTY_VALUE_2}}, empty_only_test_tag());
+    t.expect_throwing_to({EMPTY_VALUE_NONE, EMPTY_VALUE_1}, empty_only_test_tag());
+    t.expect_throwing_from({"one", "two", "x"}, empty_only_test_tag());
 
     // And if there is no empty string in the reflection, then it's not accepted.
     tester<gap_test_enum> t2;
@@ -644,6 +793,16 @@ SN_DEFINE_ENUM_REFLECTION(gap_test_enum, ({
 SN_DEFINE_ENUM_STRING_FUNCTIONS(gap_test_enum, sn::case_sensitive | sn::hashed_enum_table, hashed_gap_test_tag)
 
 static_assert(!_enum_table_container<gap_test_enum, hashed_gap_test_tag>::table_spec.flat);
+
+TEST(string_enum, hashed_narrow_keys) {
+    // The hash table above stores value - min in a single byte, and should not accept values that are the same as a
+    // listed one modulo 256.
+    std::string tmp;
+    std::size_t found = 0;
+    for (int value = -1000; value <= 70000; value++)
+        found += sn::try_to_string(static_cast<gap_test_enum>(value), &tmp, hashed_gap_test_tag());
+    EXPECT_EQ(found, 4u);
+}
 
 TEST(string_enum, table_kinds) {
     tester<kind_test_enum> t;

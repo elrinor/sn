@@ -4,6 +4,7 @@
 #include <utility> // For std::pair.
 #include <string>
 #include <tuple>
+#include <type_traits>
 
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
@@ -103,8 +104,10 @@ public:
 
     template<class... Tags>
     void expect_valid_from(std::string_view str, const T &value, Tags... tags) {
+        reset_value(value);
         EXPECT_NO_THROW(from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmpv, value) << "with str = " << str;
+        reset_value(value);
         EXPECT_TRUE(try_from(str, &_tmpv, tags...)) << "with str = " << str << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmpv, value) << "with str = " << str;
     }
@@ -143,6 +146,7 @@ public:
 
     template<class... Tags>
     void expect_valid_roundtrip(const T &value, Tags... tags) {
+        reset_value(value);
         EXPECT_NO_THROW(to(value, &_tmps, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
         EXPECT_NO_THROW(from(_tmps, &_tmpv, tags...)) << "with value = " << value << " and tags = " << to_debug_string(tags...);
         EXPECT_EQ(_tmpv, value) << "with value = " << value << " and tags = " << to_debug_string(tags...);
@@ -173,14 +177,22 @@ private:
 
     template<class... Tags>
     [[nodiscard]] static bool try_from(std::string_view src, T *dst, Tags... tags) noexcept {
-        *dst = T();
         return sn::try_from_string(src, dst, tags...);
     }
 
     template<class... Tags>
     static void from(std::string_view src, T *dst, Tags... tags) {
-        *dst = T();
         sn::from_string(src, dst, tags...);
+    }
+
+    // Sets the value to something other than what's expected, so that a conversion that doesn't write anything is
+    // noticed even if the expected value is T().
+    void reset_value(const T &expected) {
+        if constexpr (std::is_enum_v<T> || std::is_arithmetic_v<T>) {
+            _tmpv = expected == T() ? static_cast<T>(1) : T();
+        } else {
+            _tmpv = T();
+        }
     }
 
 private:

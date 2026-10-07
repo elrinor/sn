@@ -10,7 +10,11 @@
 
 //
 // Benchmarks for the two implementations of enum table hash functions. The 64-bit one is used on 64-bit platforms,
-// and the 32-bit one on 32-bit platforms, and these benchmarks are what backs this choice.
+// and the 32-bit one on 32-bit platforms, and these benchmarks are what backs this choice. The 32-bit one only wins on
+// 32-bit platforms, so the numbers to look at are in the logs of 32-bit CI jobs.
+//
+// Each hash below depends on the previous one. In a table lookup the hash is on the critical path, so it's the latency
+// of a hash that matters, and not how many of them can run in parallel.
 //
 
 constexpr std::size_t benchmark_input_size = 4096;
@@ -22,13 +26,13 @@ static void benchmark_enum_table_hash_mix(benchmark::State &state) { // NOLINT
     for (std::size_t i = 0; i < benchmark_input_size; i++)
         keys.push_back(static_cast<Key>(rng()));
 
-    std::uint64_t result = 0;
+    Key key = 0;
     std::size_t i = 0;
     for (auto _ : state) {
-        result += Hash::mix(keys[i], 1);
+        key = static_cast<Key>(Hash::mix(key, 1) ^ keys[i]);
         i = (i + 1) % benchmark_input_size;
     }
-    benchmark::DoNotOptimize(result);
+    benchmark::DoNotOptimize(key);
 }
 
 template<class Hash, std::size_t size>
@@ -42,13 +46,13 @@ static void benchmark_enum_table_hash_string(benchmark::State &state) { // NOLIN
         strings.push_back(string);
     }
 
-    std::uint64_t result = 0;
+    typename Hash::hash_type seed = 0;
     std::size_t i = 0;
     for (auto _ : state) {
-        result += Hash::hash_string(strings[i].data(), strings[i].size(), false, 0);
+        seed = Hash::hash_string(strings[i].data(), strings[i].size(), false, seed);
         i = (i + 1) % benchmark_input_size;
     }
-    benchmark::DoNotOptimize(result);
+    benchmark::DoNotOptimize(seed);
 }
 
 // See enum_string_benchmark.cpp for why min time is set here.
