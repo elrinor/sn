@@ -1,23 +1,20 @@
 #pragma once
 
-#include <cassert>
 #include <cstdint>
-#include <utility> // For std::pair.
 #include <string>
 #include <string_view>
+#include <utility> // For std::forward.
 
-#include "sn/core/globals.h"
 #include "sn/string/string.h"
 
 #include "enum_table_exceptions.h"
-#include "lowercase_buffer.h"
 
 namespace sn::detail {
 
 /**
  * Type-erased enum table implementation. Uses `std::uint64_t` internally to store enum values.
  *
- * @tparam Base                         Base table. Needs to expose `to_string_map` and `from_string_map` fields.
+ * @tparam Base                         Base table. Needs to expose `find_string` and `find_value` functions.
  */
 template<class Base>
 struct universal_enum_table {
@@ -28,11 +25,10 @@ public:
     using type_name_function = std::string_view (*)();
 
     template<class... Args>
-    constexpr universal_enum_table(case_sensitivity mode, type_name_function type_name, bool is_signed, Args &&... args):
-        _mode(mode),
+    constexpr universal_enum_table(type_name_function type_name, bool is_signed, Args &&... args):
+        _base(std::forward<Args>(args)...),
         _type_name(type_name),
-        _is_signed(is_signed),
-        _base(std::forward<Args>(args)...)
+        _is_signed(is_signed)
     {}
 
     // We're not following our own API conventions here mainly for the sake of better codegen.
@@ -44,13 +40,13 @@ public:
     };
 
     void to_string(std::uint64_t src, std::string *dst) const {
-        auto pos = _base.to_string_map.find(src);
-        if (pos != _base.to_string_map.end()) {
-            dst->assign(pos->second.data(), pos->second.size());
+        std::string_view string;
+        if (_base.find_string(src, &string)) {
+            dst->assign(string.data(), string.size());
         } else {
             if (_is_signed) {
-                // This static_cast relies on implementation-defined behavior, but it's symmetric to what we have in
-                // type_erase_enum_reflection(), so it's OK.
+                // This static_cast relies on implementation-defined behavior, but it's symmetric to the type erasure
+                // that's done in enum_table, so it's OK.
                 throw_enum_to_string_error(_type_name(), sn::to_string(static_cast<std::int64_t>(src)));
             } else {
                 throw_enum_to_string_error(_type_name(), sn::to_string(src));
@@ -58,74 +54,33 @@ public:
         }
     }
 
-    template<case_sensitivity mode>
     [[nodiscard]] std::uint64_t from_string(std::string_view src) const {
-        assert(_mode == mode);
-
-        auto run = [&] (std::string_view src) {
-            auto pos = _base.from_string_map.find(src);
-            if (pos == _base.from_string_map.end())
-                throw_enum_from_string_error(_type_name(), src);
-            return pos->second;
-        };
-
-        if constexpr (mode == case_insensitive) {
-            return run(lowercase_buffer(src));
-        } else {
-            return run(src);
-        }
+        std::uint64_t result = 0;
+        if (!_base.find_value(src, &result))
+            throw_enum_from_string_error(_type_name(), src);
+        return result;
     }
 
     [[nodiscard]] bool try_to_string(std::uint64_t src, std::string *dst) const noexcept {
-        auto pos = _base.to_string_map.find(src);
-        if (pos != _base.to_string_map.end()) {
-            dst->assign(pos->second.data(), pos->second.size());
+        std::string_view string;
+        if (_base.find_string(src, &string)) {
+            dst->assign(string.data(), string.size());
             return true;
         } else {
             return false;
         }
     }
 
-    template<case_sensitivity mode>
     [[nodiscard]] try_from_string_result try_from_string(std::string_view src) const noexcept {
-        assert(_mode == mode);
-
-        auto run = [&] (std::string_view src) -> try_from_string_result {
-            auto pos = _base.from_string_map.find(src);
-            if (pos != _base.from_string_map.end()) {
-                return {pos->second, true};
-            } else {
-                return {0, false};
-            }
-        };
-
-        if constexpr (mode == case_insensitive) {
-            return run(lowercase_buffer(src));
-        } else {
-            return run(src);
-        }
+        try_from_string_result result;
+        result.ok = _base.find_value(src, &result.value);
+        return result;
     }
 
 private:
     Base _base;
-    case_sensitivity _mode;
     type_name_function _type_name;
     bool _is_signed;
 };
-
-
-/**
- * Type-erases an enum reflection array, producing an array that's suitable for usage with `universal_enum_table`.
- *
- * @param pairs                         Enum reflection array, as returned from `sn::reflect_enum`.
- * @return                              Type-erased enum reflection array, with enum values converted to `std::uint64_t`.
- */
-template<class T, std::size_t size>
-consteval auto type_erase_enum_reflection(const std::array<std::pair<T, std::string_view>, size> &pairs) {
-    std::array<std::pair<std::uint64_t, std::string_view>, size> result = {{}};
-    for (std::size_t i = 0; i < pairs.size(); i++)
-        result[i] = {static_cast<std::uint64_t>(pairs[i].first), pairs[i].second};
-    return result;
-}
 
 } // namespace sn::detail

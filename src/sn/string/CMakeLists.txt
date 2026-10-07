@@ -6,10 +6,10 @@ set(SN_STRING_SOURCES
     string_concepts.h
     string_fwd.h
     string_tags.h
-    detail/frozen_enum_table.h
     detail/string_builtins.cpp
     detail/string_builtins.h
     detail/string_dispatch.h
+    detail/string_enum_table.h
     detail/string_exceptions.cpp
     detail/string_exceptions.h
     detail/string_shortcuts.h)
@@ -45,23 +45,13 @@ else()
     message(FATAL_ERROR "Unsupported value '${SN_FLOAT_LIB}' for SN_FLOAT_LIB")
 endif()
 
-if(SN_ENUM_HASH_LIB STREQUAL "frozen_bundled")
-    FetchContent_Declare(frozen
-        GIT_REPOSITORY "https://github.com/serge-sans-paille/frozen.git"
-        GIT_TAG "${SN_BUNDLED_FROZEN_TAG}")
-    FetchContent_MakeAvailable(frozen)
-elseif(NOT SN_ENUM_HASH_LIB STREQUAL "frozen_external")
-    message(FATAL_ERROR "Unsupported value '${SN_ENUM_HASH_LIB}' for SN_ENUM_HASH_LIB")
-endif()
-
-target_link_libraries(sn_string INTERFACE frozen::frozen)
-
 if(SN_BUILD_TESTS)
     set(TEST_SN_STRING_SOURCES
         test/enum_string_multi_first_ut.cpp
         test/enum_string_multi_second_ut.cpp
         test/enum_string_multi_ut.h
         test/enum_string_ut.cpp
+        test/string_enum_table_ut.cpp
         test/string_ut.cpp
         test/tester.h)
 
@@ -79,6 +69,7 @@ endif()
 if(SN_BUILD_BENCHMARKS)
     set(BENCHMARK_SN_STRING_SOURCES
         benchmark/enum_string_benchmark.cpp
+        benchmark/enum_table_hash_benchmark.cpp
         benchmark/int_string_benchmark.cpp)
 
     add_executable(benchmark_sn_string ${BENCHMARK_SN_STRING_SOURCES})
