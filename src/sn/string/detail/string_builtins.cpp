@@ -122,12 +122,9 @@ inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
         // For integers, we format right into dst, reserving the max possible length for T and the base we're using.
         // Most of the time this length fits into the small string buffer, so we don't allocate.
         //
-        // Note that this means that the fast path in std::to_chars that compares the size of the buffer with maximum
-        // possible size won't trigger, and std::to_chars will do length estimation first.
-        //
-        // There's still an opportunity for optimization here because we actually know that the number will fit in the
-        // buffer, and thus the length check inside std::to_chars isn't necessary. But will need to roll out our own
-        // std::to_chars for that.
+        // Reserving the max possible length also lets libc++'s base 10 std::to_chars take its fast path, which skips
+        // computing the number's length when the buffer is large enough for any value. For other bases libc++ computes
+        // the length anyway, and so does libstdc++ for all bases. Avoiding that would need our own std::to_chars.
         std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
 
         dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
