@@ -111,35 +111,45 @@ inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, s
     return std::to_chars(first, last, value, base);
 }
 
+template<class T>
+consteval std::size_t max_string_length_in_any_base() {
+    if constexpr (std::is_integral_v<T>) {
+        return max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[0]; // Base 2 gives the longest strings.
+    } else {
+        return max_float_length<T>;
+    }
+}
+
 template<class T, class... Tags>
 inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
-    // All modern STL implementations use small string optimization. These are the small buffer sizes:
-    // - 15 chars for msvc.
-    // - 15 chars for gcc's libstdc++.
-    // - 22 chars for clang's libc++.
-    // Numbers taken from https://tastyhedge.com/blog/memory-layout-of-std-string/.
+    std::size_t max_size;
     if constexpr (std::is_integral_v<T>) {
-        // For integers, we format right into dst, reserving the max possible length for T and the base we're using.
-        // Most of the time this length fits into the small string buffer, so we don't allocate.
-        //
-        // Reserving the max possible length also lets libc++'s base 10 std::to_chars take its fast path, which skips
-        // computing the number's length when the buffer is large enough for any value. For other bases libc++ computes
-        // the length anyway, and so does libstdc++ for all bases. Avoiding that would need our own std::to_chars.
-        std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
+        max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
+    } else {
+        static_assert(sizeof...(Tags) == 0);
+        max_size = max_float_length<T>;
+    }
 
+    // If dst can hold the longest possible result without reallocating, we format right into it. This is the fastest
+    // option. It also lets libc++'s base 10 std::to_chars take its fast path, which skips computing the number's length
+    // when the buffer is large enough for any value. For other bases libc++ computes the length anyway, and so does
+    // libstdc++ for all bases.
+    //
+    // Otherwise reserving the longest possible result in dst would allocate even for short results, e.g. for "0.5"
+    // in a new string on msvc or libstdc++. So we format into a stack buffer and then copy, which only allocates if the
+    // actual result doesn't fit.
+    //
+    // The first check is redundant, any string has at least small_string_capacity chars of capacity. But for most
+    // types and bases it's a compile-time constant, and then the capacity() call is optimized away.
+    if (max_size <= small_string_capacity || max_size <= dst->capacity()) {
         dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
             std::to_chars_result result = wrapped_to_chars(data, data + size, src, tags...);
             assert(result.ec == std::errc()); // Should never fail.
             return result.ptr - data;
         });
     } else {
-        // For floating point numbers, the max possible length (24 chars for double) doesn't fit into the small string
-        // buffer, so reserving it in dst would allocate even for short results like "0.5". So we format into a stack
-        // buffer and then copy. When dst already has enough capacity, this is a bit slower than formatting right into
-        // dst, but not allocating is a much bigger win.
-        static_assert(sizeof...(Tags) == 0);
-        std::array<char, max_float_length<T>> buffer;
-        std::to_chars_result result = wrapped_to_chars(buffer.data(), buffer.data() + buffer.size(), src);
+        std::array<char, max_string_length_in_any_base<T>()> buffer;
+        std::to_chars_result result = wrapped_to_chars(buffer.data(), buffer.data() + max_size, src, tags...);
         assert(result.ec == std::errc()); // Should never fail.
         dst->assign(buffer.data(), static_cast<std::size_t>(result.ptr - buffer.data()));
     }

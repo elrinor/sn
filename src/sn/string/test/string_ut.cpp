@@ -414,3 +414,29 @@ TEST(string, slicing) {
     check_supported<Base>();
     check_unsupported<Derived>();
 }
+
+TEST(string, small_string_capacity) {
+    // to_string relies on this to decide whether it can format numbers right into the output string.
+    EXPECT_EQ(std::string().capacity(), sn::detail::small_string_capacity);
+}
+
+template<class T, class... Tags>
+static void check_no_reallocation(T value, Tags... tags) {
+    std::string s;
+    std::size_t capacity = s.capacity();
+    sn::to_string(value, &s, tags...);
+    EXPECT_EQ(s.capacity(), capacity) << "with value = " << value << " and result = " << s;
+}
+
+TEST(string, short_numbers_dont_allocate) {
+    // Short results should stay in the small string buffer, regardless of how long the longest result for the type is.
+    check_no_reallocation(0.5f);
+    check_no_reallocation(0.5);
+    check_no_reallocation(-1.5);
+    check_no_reallocation(42);
+    check_no_reallocation(42ll);
+    check_no_reallocation(42ull);
+    check_no_reallocation(5, tn::bin);
+    check_no_reallocation(5ll, tn::bin);
+    check_no_reallocation(5ll, tn::dynamic_base(3));
+}
