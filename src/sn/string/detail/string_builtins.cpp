@@ -144,8 +144,9 @@ inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
     // in a new string on msvc or libstdc++. So we format into a stack buffer and then copy, which only allocates if the
     // actual result doesn't fit.
     //
-    // The first check is redundant, any string has at least small_string_capacity chars of capacity. But for most
-    // types and bases it's a compile-time constant, and then the capacity() call is optimized away.
+    // Checking max_size against small_string_capacity doesn't change the outcome, because every string can hold at
+    // least small_string_capacity chars. It's there for performance. For most types and bases max_size is known at
+    // compile time, so the compiler evaluates this check itself and drops the capacity() call.
     if (max_size <= small_string_capacity || max_size <= dst->capacity()) {
         dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
             std::to_chars_result result = wrapped_to_chars(data, data + size, src, tags...);
