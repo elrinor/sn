@@ -4,7 +4,7 @@
 
 #include "sn/string/string.h"
 
-static void benchmark_double_to_string(benchmark::State &state) { // NOLINT
+static void benchmark_double_to_string(benchmark::State &state) {
     std::string tmp;
     for (auto _ : state) {
         sn::to_string(0.5, &tmp);
@@ -16,7 +16,7 @@ static void benchmark_double_to_string(benchmark::State &state) { // NOLINT
     benchmark::DoNotOptimize(tmp);
 }
 
-static void benchmark_double_to_new_string(benchmark::State &state) { // NOLINT
+static void benchmark_double_to_new_string(benchmark::State &state) {
     // Unlike the benchmark above, this one creates a new string every time, so it also measures allocations.
     for (auto _ : state) {
         benchmark::DoNotOptimize(sn::to_string(0.5));
