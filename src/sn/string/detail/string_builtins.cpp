@@ -43,6 +43,21 @@ constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 8> = {64, 41, 
 
 
 //
+// max_float_length.
+//
+// Maximal length of the shortest round-trip representation of a floating point number, which is what std::to_chars
+// produces. E.g. "-1.00000075e-36" for float, and "-1.7976931348623157e+308" for double.
+//
+
+template<class T>
+static constexpr std::nullptr_t max_float_length = nullptr;
+template<>
+constexpr std::size_t max_float_length<float> = 15;
+template<>
+constexpr std::size_t max_float_length<double> = 24;
+
+
+//
 // bool.
 //
 
@@ -95,15 +110,6 @@ inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, s
     static_assert(base != 10); // Base 10 should be handled by the overload w/o the tag parameter.
     return std::to_chars(first, last, value, base);
 }
-
-// Maximal length of the shortest round-trip representation of a floating point number, which is what std::to_chars
-// produces. E.g. "-1.00000075e-36" for float, and "-1.7976931348623157e+308" for double.
-template<class T>
-static constexpr std::nullptr_t max_float_length = nullptr;
-template<>
-constexpr std::size_t max_float_length<float> = 15;
-template<>
-constexpr std::size_t max_float_length<double> = 24;
 
 template<class T, class... Tags>
 inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
