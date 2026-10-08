@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     fill_max_sizes<unsigned long long>();
 
     fmt::println("template<bool is_signed, int size>");
-    fmt::println("static constexpr std::nullptr_t max_integer_lengths = nullptr;");
+    fmt::println("static constexpr std::nullptr_t max_integer_lengths_v = nullptr;");
 
     for (int size : {2, 4, 8}) {
         for (bool sign : {true, false}) {
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
                 values.push_back(max_lengths[k]);
             }
             fmt::println("template<>");
-            fmt::println("constexpr std::array<std::uint8_t, 35> max_integer_lengths<{}, {}> = {{{}}};",
+            fmt::println("constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<{}, {}> = {{{}}};",
                          sign, size, fmt::join(values, ", "));
         }
     }

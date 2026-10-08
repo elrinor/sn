@@ -7,6 +7,7 @@
 #include <cassert>
 #include <array>
 #include <charconv>
+#include <concepts> // For std::integral.
 #include <string>
 
 #if SN_USE_FAST_FLOAT
@@ -21,40 +22,53 @@
 namespace sn::detail::builtins {
 
 //
-// max_integer_lengths.
+// max_integer_lengths_v.
 //
 // This code is auto-generated using the `intgen` tool in `/tools`.
 //
 
 template<bool is_signed, int size>
-static constexpr std::nullptr_t max_integer_lengths = nullptr;
+static constexpr std::nullptr_t max_integer_lengths_v = nullptr;
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 2> = {17, 11, 9, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<true, 2> = {17, 11, 9, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 2> = {16, 11, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<false, 2> = {16, 11, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 4> = {33, 21, 17, 15, 13, 13, 12, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<true, 4> = {33, 21, 17, 15, 13, 13, 12, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 4> = {32, 21, 16, 14, 13, 12, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<false, 4> = {32, 21, 16, 14, 13, 12, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 8> = {65, 41, 33, 29, 26, 24, 23, 21, 20, 20, 19, 19, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<true, 8> = {65, 41, 33, 29, 26, 24, 23, 21, 20, 20, 19, 19, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 8> = {64, 41, 32, 28, 25, 23, 22, 21, 20, 19, 18, 18, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<false, 8> = {64, 41, 32, 28, 25, 23, 22, 21, 20, 19, 18, 18, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13};
 
 
 //
-// max_float_length.
+// max_float_length_v.
 //
 // Maximal length of the shortest round-trip representation of a floating point number, which is what std::to_chars
 // produces. E.g. "-1.00000075e-36" for float, and "-1.7976931348623157e+308" for double.
 //
 
 template<class T>
-static constexpr std::nullptr_t max_float_length = nullptr;
+static constexpr std::nullptr_t max_float_length_v = nullptr;
 template<>
-constexpr std::size_t max_float_length<float> = 15;
+constexpr std::size_t max_float_length_v<float> = 15;
 template<>
-constexpr std::size_t max_float_length<double> = 24;
+constexpr std::size_t max_float_length_v<double> = 24;
+
+
+//
+// max_arithmetic_length_v.
+//
+// Maximal length of a string representation of an arithmetic type, in any base. For integers, base 2 gives the longest
+// strings.
+//
+
+template<class T>
+constexpr std::size_t max_arithmetic_length_v = max_float_length_v<T>;
+template<std::integral T>
+constexpr std::size_t max_arithmetic_length_v<T> = max_integer_lengths_v<std::is_signed_v<T>, sizeof(T)>[0];
 
 
 //
@@ -111,23 +125,14 @@ inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, s
     return std::to_chars(first, last, value, base);
 }
 
-template<class T>
-consteval std::size_t max_string_length_in_any_base() {
-    if constexpr (std::is_integral_v<T>) {
-        return max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[0]; // Base 2 gives the longest strings.
-    } else {
-        return max_float_length<T>;
-    }
-}
-
 template<class T, class... Tags>
 inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
     std::size_t max_size;
     if constexpr (std::is_integral_v<T>) {
-        max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
+        max_size = max_integer_lengths_v<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
     } else {
         static_assert(sizeof...(Tags) == 0);
-        max_size = max_float_length<T>;
+        max_size = max_float_length_v<T>;
     }
 
     // If dst can hold the longest possible result without reallocating, we format right into it. This is the fastest
@@ -148,7 +153,7 @@ inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
             return result.ptr - data;
         });
     } else {
-        std::array<char, max_string_length_in_any_base<T>()> buffer;
+        std::array<char, max_arithmetic_length_v<T>> buffer;
         std::to_chars_result result = wrapped_to_chars(buffer.data(), buffer.data() + max_size, src, tags...);
         assert(result.ec == std::errc()); // Should never fail.
         dst->assign(buffer.data(), static_cast<std::size_t>(result.ptr - buffer.data()));
