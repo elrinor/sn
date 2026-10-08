@@ -96,32 +96,50 @@ inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, s
     return std::to_chars(first, last, value, base);
 }
 
+// Maximal length of the shortest round-trip representation of a floating point number, which is what std::to_chars
+// produces. E.g. "-1.00000075e-36" for float, and "-1.7976931348623157e+308" for double.
+template<class T>
+static constexpr std::nullptr_t max_float_length = nullptr;
+template<>
+constexpr std::size_t max_float_length<float> = 15;
+template<>
+constexpr std::size_t max_float_length<double> = 24;
+
 template<class T, class... Tags>
 inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
-    // We can actually do better, but it's probably not worth it.
-    //
-    // Since all modern STL implementations use small string optimization, we can first check if the value fits in the
-    // small string buffer. These are the small buffer sizes:
+    // All modern STL implementations use small string optimization. These are the small buffer sizes:
     // - 15 chars for msvc.
     // - 15 chars for gcc's libstdc++.
     // - 22 chars for clang's libc++.
     // Numbers taken from https://tastyhedge.com/blog/memory-layout-of-std-string/.
-    //
-    // This will make it possible to avoid allocations in most cases.
-    //
-    // But this also means that the fast path in std::to_chars that compares the size of the buffer with maximum
-    // possible size won't trigger, and std::to_chars will do length estimation first. So, might actually be slower.
-    //
-    // There's still an opportunity for optimization here because we actually know that the number will fit in the
-    // buffer, and thus the length check inside std::to_chars isn't necessary. But will need to roll out our own
-    // std::to_chars for that.
-    std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
+    if constexpr (std::is_integral_v<T>) {
+        // For integers, we format right into dst, reserving the max possible length for T and the base we're using.
+        // Most of the time this length fits into the small string buffer, so we don't allocate.
+        //
+        // Note that this means that the fast path in std::to_chars that compares the size of the buffer with maximum
+        // possible size won't trigger, and std::to_chars will do length estimation first.
+        //
+        // There's still an opportunity for optimization here because we actually know that the number will fit in the
+        // buffer, and thus the length check inside std::to_chars isn't necessary. But will need to roll out our own
+        // std::to_chars for that.
+        std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
 
-    dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
-        std::to_chars_result result = wrapped_to_chars(data, data + size, src, tags...);
+        dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
+            std::to_chars_result result = wrapped_to_chars(data, data + size, src, tags...);
+            assert(result.ec == std::errc()); // Should never fail.
+            return result.ptr - data;
+        });
+    } else {
+        // For floating point numbers, the max possible length (24 chars for double) doesn't fit into the small string
+        // buffer, so reserving it in dst would allocate even for short results like "0.5". So we format into a stack
+        // buffer and then copy. When dst already has enough capacity, this is a bit slower than formatting right into
+        // dst, but not allocating is a much bigger win.
+        static_assert(sizeof...(Tags) == 0);
+        std::array<char, max_float_length<T>> buffer;
+        std::to_chars_result result = wrapped_to_chars(buffer.data(), buffer.data() + buffer.size(), src);
         assert(result.ec == std::errc()); // Should never fail.
-        return result.ptr - data;
-    });
+        dst->assign(buffer.data(), static_cast<std::size_t>(result.ptr - buffer.data()));
+    }
 
     return true;
 }

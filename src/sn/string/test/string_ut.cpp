@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include <functional> // For std::identity.
+#include <type_traits>
 
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
@@ -236,6 +237,9 @@ static void run_integer_tests() {
     auto run_base_tests = [&](int base, auto tag) {
         std::string positive_100 = base_strings_for_100[base];
         t.expect_valid_fromto(positive_100, 100, tag);
+
+        // Longest strings that to_string can produce for T in this base.
+        t.expect_valid_roundtrip({std::numeric_limits<T>::max(), std::numeric_limits<T>::min()}, tag);
         t.expect_valid_from(prepend_zeros(100, positive_100), 100, tag);
 
         t.expect_throwing_from(always_throwing, tag);
@@ -338,6 +342,35 @@ static void run_float_tests() {
         {"0.5", 0.5f},
         {"inf", std::numeric_limits<T>::infinity()},
         {"-inf", -std::numeric_limits<T>::infinity()},
+    });
+
+    // Longest strings that to_string can produce for T.
+    if constexpr (std::is_same_v<T, float>) {
+        t.expect_valid_fromto({
+            {"-3.4028235e+38", std::numeric_limits<float>::lowest()},
+            {"-1.1754944e-38", -std::numeric_limits<float>::min()},
+            {"-1.00000075e-36", -1.00000075e-36f},
+            {"1e-45", std::numeric_limits<float>::denorm_min()},
+        });
+    } else {
+        t.expect_valid_fromto({
+            {"-1.7976931348623157e+308", std::numeric_limits<double>::lowest()},
+            {"-2.2250738585072014e-308", -std::numeric_limits<double>::min()},
+            {"5e-324", std::numeric_limits<double>::denorm_min()},
+        });
+    }
+
+    t.expect_valid_roundtrip({
+        std::numeric_limits<T>::max(),
+        std::numeric_limits<T>::lowest(),
+        std::numeric_limits<T>::min(),
+        -std::numeric_limits<T>::min(),
+        std::numeric_limits<T>::denorm_min(),
+        -std::numeric_limits<T>::denorm_min(),
+        std::numeric_limits<T>::epsilon(),
+        static_cast<T>(0.1),
+        static_cast<T>(1.0 / 3.0),
+        static_cast<T>(-1.0 / 3.0),
     });
 
     // TODO(elric): test NANs.
