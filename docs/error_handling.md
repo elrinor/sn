@@ -51,9 +51,6 @@ need the message, pass `nullptr` as the `sn::error *` argument and nothing will 
 Going through a `std::expected` reference, or copying into a `std::expected`, brings back the standard `value()` and
 its generic message. Use `auto` or `sn::expected` for the results of `sn` calls.
 
-Code that integrates with `std::expected<T, E>` generically, e.g. a coroutine promise's `await_transform`, accepts
-`sn::expected` as is.
-
 
 ## Writing extension points
 
