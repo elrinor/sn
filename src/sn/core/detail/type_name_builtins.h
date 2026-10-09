@@ -23,8 +23,11 @@
 namespace sn::detail {
 
 /**
- * Normalizes a type name as printed by the compiler, e.g. drops spaces that don't separate words, and spells the
- * anonymous namespace the same way on all compilers.
+ * Normalizes a type name as printed by the compiler, so that it's the same on all compilers:
+ * - Drops spaces that don't separate words.
+ * - Spells the anonymous namespace as `(anonymous namespace)`.
+ * - Moves `const` and `volatile` in front of the type they apply to, e.g. `int const` becomes `const int`.
+ * - On MSVC, drops `class`, `struct`, `enum` and `union` in front of type names.
  *
  * @param name                          Type name as printed by the compiler.
  * @param out                           Output buffer, or `nullptr` to only compute the size.
@@ -38,19 +41,81 @@ consteval std::size_t normalize_type_name(std::string_view name, char *out) {
 
     std::size_t size = 0;
     char last = '\0';
+    bool last_is_qualifier = false; // Whether the last word is a qualifier that stays in place, e.g. in "const int".
+    auto append_char = [&](char c) {
+        if (out)
+            out[size] = c;
+        size++;
+        last = c;
+        last_is_qualifier = false;
+    };
     auto append = [&](std::string_view chars) {
-        for (char c : chars) {
-            if (out)
-                out[size] = c;
-            size++;
-            last = c;
-        }
+        for (char c : chars)
+            append_char(c);
+    };
+
+    // Returns the qualifier that starts at pos, if it's a whole word.
+    auto qualifier_at = [&](std::size_t pos) -> std::string_view {
+        if (pos >= name.size() || (name[pos] != 'c' && name[pos] != 'v') || (pos > 0 && is_identifier(name[pos - 1])))
+            return {};
+        for (std::string_view qualifier : {"const", "volatile"})
+            if (name.substr(pos).starts_with(qualifier) && (pos + qualifier.size() == name.size() || !is_identifier(name[pos + qualifier.size()])))
+                return qualifier;
+        return {};
+    };
+
+    // A qualifier that comes right after a type name or a template argument list applies to that type, e.g. in
+    // "int const" or "X<int> const". A qualifier after "*" applies to the pointer and stays where it is.
+    auto is_after_type = [&] {
+        return (is_identifier(last) && !last_is_qualifier) || last == '>';
     };
 
     // Note that this runs at compile time, and long type names can hit the constexpr step limit. So we only look for
     // longer patterns at characters that can start them.
     for (std::size_t i = 0; i < name.size(); i++) {
         char c = name[i];
+
+        if (c == 'c' || c == 'v') {
+            std::string_view qualifier = qualifier_at(i);
+            if (!qualifier.empty() && !is_after_type()) {
+                append(qualifier);
+                last_is_qualifier = true;
+                i += qualifier.size() - 1;
+                continue;
+            }
+
+            if (!qualifier.empty()) {
+                // Insert the qualifier before the type, which starts after the closest unmatched '<' or '(', or ','.
+                std::size_t insert_size = qualifier.size() + 1;
+                if (out) {
+                    std::size_t start = size;
+                    for (std::size_t depth = 0; start > 0; start--) {
+                        char prev = out[start - 1];
+                        if (prev == '>' || prev == ')') {
+                            depth++;
+                        } else if (prev == '<' || prev == '(' || prev == ',') {
+                            if (depth == 0)
+                                break;
+                            if (prev != ',')
+                                depth--;
+                        }
+                    }
+
+                    // Keep "const volatile" in this order, like clang and GCC.
+                    if (std::string_view(out + start, size - start).starts_with("const "))
+                        start += 6;
+
+                    for (std::size_t pos = size; pos > start; pos--)
+                        out[pos - 1 + insert_size] = out[pos - 1];
+                    for (std::size_t pos = 0; pos < qualifier.size(); pos++)
+                        out[start + pos] = qualifier[pos];
+                    out[start + qualifier.size()] = ' ';
+                }
+                size += insert_size;
+                i += qualifier.size() - 1;
+                continue;
+            }
+        }
 
         // Clang, GCC and MSVC spellings, in this order. We use clang's.
         if (c == '(' || c == '{' || c == '`') {
@@ -81,11 +146,15 @@ consteval std::size_t normalize_type_name(std::string_view name, char *out) {
         }
 #endif
 
-        // Keep spaces between words, e.g. in "unsigned char", and drop the rest, e.g. in "some_class *".
-        if (c == ' ' && !(is_identifier(last) && i + 1 < name.size() && is_identifier(name[i + 1])))
-            continue;
+        // Keep spaces between words, e.g. in "unsigned char", and drop the rest, e.g. in "some_class *". Also drop the
+        // space before a qualifier that we're going to move.
+        if (c == ' ') {
+            bool between_words = is_identifier(last) && i + 1 < name.size() && is_identifier(name[i + 1]);
+            if (!between_words || (is_after_type() && !qualifier_at(i + 1).empty()))
+                continue;
+        }
 
-        append(name.substr(i, 1));
+        append_char(c);
     }
 
     return size;

@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
 #include <any>
+#include <array>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "sn/core/type_name.h"
@@ -103,10 +105,41 @@ TEST(core, type_name_anonymous_namespace) {
     EXPECT_EQ(sn::type_name<anonymous_class>(), "(anonymous namespace)::anonymous_class");
     EXPECT_EQ(sn::type_name<Nothing<anonymous_class>>(), "Nothing<(anonymous namespace)::anonymous_class>");
 
-    // MSVC writes const after the type.
-#if !defined(_MSC_VER) || defined(__clang__)
     EXPECT_EQ(sn::type_name<Nothing<const anonymous_class>>(), "Nothing<const (anonymous namespace)::anonymous_class>");
-#endif
+}
+
+TEST(core, type_name_qualifiers) {
+    EXPECT_EQ(sn::type_name<Nothing<const int>>(), "Nothing<const int>");
+    EXPECT_EQ(sn::type_name<Nothing<const volatile int>>(), "Nothing<const volatile int>");
+    EXPECT_EQ(sn::type_name<Nothing<const Nothing<int>>>(), "Nothing<const Nothing<int>>");
+    EXPECT_EQ(sn::type_name<Nothing<const char *>>(), "Nothing<const char*>");
+    EXPECT_EQ(sn::type_name<Nothing<const char *const>>(), "Nothing<const char*const>");
+}
+
+// Checks normalize_type_name on spellings that only some compilers produce, e.g. MSVC's "int const".
+consteval bool normalizes_to(std::string_view name, std::string_view expected) {
+    std::array<char, 128> buffer = {};
+    std::size_t size = sn::detail::normalize_type_name(name, buffer.data());
+    return size == sn::detail::normalize_type_name(name, nullptr) && std::string_view(buffer.data(), size) == expected;
+}
+
+TEST(core, type_name_normalize) {
+    static_assert(normalizes_to("int const", "const int"));
+    static_assert(normalizes_to("unsigned int const", "const unsigned int"));
+    static_assert(normalizes_to("int volatile", "volatile int"));
+    static_assert(normalizes_to("int const volatile", "const volatile int"));
+    static_assert(normalizes_to("int volatile const", "const volatile int"));
+    static_assert(normalizes_to("const volatile int", "const volatile int"));
+    static_assert(normalizes_to("volatile int const", "const volatile int"));
+    static_assert(normalizes_to("char const *", "const char*"));
+    static_assert(normalizes_to("char const * const", "const char*const"));
+    static_assert(normalizes_to("Nothing<int const >", "Nothing<const int>"));
+    static_assert(normalizes_to("Nothing<Nothing<int> const >", "Nothing<const Nothing<int>>"));
+    static_assert(normalizes_to("std::pair<int const,Nothing<int> const >", "std::pair<const int,const Nothing<int>>"));
+    static_assert(normalizes_to("Nothing<`anonymous-namespace'::X const >", "Nothing<const (anonymous namespace)::X>"));
+    static_assert(normalizes_to("Nothing<{anonymous}::X>", "Nothing<(anonymous namespace)::X>"));
+    static_assert(normalizes_to("Nothing<const_iterator>", "Nothing<const_iterator>"));
+    static_assert(normalizes_to("void (int) const", "void(int)const"));
 }
 
 TEST(core, type_name_string) {
