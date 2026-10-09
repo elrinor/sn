@@ -46,9 +46,10 @@ consteval std::size_t normalize_type_name(std::string_view name, char *out) {
     for (std::size_t i = 0; i < name.size(); i++) {
         std::string_view rest = name.substr(i);
 
-        // Clang, GCC and MSVC spellings, in this order. We use clang's.
+        // Clang, GCC and MSVC spellings, in this order. We use clang's. MSVC's __FUNCSIG__ has a dash, the space
+        // variant is how MSVC spells it elsewhere, e.g. in typeid names.
         std::size_t anonymous_size = 0;
-        for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous namespace'"})
+        for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous-namespace'", "`anonymous namespace'"})
             if (rest.starts_with(anonymous))
                 anonymous_size = anonymous.size();
         if (anonymous_size != 0) {
