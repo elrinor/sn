@@ -83,17 +83,19 @@ template<class T, sn::concepts::tag... Tags>
 }
 
 /**
- * Reports that `src` couldn't be deserialized as `T`. To be used in `from_string` extension points.
+ * Reports that `src` couldn't be deserialized as `T`. To be used in `from_string` extension points, takes the same
+ * arguments.
  *
  * Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`, or just "Cannot deserialize '<src>' as '<T>'" if
  * `reason` is empty. Does nothing if `err` is `nullptr`.
  *
- * @param err                           Error output, can be `nullptr`.
  * @param src                           Value that couldn't be deserialized.
+ * @param dst                           Output of the extension point, only used to deduce `T`.
+ * @param err                           Error output, can be `nullptr`.
  * @param reason                        Why it couldn't be deserialized, can be empty.
  */
 template<class T>
-void report_from_string_error(sn::error *err, std::string_view src, std::string_view reason = {}) {
+void report_from_string_error(std::string_view src, [[maybe_unused]] T *dst, sn::error *err, std::string_view reason = {}) {
     sn::detail::report_from_string_error<T>(err, src, reason);
 }
 

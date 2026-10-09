@@ -63,7 +63,7 @@ bool from_string(std::string_view src, point *dst, sn::error *err);
 ```
 
 Rules:
-- Return `false` on failure, and report what went wrong with `sn::report_from_string_error<T>(err, src, reason)`. It
+- Return `false` on failure, and report what went wrong with `sn::report_from_string_error(src, dst, err, reason)`. It
   writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`. The `reason` is optional.
 - Don't touch `*err` on success.
 - Pass `err` through when (de)serializing nested values. If a nested value fails, add your part of the path with
@@ -77,7 +77,7 @@ check it yourself.
 bool from_string(std::string_view src, point *dst, sn::error *err) {
     std::size_t pos = src.find(',');
     if (pos == std::string_view::npos) {
-        sn::report_from_string_error<point>(err, src, "missing a comma");
+        sn::report_from_string_error(src, dst, err, "missing a comma");
         return false;
     }
 

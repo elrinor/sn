@@ -425,7 +425,7 @@ bool to_string(const point &src, std::string *dst, sn::error *err) {
 bool from_string(std::string_view src, point *dst, sn::error *err) {
     std::size_t pos = src.find(',');
     if (pos == std::string_view::npos) {
-        sn::report_from_string_error<point>(err, src, "missing a comma");
+        sn::report_from_string_error(src, dst, err, "missing a comma");
         return false;
     }
 
