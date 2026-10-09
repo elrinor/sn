@@ -95,8 +95,8 @@ template<class T, sn::concepts::tag... Tags>
  * @param reason                        Why it couldn't be deserialized, can be empty.
  */
 template<class T>
-void report_from_string_error(std::string_view src, [[maybe_unused]] T *dst, sn::error *err, std::string_view reason = {}) {
-    sn::detail::report_from_string_error<T>(err, src, reason);
+void report_from_string_error(std::string_view src, T *dst, sn::error *err, std::string_view reason = {}) {
+    sn::detail::report_from_string_error(src, dst, err, reason);
 }
 
 } // namespace sn

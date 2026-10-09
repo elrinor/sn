@@ -91,7 +91,7 @@ bool from_string(std::string_view src, bool *dst, sn::error *err) {
         *dst = false;
         return true;
     } else {
-        sn::detail::report_from_string_error<bool>(err, src);
+        sn::detail::report_from_string_error(src, dst, err);
         return false;
     }
 }
@@ -187,7 +187,7 @@ inline bool from_string(std::string_view src, T *dst, sn::error *err, Tags... ta
         return true;
 
     // Trailing non-number characters mean "not a number".
-    sn::detail::report_number_from_string_error<T>(err, src, result.ec == std::errc() ? std::errc::invalid_argument : result.ec);
+    sn::detail::report_number_from_string_error(src, dst, err, result.ec == std::errc() ? std::errc::invalid_argument : result.ec);
     return false;
 }
 } // namespace detail_from_chars
@@ -211,7 +211,7 @@ template<class T>
 inline bool from_string(std::string_view src, T *dst, sn::error *err) {
     if (src.empty() || std::isspace(src[0]) || src[0] == '+') {
         // We behave the same as std::from_chars and don't skip whitespaces and don't allow leading '+'.
-        sn::detail::report_number_from_string_error<T>(err, src, std::errc::invalid_argument);
+        sn::detail::report_number_from_string_error(src, dst, err, std::errc::invalid_argument);
         return false;
     }
 
@@ -225,9 +225,9 @@ inline bool from_string(std::string_view src, T *dst, sn::error *err) {
     }
 
     if (result == 0 && errno == ERANGE) {
-        sn::detail::report_number_from_string_error<T>(err, src, std::errc::result_out_of_range);
+        sn::detail::report_number_from_string_error(src, dst, err, std::errc::result_out_of_range);
     } else {
-        sn::detail::report_number_from_string_error<T>(err, src, std::errc::invalid_argument); // Including tail non-number symbols.
+        sn::detail::report_number_from_string_error(src, dst, err, std::errc::invalid_argument); // Including tail non-number symbols.
     }
     return false;
 }
@@ -244,7 +244,7 @@ inline bool from_string(std::string_view src, T *dst, sn::error *err) {
         return true;
 
     // Trailing non-number characters mean "not a number".
-    sn::detail::report_number_from_string_error<T>(err, src, result.ec == std::errc() ? std::errc::invalid_argument : result.ec);
+    sn::detail::report_number_from_string_error(src, dst, err, result.ec == std::errc() ? std::errc::invalid_argument : result.ec);
     return false;
 }
 } // namespace detail_fast_float
