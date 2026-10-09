@@ -1,4 +1,3 @@
-#include <exception>
 #include <expected>
 #include <string>
 #include <type_traits>
@@ -18,7 +17,7 @@ template<class F>
 static std::string thrown_message(F &&f) {
     try {
         std::forward<F>(f)();
-    } catch (const std::exception &e) {
+    } catch (const sn::bad_expected_access &e) {
         return e.what();
     }
     return "<nothing thrown>";
@@ -59,14 +58,6 @@ TEST(expected, value_throws_with_path) {
     error.prepend_path("points");
     sn::expected<int> bad = std::unexpected(error);
     EXPECT_EQ(thrown_message([&] { (void) bad.value(); }), "points[2].y: 'zz' is not a number");
-}
-
-TEST(expected, base_access_falls_back_to_std) {
-    // This is a known limitation. Going through the std::expected base gets you std::expected::value().
-    sn::expected<int> bad = parse(false);
-    std::expected<int, sn::error> &base = bad;
-    EXPECT_THROW((void) base.value(), std::bad_expected_access<sn::error>);
-    EXPECT_NE(thrown_message([&] { (void) base.value(); }), "'zz' is not a number");
 }
 
 TEST(expected, void) {
