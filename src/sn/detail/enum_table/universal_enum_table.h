@@ -47,8 +47,7 @@ public:
     [[nodiscard]] bool to_string(std::uint64_t src, std::string *dst, sn::error *err) const {
         auto pos = _base.to_string_map.find(src);
         if (pos == _base.to_string_map.end()) [[unlikely]] {
-            if (err)
-                report_enum_to_string_error(*err, _type_name(), src, _is_signed);
+            report_enum_to_string_error(_type_name, src, _is_signed, err);
             return false;
         }
 
@@ -76,8 +75,8 @@ public:
             result = run(src);
         }
 
-        if (!result.ok && err) [[unlikely]]
-            report_enum_from_string_error(*err, _type_name(), src); // Note that we're reporting the original string.
+        if (!result.ok) [[unlikely]]
+            report_enum_from_string_error(_type_name, src, err); // Note that we're reporting the original string.
         return result;
     }
 
