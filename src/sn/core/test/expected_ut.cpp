@@ -24,7 +24,6 @@ static std::string thrown_message(F &&f) {
     return "<nothing thrown>";
 }
 
-// What a co_await integration written for std::expected would look like.
 template<class U>
 static bool takes_std_expected(const std::expected<U, sn::error> &e) {
     return e.has_value();
@@ -41,7 +40,7 @@ TEST(expected, value) {
 TEST(expected, value_throws_with_message) {
     sn::expected<int> bad = parse(false);
     EXPECT_THROW((void) bad.value(), sn::bad_expected_access);
-    EXPECT_THROW((void) bad.or_throw(), std::bad_expected_access<sn::error>);
+    EXPECT_THROW((void) bad.or_throw(), sn::bad_expected_access);
     EXPECT_EQ(thrown_message([&] { (void) bad.value(); }), "'zz' is not a number");
     EXPECT_EQ(thrown_message([&] { (void) bad.or_throw(); }), "'zz' is not a number");
     EXPECT_EQ(thrown_message([] { (void) parse(false).value(); }), "'zz' is not a number");

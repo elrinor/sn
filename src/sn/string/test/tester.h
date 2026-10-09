@@ -1,6 +1,5 @@
 #pragma once
 
-#include <exception>
 #include <initializer_list>
 #include <optional>
 #include <string>
@@ -188,7 +187,7 @@ private:
     static std::string thrown_message(F &&f) {
         try {
             std::forward<F>(f)();
-        } catch (const std::exception &e) {
+        } catch (const sn::bad_expected_access &e) {
             return e.what();
         }
         return "<nothing thrown>";
