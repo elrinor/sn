@@ -86,13 +86,12 @@ TEST(core, type_name_keywords) {
 TEST(core, type_name_spaces) {
     EXPECT_EQ(sn::type_name<Nothing<unsigned char>>(), "Nothing<unsigned char>");
     EXPECT_EQ(sn::type_name<Nothing<long double>>(), "Nothing<long double>");
+}
 
-    // Compilers spell the anonymous namespace differently, e.g. GCC writes "{anonymous}".
-#if defined(__clang__)
+TEST(core, type_name_anonymous_namespace) {
+    // GCC and MSVC spell it differently, but we use clang's spelling everywhere.
     EXPECT_EQ(sn::type_name<anonymous_class>(), "(anonymous namespace)::anonymous_class");
-#else
-    EXPECT_TRUE(sn::type_name<anonymous_class>().ends_with("::anonymous_class")) << sn::type_name<anonymous_class>();
-#endif
+    EXPECT_EQ(sn::type_name<Nothing<anonymous_class>>(), "Nothing<(anonymous namespace)::anonymous_class>");
 }
 
 TEST(core, type_name_string) {

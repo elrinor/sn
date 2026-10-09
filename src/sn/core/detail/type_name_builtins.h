@@ -19,11 +19,67 @@
 
 namespace sn::detail {
 
-template<std::size_t N>
-struct static_string {
-    std::array<char, N> data = {{}};
+/**
+ * Normalizes a type name as printed by the compiler, e.g. drops spaces that don't separate words, and spells the
+ * anonymous namespace the same way on all compilers.
+ *
+ * @param name                          Type name as printed by the compiler.
+ * @param out                           Output buffer, or `nullptr` to only compute the size.
+ * @return                              Size of the normalized type name.
+ */
+consteval std::size_t normalize_type_name(std::string_view name, char *out) {
+    auto is_identifier = [](char c) {
+        return (c >= '0' && c <= '9') || c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    };
+
     std::size_t size = 0;
-};
+    char last = '\0';
+    auto append = [&](std::string_view chars) {
+        for (char c : chars) {
+            if (out)
+                out[size] = c;
+            size++;
+            last = c;
+        }
+    };
+
+    for (std::size_t i = 0; i < name.size(); i++) {
+        std::string_view rest = name.substr(i);
+
+        // Clang, GCC and MSVC spellings, in this order. We use clang's.
+        std::size_t anonymous_size = 0;
+        for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous namespace'"})
+            if (rest.starts_with(anonymous))
+                anonymous_size = anonymous.size();
+        if (anonymous_size != 0) {
+            append("(anonymous namespace)");
+            i += anonymous_size - 1;
+            continue;
+        }
+
+#if SN_USE_MSVC_TYPE_NAME
+        // MSVC writes "class ns::X", "enum ns::Y", etc. Drop the keywords.
+        if (i == 0 || !is_identifier(name[i - 1])) {
+            std::size_t keyword_size = 0;
+            for (std::string_view keyword : {"class ", "struct ", "enum ", "union "})
+                if (rest.starts_with(keyword))
+                    keyword_size = keyword.size();
+            if (keyword_size != 0) {
+                i += keyword_size - 1;
+                continue;
+            }
+        }
+#endif
+
+        // Keep spaces between words, e.g. in "unsigned char", and drop the rest, e.g. in "some_class *".
+        if (name[i] == ' ' && !(size > 0 && is_identifier(last) && i + 1 < name.size() && is_identifier(name[i + 1])))
+            continue;
+
+        append(rest.substr(0, 1));
+    }
+
+    return size;
+}
 
 template <class T>
 consteval auto type_name_static_string() noexcept {
@@ -50,39 +106,8 @@ consteval auto type_name_static_string() noexcept {
 
     constexpr std::string_view type_name = function.substr(start_pos + prefix.size(), end_pos - start_pos - prefix.size());
 
-    auto is_identifier = [](char c) {
-        return (c >= '0' && c <= '9') || c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-    };
-
-    static_string<type_name.size()> result = {{}};
-    for (std::size_t i = 0; i < type_name.size(); i++) {
-#if SN_USE_MSVC_TYPE_NAME
-        // MSVC writes "class ns::X", "enum ns::Y", etc. Drop the keywords.
-        if (i == 0 || !is_identifier(type_name[i - 1])) {
-            std::size_t keyword_size = 0;
-            for (std::string_view keyword : {"class ", "struct ", "enum ", "union "})
-                if (type_name.substr(i).starts_with(keyword))
-                    keyword_size = keyword.size();
-
-            if (keyword_size != 0) {
-                i += keyword_size - 1;
-                continue;
-            }
-        }
-#endif
-
-        // Keep spaces between words, e.g. in "unsigned char" or "(anonymous namespace)", and drop the rest, e.g. in
-        // "some_class *".
-        if (type_name[i] == ' ') {
-            bool after_word = result.size > 0 && is_identifier(result.data[result.size - 1]);
-            bool before_word = i + 1 < type_name.size() && is_identifier(type_name[i + 1]);
-            if (!after_word || !before_word)
-                continue;
-        }
-
-        result.data[result.size++] = type_name[i];
-    }
-
+    std::array<char, normalize_type_name(type_name, nullptr)> result = {{}};
+    normalize_type_name(type_name, result.data());
     return result;
 }
 
@@ -93,7 +118,7 @@ struct type_name_holder {
 
 template <class T>
 constexpr std::string_view type_name_impl() noexcept {
-    return {type_name_holder<T>::value.data.data(), type_name_holder<T>::value.size};
+    return {type_name_holder<T>::value.data(), type_name_holder<T>::value.size()};
 }
 
 } // namespace sn::detail
