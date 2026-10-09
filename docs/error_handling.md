@@ -68,10 +68,10 @@ Rules:
   writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`. The `reason` is optional.
 - Don't touch `*err` on success.
 - Pass `err` through when (de)serializing nested values. If a nested value fails, add your part of the path with
-  `sn::error::prepend_path(err, key)` or `sn::error::prepend_path(err, index)`.
+  `sn::prepend_error_path(err, key)` or `sn::prepend_error_path(err, index)`.
 - For speculative attempts that you recover from, e.g. trying one format and then another, pass `nullptr`.
 
-`sn::report_from_string_error` and `sn::error::prepend_path` do nothing if `err` is `nullptr`, so you don't need to
+`sn::report_from_string_error` and `sn::prepend_error_path` do nothing if `err` is `nullptr`, so you don't need to
 check it yourself.
 
 ```cpp
@@ -83,12 +83,12 @@ bool from_string(std::string_view src, point *dst, sn::error *err) {
     }
 
     if (!sn::from_string(src.substr(0, pos), &dst->x, err)) {
-        sn::error::prepend_path(err, "x");
+        sn::prepend_error_path(err, "x");
         return false;
     }
 
     if (!sn::from_string(src.substr(pos + 1), &dst->y, err)) {
-        sn::error::prepend_path(err, "y");
+        sn::prepend_error_path(err, "y");
         return false;
     }
 

@@ -70,26 +70,23 @@ public:
     }
 
     /**
-     * Adds a key segment, e.g. a struct field name or a map key, to the front of the path of `*err`. Does nothing if
-     * `err` is `nullptr`. To be called by serialization functions for composite types when a nested value fails.
+     * Adds a key segment, e.g. a struct field name or a map key, to the front of the path.
      *
-     * @param err                       Error to update, can be `nullptr`.
+     * In extension points, use `sn::prepend_error_path` instead, it handles `nullptr`.
+     *
      * @param key                       Key to add.
      */
-    static void prepend_path(error *err, std::string_view key) {
-        if (err)
-            err->_reversed_path.emplace_back(std::in_place_type<std::string>, key);
+    void prepend_path(std::string_view key) {
+        _reversed_path.emplace_back(std::in_place_type<std::string>, key);
     }
 
     /**
      * Same as above, but adds an index segment, e.g. an array element index.
      *
-     * @param err                       Error to update, can be `nullptr`.
      * @param index                     Index to add.
      */
-    static void prepend_path(error *err, std::size_t index) {
-        if (err)
-            err->_reversed_path.emplace_back(std::in_place_type<std::size_t>, index);
+    void prepend_path(std::size_t index) {
+        _reversed_path.emplace_back(std::in_place_type<std::size_t>, index);
     }
 
     friend bool operator==(const error &l, const error &r) = default;
@@ -100,3 +97,32 @@ private:
 };
 
 } // namespace sn::errors
+
+namespace sn {
+
+/**
+ * Adds a key segment, e.g. a struct field name or a map key, to the front of the path of `*err`. To be used in
+ * extension points for composite types when a nested value fails.
+ *
+ * Does nothing if `err` is `nullptr`.
+ *
+ * @param err                           Error output, can be `nullptr`.
+ * @param key                           Key to add.
+ */
+inline void prepend_error_path(sn::error *err, std::string_view key) {
+    if (err)
+        err->prepend_path(key);
+}
+
+/**
+ * Same as above, but adds an index segment, e.g. an array element index.
+ *
+ * @param err                           Error output, can be `nullptr`.
+ * @param index                         Index to add.
+ */
+inline void prepend_error_path(sn::error *err, std::size_t index) {
+    if (err)
+        err->prepend_path(index);
+}
+
+} // namespace sn

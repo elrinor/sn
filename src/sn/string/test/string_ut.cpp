@@ -429,12 +429,12 @@ bool from_string(std::string_view src, point *dst, sn::error *err) {
     }
 
     if (!sn::from_string(src.substr(0, pos), &dst->x, err)) {
-        sn::error::prepend_path(err, "x");
+        sn::prepend_error_path(err, "x");
         return false;
     }
 
     if (!sn::from_string(src.substr(pos + 1), &dst->y, err)) {
-        sn::error::prepend_path(err, "y");
+        sn::prepend_error_path(err, "y");
         return false;
     }
 

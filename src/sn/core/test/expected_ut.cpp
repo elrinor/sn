@@ -55,9 +55,9 @@ TEST(expected, value_throws_with_message) {
 
 TEST(expected, value_throws_with_path) {
     sn::error error("'zz' is not a number");
-    sn::error::prepend_path(&error, "y");
-    sn::error::prepend_path(&error, 2);
-    sn::error::prepend_path(&error, "points");
+    error.prepend_path("y");
+    error.prepend_path(2);
+    error.prepend_path("points");
     sn::expected<int> bad = std::unexpected(error);
     EXPECT_EQ(thrown_message([&] { (void) bad.value(); }), "points[2].y: 'zz' is not a number");
 }
@@ -126,7 +126,7 @@ TEST(expected, transform) {
 
 TEST(expected, transform_error) {
     auto with_path = parse(false).transform_error([](sn::error e) {
-        sn::error::prepend_path(&e, "x");
+        e.prepend_path("x");
         return e;
     });
     static_assert(std::is_same_v<decltype(with_path), sn::expected<int>>);
