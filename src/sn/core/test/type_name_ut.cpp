@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <any>
-#include <array>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -116,9 +115,9 @@ TEST(core, type_name_qualifiers) {
     EXPECT_EQ(sn::type_name<Nothing<const char *const>>(), "Nothing<const char*const>");
 }
 
-// Checks normalize_type_name on spellings that only some compilers produce, e.g. MSVC's "int const".
-consteval bool normalizes_to(std::string_view name, std::string_view expected) {
-    return sn::detail::type_name_normalizer::normalize<128>(name).view() == expected;
+// Checks type_name_normalizer on spellings that only some compilers produce, e.g. MSVC's "int const".
+consteval bool normalizes_to(std::string_view name, std::string_view expected, bool msvc = false) {
+    return sn::detail::type_name_normalizer::normalize<128>(name, msvc).view() == expected;
 }
 
 TEST(core, type_name_normalize) {
@@ -140,11 +139,23 @@ TEST(core, type_name_normalize) {
     static_assert(normalizes_to("Nothing<`anonymous namespace'::X>", "Nothing<(anonymous namespace)::X>"));
     static_assert(normalizes_to("Nothing<const_iterator>", "Nothing<const_iterator>"));
     static_assert(normalizes_to("void (int) const", "void(int)const"));
-    static_assert(normalizes_to("class ns::X", "ns::X"));
-    static_assert(normalizes_to("Nothing<struct A,enum B,union C>", "Nothing<A,B,C>"));
-    static_assert(normalizes_to("class Nothing<class `anonymous namespace'::X const >", "Nothing<const (anonymous namespace)::X>"));
     static_assert(normalizes_to("some_class * *", "some_class**"));
     static_assert(normalizes_to("std::pair<long long, unsigned char>", "std::pair<long long,unsigned char>"));
+
+    // Pointer modifiers.
+    static_assert(normalizes_to("int * __restrict const", "int*__restrict const"));
+    static_assert(normalizes_to("int const * __ptr64", "const int*__ptr64"));
+
+    // Literals are left alone.
+    static_assert(normalizes_to("V<' '>", "V<' '>"));
+    static_assert(normalizes_to("V<'\\''>", "V<'\\''>"));
+    static_assert(normalizes_to("named<fixed_string<10>{\"int const\"}>", "named<fixed_string<10>{\"int const\"}>"));
+
+    // MSVC keywords are only dropped for MSVC, clang uses them for unnamed types.
+    static_assert(normalizes_to("class ns::X", "ns::X", true));
+    static_assert(normalizes_to("Nothing<struct A,enum B,union C>", "Nothing<A,B,C>", true));
+    static_assert(normalizes_to("class Nothing<class `anonymous namespace'::X const >", "Nothing<const (anonymous namespace)::X>", true));
+    static_assert(normalizes_to("(unnamed struct at f.cpp:16:1)", "(unnamed struct at f.cpp:16:1)"));
 }
 
 TEST(core, type_name_string) {
