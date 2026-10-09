@@ -81,7 +81,9 @@ public:
     }
 
     /**
-     * Same as above, but adds an index segment, e.g. an array element index.
+     * Adds an index segment, e.g. an array element index, to the front of the path.
+     *
+     * In extension points, use `sn::prepend_error_path` instead, it handles `nullptr`.
      *
      * @param index                     Index to add.
      */
@@ -115,7 +117,10 @@ inline void prepend_error_path(sn::error *err, std::string_view key) {
 }
 
 /**
- * Same as above, but adds an index segment, e.g. an array element index.
+ * Adds an index segment, e.g. an array element index, to the front of the path of `*err`. To be used in extension
+ * points for composite types when a nested value fails.
+ *
+ * Does nothing if `err` is `nullptr`.
  *
  * @param err                           Error output, can be `nullptr`.
  * @param index                         Index to add.

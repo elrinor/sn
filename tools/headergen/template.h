@@ -93,7 +93,9 @@ void report_from_@LOWER@_error(sn::error *err, @SRC@) {
 }
 
 /**
- * Same as above, but with a reason. Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`.
+ * Reports that `src` couldn't be deserialized as `T`, and why. To be used in `from_@LOWER@` extension points.
+ *
+ * Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`. Does nothing if `err` is `nullptr`.
  *
  * @param err                           Error output, can be `nullptr`.
  * @param src                           Value that couldn't be deserialized.

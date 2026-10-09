@@ -96,7 +96,9 @@ void report_from_string_error(sn::error *err, std::string_view src) {
 }
 
 /**
- * Same as above, but with a reason. Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`.
+ * Reports that `src` couldn't be deserialized as `T`, and why. To be used in `from_string` extension points.
+ *
+ * Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`. Does nothing if `err` is `nullptr`.
  *
  * @param err                           Error output, can be `nullptr`.
  * @param src                           Value that couldn't be deserialized.
