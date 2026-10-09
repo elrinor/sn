@@ -5,6 +5,8 @@
 #include <string_view>
 #include <type_traits>
 
+#include "sn/core/type_name_fwd.h"
+
 // Note that clang-cl defines both __clang__ and _MSC_VER, and its __FUNCSIG__ looks like clang's __PRETTY_FUNCTION__.
 // So we check for clang first.
 #if defined(__clang__)
@@ -136,33 +138,26 @@ template<class T>
     return sn::detail::type_name_impl<T>();
 }
 
-#define SN_DEFINE_BUILTIN_TYPE_NAME(T, NAME)                                                                            \
-[[nodiscard]] constexpr std::string_view type_name(std::type_identity<T>) noexcept {                                    \
-    return NAME;                                                                                                        \
-}
+SN_DEFINE_TYPE_NAME(bool, "bool")
+SN_DEFINE_TYPE_NAME(short, "short")
+SN_DEFINE_TYPE_NAME(unsigned short, "unsigned short")
+SN_DEFINE_TYPE_NAME(int, "int")
+SN_DEFINE_TYPE_NAME(unsigned int, "unsigned int")
+SN_DEFINE_TYPE_NAME(long, "long")
+SN_DEFINE_TYPE_NAME(unsigned long, "unsigned long")
+SN_DEFINE_TYPE_NAME(long long, "long long")
+SN_DEFINE_TYPE_NAME(unsigned long long, "unsigned long long")
+SN_DEFINE_TYPE_NAME(float, "float")
+SN_DEFINE_TYPE_NAME(double, "double")
 
-SN_DEFINE_BUILTIN_TYPE_NAME(bool, "bool")
-SN_DEFINE_BUILTIN_TYPE_NAME(short, "short")
-SN_DEFINE_BUILTIN_TYPE_NAME(unsigned short, "unsigned short")
-SN_DEFINE_BUILTIN_TYPE_NAME(int, "int")
-SN_DEFINE_BUILTIN_TYPE_NAME(unsigned int, "unsigned int")
-SN_DEFINE_BUILTIN_TYPE_NAME(long, "long")
-SN_DEFINE_BUILTIN_TYPE_NAME(unsigned long, "unsigned long")
-SN_DEFINE_BUILTIN_TYPE_NAME(long long, "long long")
-SN_DEFINE_BUILTIN_TYPE_NAME(unsigned long long, "unsigned long long")
-SN_DEFINE_BUILTIN_TYPE_NAME(float, "float")
-SN_DEFINE_BUILTIN_TYPE_NAME(double, "double")
+SN_DEFINE_TYPE_NAME(char, "char")
+SN_DEFINE_TYPE_NAME(unsigned char, "unsigned char")
+SN_DEFINE_TYPE_NAME(signed char, "signed char")
 
-SN_DEFINE_BUILTIN_TYPE_NAME(char, "char")
-SN_DEFINE_BUILTIN_TYPE_NAME(unsigned char, "unsigned char")
-SN_DEFINE_BUILTIN_TYPE_NAME(signed char, "signed char")
-
-SN_DEFINE_BUILTIN_TYPE_NAME(std::string, "std::string")
-SN_DEFINE_BUILTIN_TYPE_NAME(std::string_view, "std::string_view")
-SN_DEFINE_BUILTIN_TYPE_NAME(std::wstring, "std::wstring")
-SN_DEFINE_BUILTIN_TYPE_NAME(std::wstring_view, "std::wstring_view")
-
-#undef SN_DEFINE_BUILTIN_TYPE_NAME
+SN_DEFINE_TYPE_NAME(std::string, "std::string")
+SN_DEFINE_TYPE_NAME(std::string_view, "std::string_view")
+SN_DEFINE_TYPE_NAME(std::wstring, "std::wstring")
+SN_DEFINE_TYPE_NAME(std::wstring_view, "std::wstring_view")
 
 } // namespace sn::detail::builtins
 
