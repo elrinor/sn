@@ -44,7 +44,7 @@ public:
      */
     [[nodiscard]] std::string path() const {
         std::string result;
-        for (auto pos = _reversed_path.rbegin(); pos != _reversed_path.rend(); ++pos) {
+        for (auto pos = _rpath.rbegin(); pos != _rpath.rend(); ++pos) {
             if (const std::size_t *index = std::get_if<std::size_t>(&*pos)) {
                 result += '[';
                 result += std::to_string(*index);
@@ -78,7 +78,7 @@ public:
      * @param key                       Key to add.
      */
     void prepend_path(std::string_view key) {
-        _reversed_path.emplace_back(std::in_place_type<std::string>, key);
+        _rpath.emplace_back(std::in_place_type<std::string>, key);
     }
 
     /**
@@ -89,14 +89,14 @@ public:
      * @param index                     Index to add.
      */
     void prepend_path(std::size_t index) {
-        _reversed_path.emplace_back(std::in_place_type<std::size_t>, index);
+        _rpath.emplace_back(std::in_place_type<std::size_t>, index);
     }
 
     friend bool operator==(const error &l, const error &r) = default;
 
 private:
     std::string _message;
-    std::vector<std::variant<std::string, std::size_t>> _reversed_path; // Innermost segment first.
+    std::vector<std::variant<std::string, std::size_t>> _rpath; // Reversed path, innermost segment first.
 };
 
 } // namespace sn::errors
