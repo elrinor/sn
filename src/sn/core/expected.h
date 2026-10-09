@@ -47,7 +47,7 @@ concept expected_like = requires { typename T::value_type; typename T::error_typ
  *
  * Differences from `std::expected`:
  * - `value()` throws `sn::bad_expected_access`, whose `what()` returns the error message.
- * - `or_throw()` is an alias for `value()`, for call sites that want to make the throw explicit.
+ * - `or_throw()` is the same as `value()`, but reads better at call sites, e.g. `sn::from_string<int>(s).or_throw()`.
  * - Monadic operations return `sn::expected`, and `and_then` / `or_else` accept functions that return either
  *   `sn::expected` or `std::expected`.
  *
@@ -77,6 +77,9 @@ public:
             return *std::forward<Self>(self);
     }
 
+    /**
+     * Same as `value()`, but reads better at call sites.
+     */
     template<class Self>
     constexpr decltype(auto) or_throw(this Self &&self) {
         return std::forward<Self>(self).value();

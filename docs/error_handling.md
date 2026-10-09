@@ -23,8 +23,8 @@ The second form returns `sn::expected`, which is what you want for `co_await`-st
 need the value:
 
 ```cpp
-int x = sn::from_string<int>(s).value(); // Throws sn::bad_expected_access with a sane what() on failure.
-std::string s = sn::to_string(MonsterType::Goblin).or_throw(); // Same, but the throw is spelled out.
+int x = sn::from_string<int>(s).or_throw(); // Throws sn::bad_expected_access with the error message on failure.
+std::string name = sn::to_string(MonsterType::Goblin).or_throw();
 
 if (sn::expected<int> x = sn::from_string<int>(s)) {
     use(*x);
@@ -44,10 +44,10 @@ There are no `try_` functions and no throwing out-parameter forms.
 ## `sn::expected`
 
 `sn::expected<T>` derives from `std::expected<T, sn::error>`. The differences are:
-- `value()` throws `sn::bad_expected_access`, which derives from `std::bad_expected_access<sn::error>`, but its
-  `what()` returns the error message. `std::bad_expected_access::what()` returns a generic string, e.g. on libc++ and
-  libstdc++.
-- `or_throw()` is an alias for `value()`.
+- `or_throw()` is the same as `value()`, but reads better at call sites. Prefer it.
+- `or_throw()` and `value()` throw `sn::bad_expected_access`, which derives from `std::bad_expected_access<sn::error>`,
+  but its `what()` returns the error message. `std::bad_expected_access::what()` returns a generic string, e.g. on
+  libc++ and libstdc++.
 - Monadic operations return `sn::expected`, and `and_then` / `or_else` accept functions that return either
   `sn::expected` or `std::expected` with `sn::error` as the error type.
 
