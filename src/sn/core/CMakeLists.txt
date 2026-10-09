@@ -8,13 +8,13 @@ set(SN_CORE_SOURCES
     preprocessor.h
     tag.h
     type_name.h
+    detail/concat.h
     detail/type_name_builtins.h)
 
 add_library(sn_core INTERFACE ${SN_CORE_SOURCES})
 add_library(sn::core ALIAS sn_core)
 target_include_directories(sn_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 target_compile_definitions(sn_core INTERFACE SN_MAX_SMALL_BUFFER_SIZE=${SN_MAX_SMALL_BUFFER_SIZE})
-target_link_libraries(sn_core INTERFACE sn_detail_format)
 lint_target(sn_core)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

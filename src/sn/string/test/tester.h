@@ -11,9 +11,9 @@
 #include "sn/core/error.h"
 #include "sn/core/expected.h"
 #include "sn/core/type_name.h"
+#include "sn/core/detail/concat.h"
 #include "sn/string/string.h"
 #include "sn/string/string_tags.h"
-#include "sn/detail/format/format.h"
 
 namespace sn::detail {
 
@@ -23,12 +23,12 @@ inline std::string to_debug_string() {
 }
 
 inline std::string to_debug_string(sn::tags::dynamic_base_tag tag) {
-    return sn::detail::format("sn::tags::dynamic_base_tag({})", tag.value());
+    return sn::detail::concat("sn::tags::dynamic_base_tag(", std::to_string(tag.value()), ")");
 }
 
 template<int base>
 inline std::string to_debug_string(sn::tags::base_tag<base>) {
-    return sn::detail::format("sn::tags::base_tag<{}>()", base);
+    return sn::detail::concat("sn::tags::base_tag<", std::to_string(base), ">()");
 }
 
 template<sn::concepts::tag... Tags>

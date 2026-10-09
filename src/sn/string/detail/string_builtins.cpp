@@ -15,7 +15,6 @@
 #endif
 
 #include "sn/detail/codegen/forwarding.h"
-#include "sn/detail/format/format.h"
 
 #include "small_string_capacity.h"
 #include "string_errors.h"
