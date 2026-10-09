@@ -82,27 +82,15 @@ template<class T, sn::concepts::tag... Tags>
 /**
  * Reports that `src` couldn't be deserialized as `T`. To be used in `from_@LOWER@` extension points.
  *
- * Writes "Cannot deserialize '<src>' as '<T>'" into `*err`. Does nothing if `err` is `nullptr`.
+ * Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`, or just "Cannot deserialize '<src>' as '<T>'" if
+ * `reason` is empty. Does nothing if `err` is `nullptr`.
  *
  * @param err                           Error output, can be `nullptr`.
  * @param src                           Value that couldn't be deserialized.
+ * @param reason                        Why it couldn't be deserialized, can be empty.
  */
 template<class T>
-void report_from_@LOWER@_error(sn::error *err, @SRC@) {
-    sn::detail::report_from_@LOWER@_error<T>(err, src);
-}
-
-/**
- * Reports that `src` couldn't be deserialized as `T`, and why. To be used in `from_@LOWER@` extension points.
- *
- * Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`. Does nothing if `err` is `nullptr`.
- *
- * @param err                           Error output, can be `nullptr`.
- * @param src                           Value that couldn't be deserialized.
- * @param reason                        Why it couldn't be deserialized.
- */
-template<class T>
-void report_from_@LOWER@_error(sn::error *err, @SRC@, std::string_view reason) {
+void report_from_@LOWER@_error(sn::error *err, @SRC@, std::string_view reason = {}) {
     sn::detail::report_from_@LOWER@_error<T>(err, src, reason);
 }
 

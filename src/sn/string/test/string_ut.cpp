@@ -96,6 +96,7 @@ TEST(string, boolean) {
         "da"
     });
     t.expect_failing_from_with_message("da", "Cannot deserialize 'da' as 'bool'");
+    EXPECT_EQ(sn::from_string<bool>("da").error().message(), "Cannot deserialize 'da' as 'bool'"); // No ": " w/o a reason.
 
     t.expect_valid_from({
         {"0", false},
