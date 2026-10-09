@@ -34,8 +34,7 @@ if (sn::expected<int> x = sn::from_string<int>(s)) {
 ```
 
 `sn::error` holds a message and, for errors in nested values, a path to the value that failed. `what()` returns both,
-e.g. `points[2].y: 'zz' is not a number`. Messages are formatted when the error happens, which allocates. If you don't
-need the message, pass `nullptr` as the `sn::error *` argument and nothing will be allocated.
+e.g. `points[2].y: 'zz' is not a number`.
 
 
 ## `sn::expected`
