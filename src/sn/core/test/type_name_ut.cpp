@@ -109,6 +109,12 @@ TEST(core, type_name_string) {
     EXPECT_EQ(sn::type_name<std::string_view>(), "std::string_view");
     EXPECT_EQ(sn::type_name<std::wstring>(), "std::wstring");
     EXPECT_EQ(sn::type_name<std::wstring_view>(), "std::wstring_view");
+    EXPECT_EQ(sn::type_name<std::u8string>(), "std::u8string");
+    EXPECT_EQ(sn::type_name<std::u8string_view>(), "std::u8string_view");
+    EXPECT_EQ(sn::type_name<std::u16string>(), "std::u16string");
+    EXPECT_EQ(sn::type_name<std::u16string_view>(), "std::u16string_view");
+    EXPECT_EQ(sn::type_name<std::u32string>(), "std::u32string");
+    EXPECT_EQ(sn::type_name<std::u32string_view>(), "std::u32string_view");
 }
 
 TEST(core, type_name_constexpr) {

@@ -159,6 +159,12 @@ SN_DEFINE_TYPE_NAME(std::string, "std::string")
 SN_DEFINE_TYPE_NAME(std::string_view, "std::string_view")
 SN_DEFINE_TYPE_NAME(std::wstring, "std::wstring")
 SN_DEFINE_TYPE_NAME(std::wstring_view, "std::wstring_view")
+SN_DEFINE_TYPE_NAME(std::u8string, "std::u8string")
+SN_DEFINE_TYPE_NAME(std::u8string_view, "std::u8string_view")
+SN_DEFINE_TYPE_NAME(std::u16string, "std::u16string")
+SN_DEFINE_TYPE_NAME(std::u16string_view, "std::u16string_view")
+SN_DEFINE_TYPE_NAME(std::u32string, "std::u32string")
+SN_DEFINE_TYPE_NAME(std::u32string_view, "std::u32string_view")
 
 } // namespace sn::detail::builtins
 
