@@ -24,10 +24,10 @@ struct universal_enum_table {
 public:
     template<class... Args>
     constexpr universal_enum_table(case_sensitivity mode, std::string_view type_name, bool is_signed, Args &&... args):
+        _base(std::forward<Args>(args)...),
         _mode(mode),
         _type_name(type_name),
-        _is_signed(is_signed),
-        _base(std::forward<Args>(args)...)
+        _is_signed(is_signed)
     {}
 
     // We're not following our own API conventions here mainly for the sake of better codegen.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <initializer_list>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -30,8 +31,9 @@ namespace sn::detail {
  * @return                              Size of the normalized type name.
  */
 consteval std::size_t normalize_type_name(std::string_view name, char *out) {
+    // Bytes >= 0x80 are parts of UTF-8 identifiers.
     auto is_identifier = [](char c) {
-        return (c >= '0' && c <= '9') || c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+        return (c >= '0' && c <= '9') || c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || static_cast<unsigned char>(c) >= 0x80;
     };
 
     std::size_t size = 0;
@@ -45,27 +47,32 @@ consteval std::size_t normalize_type_name(std::string_view name, char *out) {
         }
     };
 
+    // Note that this runs at compile time, and long type names can hit the constexpr step limit. So we only look for
+    // longer patterns at characters that can start them.
     for (std::size_t i = 0; i < name.size(); i++) {
-        std::string_view rest = name.substr(i);
+        char c = name[i];
 
-        // Clang, GCC and MSVC spellings, in this order. We use clang's. MSVC's __FUNCSIG__ has a dash, the space
-        // variant is how MSVC spells it elsewhere, e.g. in typeid names.
-        std::size_t anonymous_size = 0;
-        for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous-namespace'", "`anonymous namespace'"})
-            if (rest.starts_with(anonymous))
-                anonymous_size = anonymous.size();
-        if (anonymous_size != 0) {
-            append("(anonymous namespace)");
-            i += anonymous_size - 1;
-            continue;
+        // Clang, GCC and MSVC spellings, in this order. We use clang's.
+        if (c == '(' || c == '{' || c == '`') {
+            std::size_t anonymous_size = 0;
+            for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous-namespace'"})
+                if (name.substr(i).starts_with(anonymous))
+                    anonymous_size = anonymous.size();
+            if (anonymous_size != 0) {
+                if (is_identifier(last))
+                    append(" "); // The space before it was dropped below, e.g. in "const (anonymous namespace)::X".
+                append("(anonymous namespace)");
+                i += anonymous_size - 1;
+                continue;
+            }
         }
 
 #if SN_USE_MSVC_TYPE_NAME
         // MSVC writes "class ns::X", "enum ns::Y", etc. Drop the keywords.
-        if (i == 0 || !is_identifier(name[i - 1])) {
+        if (is_identifier(c) && (i == 0 || !is_identifier(name[i - 1]))) {
             std::size_t keyword_size = 0;
             for (std::string_view keyword : {"class ", "struct ", "enum ", "union "})
-                if (rest.starts_with(keyword))
+                if (name.substr(i).starts_with(keyword))
                     keyword_size = keyword.size();
             if (keyword_size != 0) {
                 i += keyword_size - 1;
@@ -75,10 +82,10 @@ consteval std::size_t normalize_type_name(std::string_view name, char *out) {
 #endif
 
         // Keep spaces between words, e.g. in "unsigned char", and drop the rest, e.g. in "some_class *".
-        if (name[i] == ' ' && !(size > 0 && is_identifier(last) && i + 1 < name.size() && is_identifier(name[i + 1])))
+        if (c == ' ' && !(is_identifier(last) && i + 1 < name.size() && is_identifier(name[i + 1])))
             continue;
 
-        append(rest.substr(0, 1));
+        append(name.substr(i, 1));
     }
 
     return size;

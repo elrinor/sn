@@ -102,6 +102,11 @@ TEST(core, type_name_anonymous_namespace) {
     // GCC and MSVC spell it differently, but we use clang's spelling everywhere.
     EXPECT_EQ(sn::type_name<anonymous_class>(), "(anonymous namespace)::anonymous_class");
     EXPECT_EQ(sn::type_name<Nothing<anonymous_class>>(), "Nothing<(anonymous namespace)::anonymous_class>");
+
+    // MSVC writes const after the type.
+#if !defined(_MSC_VER) || defined(__clang__)
+    EXPECT_EQ(sn::type_name<Nothing<const anonymous_class>>(), "Nothing<const (anonymous namespace)::anonymous_class>");
+#endif
 }
 
 TEST(core, type_name_string) {
