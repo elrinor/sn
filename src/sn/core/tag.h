@@ -18,8 +18,9 @@ namespace sn::concepts {
  *
  * It's used in user-facing functions and classes in `sn` namespace to improve error reporting.
  *
- * For example, consider a call `sn::to_string(x, &s)`, where `s` is not `std::string`. This call will be matched to an
- * overload that returns an `std::string` and assumes that the 2nd arg is a tag, which is definitely not what we want.
+ * For example, consider a call `sn::to_string(x, &s)`, where the caller forgot the `sn::error *` argument. Without the
+ * concept, this call would be matched to the overload that returns `sn::expected<std::string>`, treating `&s` as a tag,
+ * which is definitely not what we want.
  */
 template<class T>
 concept tag = std::is_base_of_v<sn::tags::tag, T>;

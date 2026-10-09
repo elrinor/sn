@@ -14,25 +14,19 @@
 template<class T>
 static void check_supported() {
     static_assert(sn::concepts::to_stringable<T>);
-    static_assert(sn::concepts::try_to_stringable<T>);
     static_assert(sn::concepts::from_stringable<T>);
-    static_assert(sn::concepts::try_from_stringable<T>);
 }
 
 template<class T>
 static void check_unsupported() {
     static_assert(!sn::concepts::to_stringable<T>);
-    static_assert(!sn::concepts::try_to_stringable<T>);
     static_assert(!sn::concepts::from_stringable<T>);
-    static_assert(!sn::concepts::try_from_stringable<T>);
 }
 
 template<class T>
 static void check_has_to_string_only() {
     static_assert(sn::concepts::to_stringable<T>);
-    static_assert(sn::concepts::try_to_stringable<T>);
     static_assert(!sn::concepts::from_stringable<T>);
-    static_assert(!sn::concepts::try_from_stringable<T>);
 }
 
 template<class T>
@@ -55,11 +49,11 @@ static void run_pointer_tests() {
     check_unsupported<wchar_t *>();
 
     // Same checks for from_string, albeit this one is more of a sanity check as the first arg is always a std::string_view.
-    static_assert(requires(T s) { sn::detail::builtins::from_string("123", &s); });
-    static_assert(!requires(T s) { sn::detail::builtins::from_string(u8"123", &s); });
-    static_assert(!requires(T s) { sn::detail::builtins::from_string(u"123", &s); });
-    static_assert(!requires(T s) { sn::detail::builtins::from_string(U"123", &s); });
-    static_assert(!requires(T s) { sn::detail::builtins::from_string(L"123", &s); });
+    static_assert(requires(T s) { sn::detail::builtins::from_string("123", &s, nullptr); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(u8"123", &s, nullptr); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(u"123", &s, nullptr); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(U"123", &s, nullptr); });
+    static_assert(!requires(T s) { sn::detail::builtins::from_string(L"123", &s, nullptr); });
 
     // And we also do some sanity checks for non-char pointers.
     check_unsupported<unsigned char *>();
@@ -97,10 +91,12 @@ TEST(string, char) {
 TEST(string, boolean) {
     sn::detail::tester<bool> t;
 
-    t.expect_throwing_from({
+    t.expect_failing_from({
         "",
         "da"
     });
+    t.expect_failing_from_with_message("da", "Cannot deserialize 'da' as 'bool'");
+    EXPECT_EQ(sn::from_string<bool>("da").error().message(), "Cannot deserialize 'da' as 'bool'"); // No ": " w/o a reason.
 
     t.expect_valid_from({
         {"0", false},
@@ -130,7 +126,7 @@ template<class T>
 static void run_integer_tests() {
     sn::detail::tester<T> t;
 
-    std::initializer_list<std::string_view> always_throwing = {
+    std::initializer_list<std::string_view> always_failing = {
         "",
         " 1",
         "1 ",
@@ -141,9 +137,9 @@ static void run_integer_tests() {
         "0-0",
         "0-1",
     };
-    t.expect_throwing_from(always_throwing);
+    t.expect_failing_from(always_failing);
 
-    std::initializer_list<std::string_view> throwing_in_base10 = {
+    std::initializer_list<std::string_view> failing_in_base10 = {
         " 111",
         "111 ",
         "\t111",
@@ -151,23 +147,23 @@ static void run_integer_tests() {
         "0x1",
         "0b1",
     };
-    t.expect_throwing_from(throwing_in_base10);
+    t.expect_failing_from(failing_in_base10);
 
     if constexpr (sizeof(T) < sizeof(long long)) {
-        t.expect_throwing_from({
-            sn::to_string(static_cast<long long>(std::numeric_limits<T>::max()) + 1),
-            sn::to_string(static_cast<long long>(std::numeric_limits<T>::min()) - 1)
+        t.expect_failing_from({
+            sn::to_string(static_cast<long long>(std::numeric_limits<T>::max()) + 1).value(),
+            sn::to_string(static_cast<long long>(std::numeric_limits<T>::min()) - 1).value()
         });
     } else {
         static_assert(sizeof(T) == 8);
 
         if constexpr (std::is_unsigned_v<T>) {
-            t.expect_throwing_from({
+            t.expect_failing_from({
                 "-1",
                 "18446744073709551616" // max unsigned long long +1
             });
         } else {
-            t.expect_throwing_from({
+            t.expect_failing_from({
                 "-9223372036854775809", // min long long -1
                 "9223372036854775808" // max long long +1
             });
@@ -184,10 +180,10 @@ static void run_integer_tests() {
 
     t.expect_valid_from({
         {"010", 10}, // This is not an octal number.
-        {prepend_zeros(1, sn::to_string(std::numeric_limits<T>::max())), std::numeric_limits<T>::max()},
-        {prepend_zeros(1, sn::to_string(std::numeric_limits<T>::min())), std::numeric_limits<T>::min()},
-        {prepend_zeros(100, sn::to_string(std::numeric_limits<T>::max())), std::numeric_limits<T>::max()},
-        {prepend_zeros(100, sn::to_string(std::numeric_limits<T>::min())), std::numeric_limits<T>::min()}
+        {prepend_zeros(1, sn::to_string(std::numeric_limits<T>::max()).value()), std::numeric_limits<T>::max()},
+        {prepend_zeros(1, sn::to_string(std::numeric_limits<T>::min()).value()), std::numeric_limits<T>::min()},
+        {prepend_zeros(100, sn::to_string(std::numeric_limits<T>::max()).value()), std::numeric_limits<T>::max()},
+        {prepend_zeros(100, sn::to_string(std::numeric_limits<T>::min()).value()), std::numeric_limits<T>::min()}
     });
 
     t.expect_valid_roundtrip({
@@ -243,20 +239,20 @@ static void run_integer_tests() {
         t.expect_valid_roundtrip({std::numeric_limits<T>::max(), std::numeric_limits<T>::min()}, tag);
         t.expect_valid_from(prepend_zeros(100, positive_100), 100, tag);
 
-        t.expect_throwing_from(always_throwing, tag);
+        t.expect_failing_from(always_failing, tag);
         if (base == 10)
-            t.expect_throwing_from(throwing_in_base10, tag);
+            t.expect_failing_from(failing_in_base10, tag);
 
         if (base <= 11) {
-            t.expect_throwing_from("0b1", tag);
+            t.expect_failing_from("0b1", tag);
         } else {
-            t.expect_nonthrowing_from("0b1", tag);
+            t.expect_succeeding_from("0b1", tag);
         }
 
         if (base <= 33) {
-            t.expect_throwing_from("0x1", tag);
+            t.expect_failing_from("0x1", tag);
         } else {
-            t.expect_nonthrowing_from("0x1", tag);
+            t.expect_succeeding_from("0x1", tag);
         }
 
         if (std::is_signed_v<T>) {
@@ -298,7 +294,7 @@ template<class T>
 static void run_float_tests() {
     sn::detail::tester<T> t;
 
-    t.expect_throwing_from({
+    t.expect_failing_from({
         "+1",
         "+1.5",
         " 1.5",
@@ -393,18 +389,80 @@ struct friendly {
     int value = 0;
 };
 
-void to_string(const friendly &src, std::string *dst) {
-    sn::to_string(src.value, dst);
+bool to_string(const friendly &src, std::string *dst, sn::error *err) {
+    return sn::to_string(src.value, dst, err);
 }
 
-void from_string(std::string_view src, friendly *dst) {
-    sn::from_string(src, &dst->value);
+bool from_string(std::string_view src, friendly *dst, sn::error *err) {
+    return sn::from_string(src, &dst->value, err);
 }
 } // namespace friendlyns
 
 TEST(string, friend) { // NOLINT: this is not std::string.
     EXPECT_EQ(sn::to_string(friendlyns::friendly(1)), "1");
     EXPECT_EQ(sn::from_string<friendlyns::friendly>("1"), friendlyns::friendly(1));
+    EXPECT_EQ(sn::from_string<friendlyns::friendly>("zz").error().what(), "'zz' is not a number");
+}
+
+namespace pointns {
+struct point {
+    int x = 0;
+    int y = 0;
+    friend bool operator==(const point &, const point &) = default;
+};
+
+SN_DECLARE_STRING_FUNCTIONS(point)
+
+bool to_string(const point &src, std::string *dst, sn::error *err) {
+    std::string y;
+    if (!sn::to_string(src.x, dst, err) || !sn::to_string(src.y, &y, err))
+        return false;
+    *dst += ',';
+    *dst += y;
+    return true;
+}
+
+bool from_string(std::string_view src, point *dst, sn::error *err) {
+    std::size_t pos = src.find(',');
+    if (pos == std::string_view::npos) {
+        sn::report_from_string_error(src, dst, err, "missing a comma");
+        return false;
+    }
+
+    if (!sn::from_string(src.substr(0, pos), &dst->x, err)) {
+        sn::prepend_error_path(err, "x");
+        return false;
+    }
+
+    if (!sn::from_string(src.substr(pos + 1), &dst->y, err)) {
+        sn::prepend_error_path(err, "y");
+        return false;
+    }
+
+    return true;
+}
+} // namespace pointns
+
+TEST(string, composite) {
+    EXPECT_EQ(sn::to_string(pointns::point{1, 2}), "1,2");
+    EXPECT_EQ(sn::from_string<pointns::point>("1,2"), (pointns::point{1, 2}));
+
+    sn::expected<pointns::point> result = sn::from_string<pointns::point>("1,zz");
+    ASSERT_FALSE(result.has_value());
+    EXPECT_EQ(result.error().message(), "'zz' is not a number");
+    EXPECT_EQ(result.error().path(), "y");
+    EXPECT_EQ(result.error().what(), "y: 'zz' is not a number");
+
+    // Error reported by the extension point itself, with a reason.
+    sn::expected<pointns::point> no_comma = sn::from_string<pointns::point>("12");
+    ASSERT_FALSE(no_comma.has_value());
+    EXPECT_TRUE(no_comma.error().message().starts_with("Cannot deserialize '12' as ")) << no_comma.error().message();
+    EXPECT_TRUE(no_comma.error().message().ends_with(": missing a comma")) << no_comma.error().message();
+    EXPECT_EQ(no_comma.error().path(), "");
+
+    // Speculative parsing doesn't report anything.
+    pointns::point p;
+    EXPECT_FALSE(sn::from_string("1,zz", &p, nullptr));
 }
 
 class Base {};
@@ -425,7 +483,7 @@ template<class T, class... Tags>
 static void check_no_reallocation(T value, Tags... tags) {
     std::string s;
     std::size_t capacity = s.capacity();
-    sn::to_string(value, &s, tags...);
+    EXPECT_TRUE(sn::to_string(value, &s, nullptr, tags...));
     EXPECT_EQ(s.capacity(), capacity) << "with value = " << value << " and result = " << s;
 }
 
@@ -440,4 +498,25 @@ TEST(string, short_numbers_dont_allocate) {
     check_no_reallocation(5, tn::bin);
     check_no_reallocation(5ll, tn::bin);
     check_no_reallocation(5ll, tn::dynamic_base(3));
+}
+
+namespace unsupportedns {
+struct unsupported {};
+} // namespace unsupportedns
+
+TEST(string, unsupported) {
+    // If sn::error were declared directly in namespace sn, ADL at sn's own extension point calls would find the
+    // user-facing sn::to_string / sn::from_string overloads that take sn::error *, and these checks would fail. See
+    // docs/error_handling.md.
+    check_unsupported<unsupportedns::unsupported>();
+}
+
+TEST(string, number_error_messages) {
+    sn::detail::tester<int> ti;
+    ti.expect_failing_from_with_message("zz", "'zz' is not a number");
+    ti.expect_failing_from_with_message("1zz", "'1zz' is not a number");
+    ti.expect_failing_from_with_message("99999999999999999999", "'99999999999999999999' does not fit in the range of int");
+
+    sn::detail::tester<double> td;
+    td.expect_failing_from_with_message("zz", "'zz' is not a number");
 }

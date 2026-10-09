@@ -1,15 +1,16 @@
 #pragma once
 
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <utility> // For std::pair.
 #include <string>
 #include <string_view>
 
+#include "sn/core/error_fwd.h"
 #include "sn/core/globals.h"
-#include "sn/string/string.h"
 
-#include "enum_table_exceptions.h"
+#include "enum_table_errors.h"
 #include "lowercase_buffer.h"
 
 namespace sn::detail {
@@ -24,7 +25,7 @@ struct universal_enum_table {
 public:
     // sn::type_name is not constexpr b/c it has typeid() as one of its backends. Thus, we cannot use type name as an
     // argument to a constexpr constructor. We can, however, use a pointer to a function doing what we need. This
-    // won't be a performance problem b/c it's on the cold (exception-throwing) path.
+    // won't be a performance problem b/c it's on the cold (error-reporting) path.
     using type_name_function = std::string_view (*)();
 
     template<class... Args>
@@ -38,60 +39,28 @@ public:
     // We're not following our own API conventions here mainly for the sake of better codegen.
     // Both x86_64 and arm64 ABIs return structs up to 16 bytes in registers, and it makes a lot of sense to use this here.
 
-    struct try_from_string_result {
+    struct from_string_result {
         std::uint64_t value = 0;
         bool ok = false;
     };
 
-    void to_string(std::uint64_t src, std::string *dst) const {
+    [[nodiscard]] bool to_string(std::uint64_t src, std::string *dst, sn::error *err) const {
         auto pos = _base.to_string_map.find(src);
-        if (pos != _base.to_string_map.end()) {
-            dst->assign(pos->second.data(), pos->second.size());
-        } else {
-            if (_is_signed) {
-                // This static_cast relies on implementation-defined behavior, but it's symmetric to what we have in
-                // type_erase_enum_reflection(), so it's OK.
-                throw_enum_to_string_error(_type_name(), sn::to_string(static_cast<std::int64_t>(src)));
-            } else {
-                throw_enum_to_string_error(_type_name(), sn::to_string(src));
-            }
-        }
-    }
-
-    template<case_sensitivity mode>
-    [[nodiscard]] std::uint64_t from_string(std::string_view src) const {
-        assert(_mode == mode);
-
-        auto run = [&] (std::string_view src) {
-            auto pos = _base.from_string_map.find(src);
-            if (pos == _base.from_string_map.end())
-                throw_enum_from_string_error(_type_name(), src);
-            return pos->second;
-        };
-
-        if constexpr (mode == case_insensitive) {
-            return run(lowercase_buffer(src));
-        } else {
-            return run(src);
-        }
-    }
-
-    [[nodiscard]] bool try_to_string(std::uint64_t src, std::string *dst) const noexcept {
-        auto pos = _base.to_string_map.find(src);
-        if (pos != _base.to_string_map.end()) {
-            dst->assign(pos->second.data(), pos->second.size());
-            return true;
-        } else {
+        if (pos == _base.to_string_map.end()) [[unlikely]] {
+            report_enum_to_string_error(_type_name, src, _is_signed, err);
             return false;
         }
+
+        dst->assign(pos->second.data(), pos->second.size());
+        return true;
     }
 
     template<case_sensitivity mode>
-    [[nodiscard]] try_from_string_result try_from_string(std::string_view src) const noexcept {
+    [[nodiscard]] from_string_result from_string(std::string_view src, sn::error *err) const {
         assert(_mode == mode);
 
-        auto run = [&] (std::string_view src) -> try_from_string_result {
-            auto pos = _base.from_string_map.find(src);
+        auto run = [&] (std::string_view key) -> from_string_result {
+            auto pos = _base.from_string_map.find(key);
             if (pos != _base.from_string_map.end()) {
                 return {pos->second, true};
             } else {
@@ -99,11 +68,16 @@ public:
             }
         };
 
+        from_string_result result;
         if constexpr (mode == case_insensitive) {
-            return run(lowercase_buffer(src));
+            result = run(lowercase_buffer(src));
         } else {
-            return run(src);
+            result = run(src);
         }
+
+        if (!result.ok) [[unlikely]]
+            report_enum_from_string_error(_type_name, src, err); // Note that we're reporting the original string.
+        return result;
     }
 
 private:

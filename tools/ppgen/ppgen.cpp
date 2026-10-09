@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     if (argc != 2)
         return 1;
 
-    int count = sn::from_string<int>(argv[1]);
+    int count = sn::from_string<int>(argv[1]).value();
     auto forward_range = std::views::iota(0, count);
     auto reverse_range = std::views::iota(0, count + 1) | std::views::reverse;
 

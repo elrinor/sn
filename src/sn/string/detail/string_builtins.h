@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 
+#include "sn/core/error_fwd.h"
 #include "sn/string/string_fwd.h"
 #include "sn/string/string_tags.h"
 
@@ -14,22 +15,14 @@ namespace sn::detail::builtins {
 // Support for std::string.
 //
 
-[[nodiscard]] inline bool try_to_string(const std::string &src, std::string *dst) noexcept {
+[[nodiscard]] inline bool to_string(const std::string &src, std::string *dst, sn::error *) {
     *dst = src;
     return true;
 }
 
-inline void to_string(const std::string &src, std::string *dst) {
-    *dst = src;
-}
-
-[[nodiscard]] inline bool try_from_string(std::string_view src, std::string *dst) noexcept {
+[[nodiscard]] inline bool from_string(std::string_view src, std::string *dst, sn::error *) {
     *dst = src;
     return true;
-}
-
-inline void from_string(std::string_view src, std::string *dst) {
-    *dst = src;
 }
 
 
@@ -37,13 +30,9 @@ inline void from_string(std::string_view src, std::string *dst) {
 // Support for std::string_view, to_string only.
 //
 
-[[nodiscard]] inline bool try_to_string(std::string_view src, std::string *dst) noexcept {
+[[nodiscard]] inline bool to_string(std::string_view src, std::string *dst, sn::error *) {
     *dst = src;
     return true;
-}
-
-inline void to_string(std::string_view src, std::string *dst) {
-    *dst = src;
 }
 
 
@@ -52,14 +41,9 @@ inline void to_string(std::string_view src, std::string *dst) {
 //
 
 template<std::size_t N>
-[[nodiscard]] inline bool try_to_string(const char (&src)[N], std::string *dst) noexcept {
+[[nodiscard]] inline bool to_string(const char (&src)[N], std::string *dst, sn::error *) {
     *dst = src;
     return true;
-}
-
-template<std::size_t N>
-inline void to_string(const char (&src)[N], std::string *dst) {
-    *dst = src;
 }
 
 
@@ -67,13 +51,9 @@ inline void to_string(const char (&src)[N], std::string *dst) {
 // Support for const char *, to_string only.
 //
 
-[[nodiscard]] inline bool try_to_string(const char *src, std::string *dst) noexcept {
+[[nodiscard]] inline bool to_string(const char *src, std::string *dst, sn::error *) {
     *dst = src;
     return true;
-}
-
-inline void to_string(const char *src, std::string *dst) {
-    *dst = src;
 }
 
 
@@ -81,13 +61,9 @@ inline void to_string(const char *src, std::string *dst) {
 // Support for char *, to_string only.
 //
 
-[[nodiscard]] inline bool try_to_string(char *src, std::string *dst) noexcept {
+[[nodiscard]] inline bool to_string(char *src, std::string *dst, sn::error *) {
     *dst = src;
     return true;
-}
-
-inline void to_string(char *src, std::string *dst) {
-    *dst = src;
 }
 
 

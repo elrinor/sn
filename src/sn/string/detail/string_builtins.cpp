@@ -18,7 +18,7 @@
 #include "sn/detail/format/format.h"
 
 #include "small_string_capacity.h"
-#include "string_exceptions.h"
+#include "string_errors.h"
 
 namespace sn::detail::builtins {
 
@@ -78,12 +78,12 @@ constexpr std::size_t max_arithmetic_length_v<T> = max_float_length_v<T>;
 // bool.
 //
 
-bool try_to_string(bool src, std::string *dst) noexcept {
+bool to_string(bool src, std::string *dst, sn::error *) {
     *dst = src ? "true" : "false";
     return true;
 }
 
-bool try_from_string(std::string_view src, bool *dst) noexcept {
+bool from_string(std::string_view src, bool *dst, sn::error *err) {
     if (src == "true" || src == "1") {
         *dst = true;
         return true;
@@ -91,17 +91,9 @@ bool try_from_string(std::string_view src, bool *dst) noexcept {
         *dst = false;
         return true;
     } else {
+        sn::detail::report_from_string_error(src, dst, err);
         return false;
     }
-}
-
-void to_string(bool src, std::string *dst) {
-    (void) try_to_string(src, dst); // Always succeeds.
-}
-
-void from_string(std::string_view src, bool *dst) {
-    if (!try_from_string(src, dst))
-        sn::detail::throw_from_string_error<bool>(src);
 }
 
 
@@ -129,7 +121,7 @@ inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, s
 }
 
 template<class T, class... Tags>
-inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
+inline bool to_string(T src, std::string *dst, sn::error *, Tags... tags) {
     std::size_t max_size;
     if constexpr (std::is_integral_v<T>) {
         max_size = max_integer_lengths_v<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
@@ -166,10 +158,6 @@ inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
     return true;
 }
 
-template<class T, class... Tags>
-inline void to_string(T src, std::string *dst, Tags... tags) {
-    (void) try_to_string(src, dst, tags...);
-}
 } // namespace detail_to_chars
 
 namespace detail_from_chars {
@@ -192,22 +180,15 @@ inline std::from_chars_result wrapped_from_chars(const char *ptr, const char *en
 }
 
 template<class T, class... Tags>
-inline bool try_from_string(std::string_view src, T *dst, Tags... tags) noexcept {
+inline bool from_string(std::string_view src, T *dst, sn::error *err, Tags... tags) {
     const char *end = src.data() + src.size();
     std::from_chars_result result = wrapped_from_chars(src.data(), end, dst, tags...);
-    return result.ec == std::errc() && result.ptr == end;
-}
+    if (result.ec == std::errc() && result.ptr == end) [[likely]]
+        return true;
 
-template<class T, class... Tags>
-inline void from_string(std::string_view src, T *dst, Tags... tags) {
-    const char *end = src.data() + src.size();
-    std::from_chars_result result = wrapped_from_chars(src.data(), end, dst, tags...);
-
-    if (result.ec != std::errc())
-        sn::detail::throw_number_from_string_error<T>(src, result.ec);
-
-    if (result.ptr != end)
-        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument); // "Not a number"
+    // Trailing non-number characters mean "not a number".
+    sn::detail::report_number_from_string_error(src, dst, err, result.ec == std::errc() ? std::errc::invalid_argument : result.ec);
+    return false;
 }
 } // namespace detail_from_chars
 
@@ -227,9 +208,12 @@ inline double wrapped_strto<double>(const char *str, const char **end) {
 }
 
 template<class T>
-inline bool try_from_string(std::string_view src, T *dst) noexcept {
-    if (src.empty() || std::isspace(src[0]) || src[0] == '+')
-        return false; // We behave the same as std::from_chars and don't skip whitespaces and don't allow leading '+'.
+inline bool from_string(std::string_view src, T *dst, sn::error *err) {
+    if (src.empty() || std::isspace(src[0]) || src[0] == '+') {
+        // We behave the same as std::from_chars and don't skip whitespaces and don't allow leading '+'.
+        sn::detail::report_number_from_string_error(src, dst, err, std::errc::invalid_argument);
+        return false;
+    }
 
     const char *src_end = src.data() + src.size();
     const char *end = src_end;
@@ -238,29 +222,14 @@ inline bool try_from_string(std::string_view src, T *dst) noexcept {
     if ((result != 0 || errno == 0) && end == src_end) {
         *dst = result;
         return true;
+    }
+
+    if (result == 0 && errno == ERANGE) {
+        sn::detail::report_number_from_string_error(src, dst, err, std::errc::result_out_of_range);
     } else {
-        return false;
+        sn::detail::report_number_from_string_error(src, dst, err, std::errc::invalid_argument); // Including tail non-number symbols.
     }
-}
-
-template<class T>
-inline void from_string(std::string_view src, T *dst) {
-    // Implementation is pretty much a copy of try_from_string.
-    if (src.empty() || std::isspace(src[0]) || src[0] == '+')
-        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument);
-
-    const char *end = src.data() + src.size();
-    errno = 0;
-    T result = wrapped_strto<T>(src.data(), &end);
-    if (result == 0) {
-        if (errno == ERANGE)
-            sn::detail::throw_number_from_string_error<T>(src, std::errc::result_out_of_range);
-        if (errno != 0)
-            sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument);
-    }
-    if (end != src.data() + src.size()) // Tail non-number symbols => not a number.
-        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument);
-    *dst = result;
+    return false;
 }
 } // namespace detail_strtofd
 #endif // SN_USE_STRTOF
@@ -268,22 +237,15 @@ inline void from_string(std::string_view src, T *dst) {
 #if SN_USE_FAST_FLOAT
 namespace detail_fast_float {
 template<class T>
-inline bool try_from_string(std::string_view src, T *dst) noexcept {
+inline bool from_string(std::string_view src, T *dst, sn::error *err) {
     const char *end = src.data() + src.size();
     fast_float::from_chars_result result = fast_float::from_chars(src.data(), end, *dst);
-    return result.ec == std::errc() && result.ptr == end;
-}
+    if (result.ec == std::errc() && result.ptr == end) [[likely]]
+        return true;
 
-template<class T>
-inline void from_string(std::string_view src, T *dst) {
-    const char *end = src.data() + src.size();
-    fast_float::from_chars_result result = fast_float::from_chars(src.data(), end, *dst);
-
-    if (result.ec != std::errc())
-        sn::detail::throw_number_from_string_error<T>(src, result.ec);
-
-    if (result.ptr != end)
-        sn::detail::throw_number_from_string_error<T>(src, std::errc::invalid_argument); // "Not a number"
+    // Trailing non-number characters mean "not a number".
+    sn::detail::report_number_from_string_error(src, dst, err, result.ec == std::errc() ? std::errc::invalid_argument : result.ec);
+    return false;
 }
 } // namespace detail_fast_float
 #endif // SN_USE_FAST_FLOAT
