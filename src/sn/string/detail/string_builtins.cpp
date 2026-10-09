@@ -8,6 +8,8 @@
 #include <array>
 #include <charconv>
 #include <concepts> // For std::integral.
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 #if SN_USE_FAST_FLOAT
