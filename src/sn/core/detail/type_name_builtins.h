@@ -49,6 +49,10 @@ struct type_name_buffer {
  */
 class type_name_normalizer {
 public:
+    // This should be private, but MSVC doesn't let normalize() call a private constructor during constant evaluation.
+    // Use normalize() instead.
+    consteval type_name_normalizer(std::string_view name, char *out) : _name(name), _out(out) {}
+
     /**
      * @tparam capacity                 Capacity of the output buffer. A normalized name is at most twice as long as
      *                                  the original, the worst case being GCC's `{anonymous}`.
@@ -74,8 +78,6 @@ private:
         template_args,  // A closing ">".
     };
     using enum ending;
-
-    consteval type_name_normalizer(std::string_view name, char *out) : _name(name), _out(out) {}
 
     consteval void process_next() {
         char c = _name[_pos];
