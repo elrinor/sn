@@ -52,6 +52,15 @@ struct type_name_buffer {
  */
 class type_name_normalizer {
 public:
+    // This should be private, but MSVC doesn't let normalize() call a private constructor during constant evaluation
+    // (C2248), whether the constructor is consteval or constexpr. Use normalize() instead.
+    constexpr type_name_normalizer(std::string_view name, bool msvc, char *out, std::size_t *type_starts) :
+        _name(name),
+        _msvc(msvc),
+        _out(out),
+        _type_starts(type_starts)
+    {}
+
     /**
      * @tparam capacity                 Capacity of the output buffer. A normalized name is at most twice as long as
      *                                  the original, the worst case being GCC's `{anonymous}`.
@@ -86,13 +95,6 @@ private:
     static constexpr std::array<std::string_view, 4> anonymous_namespace_spellings = {
         "(anonymous namespace)", "{anonymous}", "`anonymous-namespace'", "`anonymous namespace'"
     };
-
-    constexpr type_name_normalizer(std::string_view name, bool msvc, char *out, std::size_t *type_starts) :
-        _name(name),
-        _msvc(msvc),
-        _out(out),
-        _type_starts(type_starts)
-    {}
 
     consteval void process_next() {
         char c = _name[_pos];
