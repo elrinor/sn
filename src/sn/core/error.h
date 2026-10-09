@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <expected>
 #include <string>
 #include <string_view>
 #include <utility> // For std::move.
@@ -99,6 +100,49 @@ private:
 };
 
 } // namespace sn::errors
+
+namespace std {
+
+/**
+ * Exception thrown by `std::expected<T, sn::error>::value()`.
+ *
+ * The standard `what()` returns a generic string, this specialization returns `sn::error::what()` instead, e.g.
+ * `points[2].y: 'zz' is not a number`. Specializing a standard class template for a program-defined type is allowed as
+ * long as the specialization meets the requirements of the original template, see [namespace.std].
+ *
+ * It's declared right after `sn::error`, so that it's visible wherever `std::expected<T, sn::error>` can be used.
+ */
+template<>
+class bad_expected_access<sn::errors::error> : public bad_expected_access<void> {
+public:
+    explicit bad_expected_access(sn::errors::error error) : _error(std::move(error)), _what(_error.what()) {}
+
+    [[nodiscard]] const char *what() const noexcept override {
+        return _what.c_str();
+    }
+
+    [[nodiscard]] sn::errors::error &error() & noexcept {
+        return _error;
+    }
+
+    [[nodiscard]] const sn::errors::error &error() const & noexcept {
+        return _error;
+    }
+
+    [[nodiscard]] sn::errors::error &&error() && noexcept {
+        return std::move(_error);
+    }
+
+    [[nodiscard]] const sn::errors::error &&error() const && noexcept {
+        return std::move(_error);
+    }
+
+private:
+    sn::errors::error _error;
+    std::string _what;
+};
+
+} // namespace std
 
 namespace sn {
 
