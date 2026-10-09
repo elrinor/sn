@@ -113,9 +113,9 @@ namespace std {
  * It's declared right after `sn::error`, so that it's visible wherever `std::expected<T, sn::error>` can be used.
  */
 template<>
-class bad_expected_access<sn::errors::error> : public bad_expected_access<void> {
+class bad_expected_access<sn::error> : public bad_expected_access<void> {
 public:
-    explicit bad_expected_access(sn::errors::error error) : _error(std::move(error)), _what(_error.what()) {}
+    explicit bad_expected_access(sn::error error) : _error(std::move(error)), _what(_error.what()) {}
 
     [[nodiscard]] const char *what() const noexcept override {
         return _what.c_str();
@@ -127,7 +127,7 @@ public:
     }
 
 private:
-    sn::errors::error _error;
+    sn::error _error;
     std::string _what;
 };
 
