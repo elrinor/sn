@@ -16,8 +16,6 @@ set(SN_BUILD_TOOLS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN tools")
 set(SN_BUILD_BENCHMARKS "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Build SN benchmarks")
 set(SN_CHECK_STYLE "${PROJECT_IS_TOP_LEVEL}" CACHE BOOL "Enable style checks")
 
-set(SN_FORMAT_LIB "fmt_bundled" CACHE STRING "Format library to use, 'std', 'fmt_bundled', or 'fmt_external'")
-set_property(CACHE SN_FORMAT_LIB PROPERTY STRINGS std fmt_bundled fmt_external)
 set(SN_FLOAT_LIB "fast_float_bundled" CACHE STRING "Float string functions to use, 'strtof', 'from_chars', 'fast_float_bundled', or 'fast_float_external'")
 set_property(CACHE SN_FLOAT_LIB PROPERTY STRINGS strtof from_chars fast_float_bundled fast_float_external)
 set(SN_TYPE_NAME_IMPL "funcsig" CACHE STRING "Implementation of sn::type_name to use, 'typeid' or 'funcsig'")
@@ -25,9 +23,6 @@ set_property(CACHE SN_TYPE_NAME_IMPL PROPERTY STRINGS typeid funcsig)
 set(SN_ENUM_HASH_LIB "frozen_bundled" CACHE STRING "Hash library to use for enum serialization hash maps, 'frozen_bundled' or 'frozen_external'")
 set_property(CACHE SN_ENUM_HASH_LIB PROPERTY STRINGS frozen_bundled frozen_external)
 
-# Note that fmt 12.2.0 doesn't compile for 32-bit x86 linux, and fmt 12.1.0 discards a [[nodiscard]] return value in
-# base.h, which is an error for us on MSVC. So we're staying on 12.0.0 until the next release.
-set(SN_BUNDLED_FMT_TAG "12.0.0" CACHE STRING "Git tag for the bundled fmt library")
 set(SN_BUNDLED_FAST_FLOAT_TAG "v8.3.0" CACHE STRING "Git tag for the bundled fast_float library")
 set(SN_BUNDLED_FROZEN_TAG "1.2.0" CACHE STRING "Git tag for the bundled frozen library")
 set(SN_BUNDLED_GOOGLETEST_TAG "v1.18.0" CACHE STRING "Git tag for the bundled google test library")

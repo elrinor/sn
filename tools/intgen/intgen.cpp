@@ -5,11 +5,9 @@
 #include <charconv>
 #include <limits>
 #include <map>
+#include <print>
 #include <vector>
 #include <type_traits>
-
-#include <fmt/format.h> // NOLINT: not a C system header.
-#include <fmt/ranges.h> // NOLINT: not a C system header. For fmt::join.
 
 struct key {
     bool sign = false;
@@ -51,8 +49,8 @@ int main(int argc, char **argv) {
     fill_max_sizes<long long>();
     fill_max_sizes<unsigned long long>();
 
-    fmt::println("template<bool is_signed, int size>");
-    fmt::println("static constexpr std::nullptr_t max_integer_lengths_v = nullptr;");
+    std::println("template<bool is_signed, int size>");
+    std::println("static constexpr std::nullptr_t max_integer_lengths_v = nullptr;");
 
     for (int size : {2, 4, 8}) {
         for (bool sign : {true, false}) {
@@ -62,9 +60,9 @@ int main(int argc, char **argv) {
                 assert(max_lengths.contains(k));
                 values.push_back(max_lengths[k]);
             }
-            fmt::println("template<>");
-            fmt::println("constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<{}, {}> = {{{}}};",
-                         sign, size, fmt::join(values, ", "));
+            std::println("template<>");
+            std::println("constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<{}, {}> = {{{:n}}};",
+                         sign, size, values);
         }
     }
 
