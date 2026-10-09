@@ -9,6 +9,10 @@ void report_from_string_error(sn::error &err, std::string_view type_name, std::s
     err = sn::error(sn::detail::format("Cannot deserialize '{}' as '{}'", value, type_name));
 }
 
+void report_from_string_error(sn::error &err, std::string_view type_name, std::string_view value, std::string_view reason) {
+    err = sn::error(sn::detail::format("Cannot deserialize '{}' as '{}': {}", value, type_name, reason));
+}
+
 void report_number_from_string_error(sn::error &err, std::string_view type_name, std::string_view value, std::errc error) {
     if (error == std::errc::invalid_argument) {
         err = sn::error(sn::detail::format("'{}' is not a number", value));

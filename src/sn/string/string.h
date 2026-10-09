@@ -10,6 +10,7 @@
 #include "sn/core/expected.h"
 #include "sn/core/tag.h"
 #include "sn/string/detail/string_dispatch.h"
+#include "sn/string/detail/string_errors.h"
 
 namespace sn {
 
@@ -79,6 +80,31 @@ template<class T, sn::concepts::tag... Tags>
     if (!sn::detail::do_from_string(src, &result, &error, tags...))
         return std::unexpected(std::move(error));
     return result;
+}
+
+/**
+ * Reports that `src` couldn't be deserialized as `T`. To be used in `from_string` extension points.
+ *
+ * Writes "Cannot deserialize '<src>' as '<T>'" into `*err`. Does nothing if `err` is `nullptr`.
+ *
+ * @param err                           Error output, can be `nullptr`.
+ * @param src                           Value that couldn't be deserialized.
+ */
+template<class T>
+void report_from_string_error(sn::error *err, std::string_view src) {
+    sn::detail::report_from_string_error<T>(err, src);
+}
+
+/**
+ * Same as above, but with a reason. Writes "Cannot deserialize '<src>' as '<T>': <reason>" into `*err`.
+ *
+ * @param err                           Error output, can be `nullptr`.
+ * @param src                           Value that couldn't be deserialized.
+ * @param reason                        Why it couldn't be deserialized.
+ */
+template<class T>
+void report_from_string_error(sn::error *err, std::string_view src, std::string_view reason) {
+    sn::detail::report_from_string_error<T>(err, src, reason);
 }
 
 } // namespace sn

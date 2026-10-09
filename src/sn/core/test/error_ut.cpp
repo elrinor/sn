@@ -21,9 +21,9 @@ TEST(error, message) {
 TEST(error, path) {
     // Paths are built innermost segment first, while unwinding from the value that failed.
     sn::error e("'zz' is not a number");
-    e.prepend_path_key("y");
-    e.prepend_path_index(2);
-    e.prepend_path_key("points");
+    sn::error::prepend_path(&e, "y");
+    sn::error::prepend_path(&e, 2);
+    sn::error::prepend_path(&e, "points");
     EXPECT_EQ(e.message(), "'zz' is not a number");
     EXPECT_EQ(e.path(), "points[2].y");
     EXPECT_EQ(e.what(), "points[2].y: 'zz' is not a number");
@@ -31,10 +31,16 @@ TEST(error, path) {
 
 TEST(error, path_starting_with_index) {
     sn::error e("x");
-    e.prepend_path_key("a");
-    e.prepend_path_index(1);
-    e.prepend_path_index(0);
+    sn::error::prepend_path(&e, "a");
+    sn::error::prepend_path(&e, 1);
+    sn::error::prepend_path(&e, 0);
     EXPECT_EQ(e.path(), "[0][1].a");
+}
+
+TEST(error, prepend_path_to_nullptr) {
+    // Does nothing.
+    sn::error::prepend_path(nullptr, "a");
+    sn::error::prepend_path(nullptr, 0);
 }
 
 TEST(error, equality) {
@@ -44,7 +50,7 @@ TEST(error, equality) {
     EXPECT_TRUE(a == b);
     EXPECT_FALSE(a == c);
 
-    b.prepend_path_key("k");
+    sn::error::prepend_path(&b, "k");
     EXPECT_FALSE(a == b);
 }
 

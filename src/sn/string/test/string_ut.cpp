@@ -424,20 +424,17 @@ bool to_string(const point &src, std::string *dst, sn::error *err) {
 bool from_string(std::string_view src, point *dst, sn::error *err) {
     std::size_t pos = src.find(',');
     if (pos == std::string_view::npos) {
-        if (err)
-            *err = sn::error("Expected 'x,y'");
+        sn::report_from_string_error<point>(err, src, "missing a comma");
         return false;
     }
 
     if (!sn::from_string(src.substr(0, pos), &dst->x, err)) {
-        if (err)
-            err->prepend_path_key("x");
+        sn::error::prepend_path(err, "x");
         return false;
     }
 
     if (!sn::from_string(src.substr(pos + 1), &dst->y, err)) {
-        if (err)
-            err->prepend_path_key("y");
+        sn::error::prepend_path(err, "y");
         return false;
     }
 
@@ -454,6 +451,13 @@ TEST(string, composite) {
     EXPECT_EQ(result.error().message(), "'zz' is not a number");
     EXPECT_EQ(result.error().path(), "y");
     EXPECT_EQ(result.error().what(), "y: 'zz' is not a number");
+
+    // Error reported by the extension point itself, with a reason.
+    sn::expected<pointns::point> no_comma = sn::from_string<pointns::point>("12");
+    ASSERT_FALSE(no_comma.has_value());
+    EXPECT_TRUE(no_comma.error().message().starts_with("Cannot deserialize '12' as ")) << no_comma.error().message();
+    EXPECT_TRUE(no_comma.error().message().ends_with(": missing a comma")) << no_comma.error().message();
+    EXPECT_EQ(no_comma.error().path(), "");
 
     // Speculative parsing doesn't report anything.
     pointns::point p;
