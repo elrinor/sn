@@ -210,6 +210,7 @@ TEST(string_enum, char) {
     tester<char_test_enum> t;
 
     t.expect_throwing_to_with_message({{CHAR_VALUE_UNK, "'64'"}});
+    t.expect_throwing_to_with_message({{CHAR_VALUE_UNK, "char_test_enum'"}});
 
     t.expect_valid_fromto({
         {"CHAR_1", CHAR_VALUE_1},

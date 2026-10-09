@@ -2,6 +2,7 @@
 
 #include <any>
 #include <string>
+#include <vector>
 
 #include "sn/core/type_name.h"
 
@@ -62,6 +63,36 @@ TEST(core, type_name_template) {
 
 TEST(core, type_name_namespace) {
     EXPECT_EQ(sn::type_name<std::any>(), "std::any");
+}
+
+namespace ns {
+enum class scoped_enum { value };
+enum unscoped_enum { unscoped_value };
+union some_union {};
+} // namespace ns
+
+namespace {
+class anonymous_class {};
+} // namespace
+
+TEST(core, type_name_keywords) {
+    // MSVC writes these with "enum " / "union " in front.
+    EXPECT_EQ(sn::type_name<ns::scoped_enum>(), "ns::scoped_enum");
+    EXPECT_EQ(sn::type_name<ns::unscoped_enum>(), "ns::unscoped_enum");
+    EXPECT_EQ(sn::type_name<ns::some_union>(), "ns::some_union");
+    EXPECT_EQ(sn::type_name<Nothing<ns::scoped_enum>>(), "Nothing<ns::scoped_enum>");
+}
+
+TEST(core, type_name_spaces) {
+    EXPECT_EQ(sn::type_name<Nothing<unsigned char>>(), "Nothing<unsigned char>");
+    EXPECT_EQ(sn::type_name<Nothing<long double>>(), "Nothing<long double>");
+
+    // Compilers spell the anonymous namespace differently, e.g. GCC writes "{anonymous}".
+#if defined(__clang__)
+    EXPECT_EQ(sn::type_name<anonymous_class>(), "(anonymous namespace)::anonymous_class");
+#else
+    EXPECT_TRUE(sn::type_name<anonymous_class>().ends_with("::anonymous_class")) << sn::type_name<anonymous_class>();
+#endif
 }
 
 TEST(core, type_name_string) {

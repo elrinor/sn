@@ -5,12 +5,14 @@
 #include <string_view>
 #include <type_traits>
 
-#if defined(_MSC_VER)
-#   define SN_USE_MSVC_TYPE_NAME 1
-#elif defined(__clang__)
+// Note that clang-cl defines both __clang__ and _MSC_VER, and its __FUNCSIG__ looks like clang's __PRETTY_FUNCTION__.
+// So we check for clang first.
+#if defined(__clang__)
 #   define SN_USE_CLANG_TYPE_NAME 1
 #elif defined(__GNUC__)
 #   define SN_USE_GCC_TYPE_NAME 1
+#elif defined(_MSC_VER)
+#   define SN_USE_MSVC_TYPE_NAME 1
 #else
 #   error "Unsupported compiler, sn::type_name needs __PRETTY_FUNCTION__ or __FUNCSIG__"
 #endif
@@ -48,28 +50,35 @@ consteval auto type_name_static_string() noexcept {
 
     constexpr std::string_view type_name = function.substr(start_pos + prefix.size(), end_pos - start_pos - prefix.size());
 
-    static_string<type_name.size()> result = {{}};
-
-#if SN_USE_MSVC_TYPE_NAME
-    auto isIdentifier = [](char c) constexpr {
+    auto is_identifier = [](char c) {
         return (c >= '0' && c <= '9') || c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     };
-#endif
 
+    static_string<type_name.size()> result = {{}};
     for (std::size_t i = 0; i < type_name.size(); i++) {
-        if (type_name[i] == ' ')
-            continue;
-
 #if SN_USE_MSVC_TYPE_NAME
-        if (type_name.substr(i).starts_with("class ") && (i == 0 || !isIdentifier(type_name[i - 1]))) {
-            i += 5;
-            continue; // Drop "class ".
-        }
-        if (type_name.substr(i).starts_with("struct ") && (i == 0 || !isIdentifier(type_name[i - 1]))) {
-            i += 6;
-            continue; // Drop "struct ".
+        // MSVC writes "class ns::X", "enum ns::Y", etc. Drop the keywords.
+        if (i == 0 || !is_identifier(type_name[i - 1])) {
+            std::size_t keyword_size = 0;
+            for (std::string_view keyword : {"class ", "struct ", "enum ", "union "})
+                if (type_name.substr(i).starts_with(keyword))
+                    keyword_size = keyword.size();
+
+            if (keyword_size != 0) {
+                i += keyword_size - 1;
+                continue;
+            }
         }
 #endif
+
+        // Keep spaces between words, e.g. in "unsigned char" or "(anonymous namespace)", and drop the rest, e.g. in
+        // "some_class *".
+        if (type_name[i] == ' ') {
+            bool after_word = result.size > 0 && is_identifier(result.data[result.size - 1]);
+            bool before_word = i + 1 < type_name.size() && is_identifier(type_name[i + 1]);
+            if (!after_word || !before_word)
+                continue;
+        }
 
         result.data[result.size++] = type_name[i];
     }
@@ -88,6 +97,10 @@ constexpr std::string_view type_name_impl() noexcept {
 }
 
 } // namespace sn::detail
+
+#undef SN_USE_CLANG_TYPE_NAME
+#undef SN_USE_GCC_TYPE_NAME
+#undef SN_USE_MSVC_TYPE_NAME
 
 
 namespace sn::detail::builtins {
