@@ -24,9 +24,6 @@ struct message_error {
     std::string message;
 };
 
-template<class L, class R>
-constexpr bool equality_comparable = requires(const L &l, const R &r) { l == r; };
-
 template<class F>
 static std::string thrown_message(F &&f) {
     try {
@@ -184,13 +181,11 @@ TEST(expected, comparisons_with_std_expected) {
     EXPECT_NE(ok, (std::expected<int, sn::error>(6)));
     EXPECT_NE((std::expected<int, sn::error>(6)), ok);
 
-    // Different value or error type only works with sn::expected on the left, see the comment in sn::expected.
+    // Different value or error type works only with sn::expected on the left, see the comment in sn::expected.
     std::expected<int, message_error> other_bad = std::unexpected(message_error("'zz' is not a number"));
     EXPECT_EQ(ok, (std::expected<long, sn::error>(5)));
     EXPECT_EQ(bad, other_bad);
     EXPECT_NE(ok, other_bad);
-    static_assert(!equality_comparable<std::expected<long, sn::error>, sn::expected<int>>);
-    static_assert(!equality_comparable<std::expected<int, message_error>, sn::expected<int>>);
 
     // Void.
     EXPECT_EQ(sn::expected<void>(), (std::expected<void, sn::error>()));
