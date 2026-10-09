@@ -13,6 +13,20 @@ static sn::expected<int> parse(bool ok) {
     return std::unexpected(sn::error("'zz' is not a number"));
 }
 
+// Error type that's not sn::error, but is comparable with it.
+struct message_error {
+    explicit message_error(std::string message) : message(std::move(message)) {}
+
+    friend bool operator==(const message_error &l, const sn::error &r) {
+        return l.message == r.message();
+    }
+
+    std::string message;
+};
+
+template<class L, class R>
+constexpr bool equality_comparable = requires(const L &l, const R &r) { l == r; };
+
 template<class F>
 static std::string thrown_message(F &&f) {
     try {
@@ -134,10 +148,58 @@ TEST(expected, comparisons) {
     EXPECT_EQ(5, ok);
     EXPECT_NE(ok, 6);
     EXPECT_EQ(ok, sn::expected<int>(5));
-    EXPECT_EQ(bad, std::unexpected(sn::error("'zz' is not a number")));
     EXPECT_NE(bad, 5);
     EXPECT_NE(ok, bad);
     EXPECT_EQ(sn::expected<void>(), sn::expected<void>());
+}
+
+TEST(expected, comparisons_with_unexpected) {
+    sn::expected<int> ok = parse(true);
+    sn::expected<int> bad = parse(false);
+    EXPECT_EQ(bad, std::unexpected(sn::error("'zz' is not a number")));
+    EXPECT_EQ(std::unexpected(sn::error("'zz' is not a number")), bad);
+    EXPECT_NE(bad, std::unexpected(sn::error("x")));
+    EXPECT_NE(std::unexpected(sn::error("x")), bad);
+    EXPECT_NE(ok, std::unexpected(sn::error("'zz' is not a number")));
+    EXPECT_NE(std::unexpected(sn::error("'zz' is not a number")), ok);
+
+    // Different error type.
+    EXPECT_EQ(bad, std::unexpected(message_error("'zz' is not a number")));
+    EXPECT_EQ(std::unexpected(message_error("'zz' is not a number")), bad);
+    EXPECT_NE(bad, std::unexpected(message_error("x")));
+    EXPECT_NE(std::unexpected(message_error("x")), bad);
+}
+
+TEST(expected, comparisons_with_std_expected) {
+    sn::expected<int> ok = parse(true);
+    sn::expected<int> bad = parse(false);
+    std::expected<int, sn::error> std_ok = 5;
+    std::expected<int, sn::error> std_bad = std::unexpected(sn::error("'zz' is not a number"));
+    EXPECT_EQ(ok, std_ok);
+    EXPECT_EQ(std_ok, ok);
+    EXPECT_EQ(bad, std_bad);
+    EXPECT_EQ(std_bad, bad);
+    EXPECT_NE(ok, std_bad);
+    EXPECT_NE(std_bad, ok);
+    EXPECT_NE(ok, (std::expected<int, sn::error>(6)));
+    EXPECT_NE((std::expected<int, sn::error>(6)), ok);
+
+    // Different value or error type only works with sn::expected on the left, see the comment in sn::expected.
+    std::expected<int, message_error> other_bad = std::unexpected(message_error("'zz' is not a number"));
+    EXPECT_EQ(ok, (std::expected<long, sn::error>(5)));
+    EXPECT_EQ(bad, other_bad);
+    EXPECT_NE(ok, other_bad);
+    static_assert(!equality_comparable<std::expected<long, sn::error>, sn::expected<int>>);
+    static_assert(!equality_comparable<std::expected<int, message_error>, sn::expected<int>>);
+
+    // Void.
+    EXPECT_EQ(sn::expected<void>(), (std::expected<void, sn::error>()));
+    EXPECT_EQ((std::expected<void, sn::error>()), sn::expected<void>());
+    EXPECT_NE(sn::expected<void>(), (std::expected<void, sn::error>(std::unexpect, "x")));
+    EXPECT_NE((std::expected<void, sn::error>(std::unexpect, "x")), sn::expected<void>());
+    std::expected<void, message_error> other_void_bad = std::unexpected(message_error("x"));
+    EXPECT_EQ(sn::expected<void>(std::unexpect, "x"), other_void_bad);
+    EXPECT_EQ(other_void_bad, sn::expected<void>(std::unexpect, "x"));
 }
 
 TEST(expected, std_interop) {

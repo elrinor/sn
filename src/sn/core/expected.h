@@ -156,6 +156,22 @@ public:
         return static_cast<const base_type &>(l) == static_cast<const std::expected<U, sn::error> &>(r);
     }
 
+    template<class U, class E>
+    friend constexpr bool operator==(const expected &l, const std::expected<U, E> &r) {
+        return static_cast<const base_type &>(l) == r;
+    }
+
+    // With std::expected on the left, std::expected's operator==(const expected &, const T2 &) takes sn::expected as a
+    // plain value, and is an exact match. Only a non-template beats it, so the base type gets its own overload...
+    friend constexpr bool operator==(const base_type &l, const expected &r) {
+        return l == static_cast<const base_type &>(r);
+    }
+
+    // ...and other std::expected types on the left don't compile, instead of returning false when both sides hold equal
+    // errors. Swap the operands for these.
+    template<class U, class E> requires(!std::is_void_v<U>)
+    friend bool operator==(const std::expected<U, E> &l, const expected &r) = delete;
+
 private:
     template<class Self>
     static constexpr auto &&as_base(Self &&self) {
