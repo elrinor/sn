@@ -2,11 +2,11 @@
 
 #include <any>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include "sn/core/type_name.h"
-
-// Tests are only for the funcsig implementation. With typeid all bets are off.
-#if SN_USE_FUNCSIG_TYPE_NAME
+#include "sn/core/type_name_fwd.h"
 
 TEST(core, type_name_builtin) {
     EXPECT_EQ(sn::type_name<bool>(), "bool");
@@ -31,6 +31,7 @@ TEST(core, type_name_builtin) {
 
     EXPECT_EQ(sn::type_name<float>(), "float");
     EXPECT_EQ(sn::type_name<double>(), "double");
+    EXPECT_EQ(sn::type_name<long double>(), "long double");
 
     EXPECT_EQ(sn::type_name<char8_t>(), "char8_t");
     EXPECT_EQ(sn::type_name<char16_t>(), "char16_t");
@@ -67,11 +68,111 @@ TEST(core, type_name_namespace) {
     EXPECT_EQ(sn::type_name<std::any>(), "std::any");
 }
 
+namespace ns {
+enum class scoped_enum { value };
+enum unscoped_enum { unscoped_value };
+union some_union {};
+
+class renamed {};
+SN_DEFINE_TYPE_NAME(renamed, "Renamed")
+} // namespace ns
+
+TEST(core, type_name_override) {
+    static_assert(sn::type_name<ns::renamed>() == "Renamed");
+    EXPECT_EQ(sn::type_name<ns::renamed>(), "Renamed");
+}
+
+namespace {
+class anonymous_class {};
+} // namespace
+
+TEST(core, type_name_keywords) {
+    // MSVC writes these with "enum " / "union " in front.
+    EXPECT_EQ(sn::type_name<ns::scoped_enum>(), "ns::scoped_enum");
+    EXPECT_EQ(sn::type_name<ns::unscoped_enum>(), "ns::unscoped_enum");
+    EXPECT_EQ(sn::type_name<ns::some_union>(), "ns::some_union");
+    EXPECT_EQ(sn::type_name<Nothing<ns::scoped_enum>>(), "Nothing<ns::scoped_enum>");
+}
+
+TEST(core, type_name_spaces) {
+    EXPECT_EQ(sn::type_name<Nothing<unsigned char>>(), "Nothing<unsigned char>");
+    EXPECT_EQ(sn::type_name<Nothing<long double>>(), "Nothing<long double>");
+}
+
+TEST(core, type_name_anonymous_namespace) {
+    // GCC and MSVC spell it differently, but we use clang's spelling everywhere.
+    EXPECT_EQ(sn::type_name<anonymous_class>(), "(anonymous namespace)::anonymous_class");
+    EXPECT_EQ(sn::type_name<Nothing<anonymous_class>>(), "Nothing<(anonymous namespace)::anonymous_class>");
+
+    EXPECT_EQ(sn::type_name<Nothing<const anonymous_class>>(), "Nothing<const (anonymous namespace)::anonymous_class>");
+}
+
+TEST(core, type_name_qualifiers) {
+    EXPECT_EQ(sn::type_name<Nothing<const int>>(), "Nothing<const int>");
+    EXPECT_EQ(sn::type_name<Nothing<const volatile int>>(), "Nothing<const volatile int>");
+    EXPECT_EQ(sn::type_name<Nothing<const Nothing<int>>>(), "Nothing<const Nothing<int>>");
+    EXPECT_EQ(sn::type_name<Nothing<const char *>>(), "Nothing<const char*>");
+    EXPECT_EQ(sn::type_name<Nothing<const char *const>>(), "Nothing<const char*const>");
+}
+
+// Checks type_name_normalizer on spellings that only some compilers produce, e.g. MSVC's "int const".
+consteval bool normalizes_to(std::string_view name, std::string_view expected, bool msvc = false) {
+    return sn::detail::type_name_normalizer::normalize<128>(name, msvc).view() == expected;
+}
+
+TEST(core, type_name_normalize) {
+    static_assert(normalizes_to("int const", "const int"));
+    static_assert(normalizes_to("unsigned int const", "const unsigned int"));
+    static_assert(normalizes_to("int volatile", "volatile int"));
+    static_assert(normalizes_to("int const volatile", "const volatile int"));
+    static_assert(normalizes_to("int volatile const", "const volatile int"));
+    static_assert(normalizes_to("const volatile int", "const volatile int"));
+    static_assert(normalizes_to("volatile int const", "const volatile int"));
+    static_assert(normalizes_to("char const *", "const char*"));
+    static_assert(normalizes_to("char const * const", "const char*const"));
+    static_assert(normalizes_to("Nothing<int const >", "Nothing<const int>"));
+    static_assert(normalizes_to("Nothing<Nothing<int> const >", "Nothing<const Nothing<int>>"));
+    static_assert(normalizes_to("std::pair<int const,Nothing<int> const >", "std::pair<const int,const Nothing<int>>"));
+    static_assert(normalizes_to("Nothing<`anonymous-namespace'::X const >", "Nothing<const (anonymous namespace)::X>"));
+    static_assert(normalizes_to("Nothing<{anonymous}::X>", "Nothing<(anonymous namespace)::X>"));
+    static_assert(normalizes_to("`anonymous-namespace'::X", "(anonymous namespace)::X"));
+    static_assert(normalizes_to("Nothing<`anonymous namespace'::X>", "Nothing<(anonymous namespace)::X>"));
+    static_assert(normalizes_to("Nothing<const_iterator>", "Nothing<const_iterator>"));
+    static_assert(normalizes_to("void (int) const", "void(int)const"));
+    static_assert(normalizes_to("some_class * *", "some_class**"));
+    static_assert(normalizes_to("std::pair<long long, unsigned char>", "std::pair<long long,unsigned char>"));
+
+    // Pointer modifiers.
+    static_assert(normalizes_to("int * __restrict const", "int*__restrict const"));
+    static_assert(normalizes_to("int const * __ptr64", "const int*__ptr64"));
+
+    // Literals are left alone.
+    static_assert(normalizes_to("V<' '>", "V<' '>"));
+    static_assert(normalizes_to("V<'\\''>", "V<'\\''>"));
+    static_assert(normalizes_to("named<fixed_string<10>{\"int const\"}>", "named<fixed_string<10>{\"int const\"}>"));
+
+    // MSVC keywords are only dropped for MSVC, clang uses them for unnamed types.
+    static_assert(normalizes_to("class ns::X", "ns::X", true));
+    static_assert(normalizes_to("Nothing<struct A,enum B,union C>", "Nothing<A,B,C>", true));
+    static_assert(normalizes_to("class Nothing<class `anonymous namespace'::X const >", "Nothing<const (anonymous namespace)::X>", true));
+    static_assert(normalizes_to("(unnamed struct at f.cpp:16:1)", "(unnamed struct at f.cpp:16:1)"));
+}
+
 TEST(core, type_name_string) {
     EXPECT_EQ(sn::type_name<std::string>(), "std::string");
     EXPECT_EQ(sn::type_name<std::string_view>(), "std::string_view");
     EXPECT_EQ(sn::type_name<std::wstring>(), "std::wstring");
     EXPECT_EQ(sn::type_name<std::wstring_view>(), "std::wstring_view");
+    EXPECT_EQ(sn::type_name<std::u8string>(), "std::u8string");
+    EXPECT_EQ(sn::type_name<std::u8string_view>(), "std::u8string_view");
+    EXPECT_EQ(sn::type_name<std::u16string>(), "std::u16string");
+    EXPECT_EQ(sn::type_name<std::u16string_view>(), "std::u16string_view");
+    EXPECT_EQ(sn::type_name<std::u32string>(), "std::u32string");
+    EXPECT_EQ(sn::type_name<std::u32string_view>(), "std::u32string_view");
 }
 
-#endif
+TEST(core, type_name_constexpr) {
+    static_assert(sn::type_name<int>() == "int");
+    static_assert(sn::type_name<std::string>() == "std::string");
+    static_assert(sn::type_name<Nothing<Something>>() == "Nothing<Something>");
+}

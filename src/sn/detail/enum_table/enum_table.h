@@ -31,7 +31,7 @@ template<class T, case_sensitivity mode, class Base>
 class enum_table {
 public:
     template<class... Args>
-    explicit constexpr enum_table(Args &&... args) : _table(mode, &sn::type_name<T>, is_signed_ex_v<T>, std::forward<Args>(args)...) {}
+    explicit constexpr enum_table(Args &&... args) : _table(mode, sn::type_name<T>(), is_signed_ex_v<T>, std::forward<Args>(args)...) {}
 
     void to_string(T src, std::string *dst) const {
         _table.to_string(static_cast<std::uint64_t>(src), dst);
