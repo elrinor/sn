@@ -7,6 +7,7 @@
 #include <cassert>
 #include <array>
 #include <charconv>
+#include <concepts> // For std::integral.
 #include <string>
 
 #if SN_USE_FAST_FLOAT
@@ -16,30 +17,61 @@
 #include "sn/detail/codegen/forwarding.h"
 #include "sn/detail/format/format.h"
 
+#include "small_string_capacity.h"
 #include "string_exceptions.h"
 
 namespace sn::detail::builtins {
 
 //
-// max_integer_lengths.
+// max_integer_lengths_v.
 //
 // This code is auto-generated using the `intgen` tool in `/tools`.
 //
 
 template<bool is_signed, int size>
-static constexpr std::nullptr_t max_integer_lengths = nullptr;
+static constexpr std::nullptr_t max_integer_lengths_v = nullptr;
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 2> = {17, 11, 9, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<true, 2> = {17, 11, 9, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 2> = {16, 11, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<false, 2> = {16, 11, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 4> = {33, 21, 17, 15, 13, 13, 12, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<true, 4> = {33, 21, 17, 15, 13, 13, 12, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 4> = {32, 21, 16, 14, 13, 12, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<false, 4> = {32, 21, 16, 14, 13, 12, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<true, 8> = {65, 41, 33, 29, 26, 24, 23, 21, 20, 20, 19, 19, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<true, 8> = {65, 41, 33, 29, 26, 24, 23, 21, 20, 20, 19, 19, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14};
 template<>
-constexpr std::array<std::uint8_t, 35> max_integer_lengths<false, 8> = {64, 41, 32, 28, 25, 23, 22, 21, 20, 19, 18, 18, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13};
+constexpr std::array<std::uint8_t, 35> max_integer_lengths_v<false, 8> = {64, 41, 32, 28, 25, 23, 22, 21, 20, 19, 18, 18, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13};
+
+
+//
+// max_float_length_v.
+//
+// Maximal length of the shortest round-trip representation of a floating point number, which is what std::to_chars
+// produces. E.g. "-1.00000075e-36" for float, and "-1.7976931348623157e+308" for double.
+//
+
+template<class T>
+static constexpr std::nullptr_t max_float_length_v = nullptr;
+template<>
+constexpr std::size_t max_float_length_v<float> = 15;
+template<>
+constexpr std::size_t max_float_length_v<double> = 24;
+
+
+//
+// max_arithmetic_length_v.
+//
+// Maximal length of a string representation of an arithmetic type, in any base. For integers, base 2 gives the longest
+// strings.
+//
+
+template<class T>
+static constexpr std::nullptr_t max_arithmetic_length_v = nullptr;
+template<std::integral T>
+constexpr std::size_t max_arithmetic_length_v<T> = max_integer_lengths_v<std::is_signed_v<T>, sizeof(T)>[0];
+template<std::floating_point T>
+constexpr std::size_t max_arithmetic_length_v<T> = max_float_length_v<T>;
 
 
 //
@@ -98,30 +130,38 @@ inline std::to_chars_result wrapped_to_chars(char *first, char *last, T value, s
 
 template<class T, class... Tags>
 inline bool try_to_string(T src, std::string *dst, Tags... tags) noexcept {
-    // We can actually do better, but it's probably not worth it.
-    //
-    // Since all modern STL implementations use small string optimization, we can first check if the value fits in the
-    // small string buffer. These are the small buffer sizes:
-    // - 15 chars for msvc.
-    // - 15 chars for gcc's libstdc++.
-    // - 22 chars for clang's libc++.
-    // Numbers taken from https://tastyhedge.com/blog/memory-layout-of-std-string/.
-    //
-    // This will make it possible to avoid allocations in most cases.
-    //
-    // But this also means that the fast path in std::to_chars that compares the size of the buffer with maximum
-    // possible size won't trigger, and std::to_chars will do length estimation first. So, might actually be slower.
-    //
-    // There's still an opportunity for optimization here because we actually know that the number will fit in the
-    // buffer, and thus the length check inside std::to_chars isn't necessary. But will need to roll out our own
-    // std::to_chars for that.
-    std::size_t max_size = max_integer_lengths<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
+    std::size_t max_size;
+    if constexpr (std::is_integral_v<T>) {
+        max_size = max_integer_lengths_v<std::is_signed_v<T>, sizeof(T)>[sn::detail::base_value(tags...) - 2];
+    } else {
+        static_assert(sizeof...(Tags) == 0);
+        max_size = max_float_length_v<T>;
+    }
 
-    dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
-        std::to_chars_result result = wrapped_to_chars(data, data + size, src, tags...);
+    // If dst can hold the longest possible result without reallocating, we format right into it. This is the fastest
+    // option. It also lets libc++'s base 10 std::to_chars take its fast path, which skips computing the number's length
+    // when the buffer is large enough for any value. For other bases libc++ computes the length anyway, and so does
+    // libstdc++ for all bases.
+    //
+    // Otherwise reserving the longest possible result in dst would allocate even for short results, e.g. for "0.5"
+    // in a new string on msvc or libstdc++. So we format into a stack buffer and then copy, which only allocates if the
+    // actual result doesn't fit.
+    //
+    // Checking max_size against small_string_capacity doesn't change the outcome, because every string can hold at
+    // least small_string_capacity chars. It's there for performance. For most types and bases max_size is known at
+    // compile time, so the compiler evaluates this check itself and drops the capacity() call.
+    if (max_size <= small_string_capacity || max_size <= dst->capacity()) {
+        dst->resize_and_overwrite(max_size, [&](char *data, size_t size) {
+            std::to_chars_result result = wrapped_to_chars(data, data + size, src, tags...);
+            assert(result.ec == std::errc()); // Should never fail.
+            return result.ptr - data;
+        });
+    } else {
+        std::array<char, max_arithmetic_length_v<T>> buffer;
+        std::to_chars_result result = wrapped_to_chars(buffer.data(), buffer.data() + max_size, src, tags...);
         assert(result.ec == std::errc()); // Should never fail.
-        return result.ptr - data;
-    });
+        dst->assign(buffer.data(), static_cast<std::size_t>(result.ptr - buffer.data()));
+    }
 
     return true;
 }

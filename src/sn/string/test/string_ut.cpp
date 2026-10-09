@@ -2,10 +2,12 @@
 #include <string>
 #include <string_view>
 #include <functional> // For std::identity.
+#include <type_traits>
 
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
 #include "sn/string/string.h"
+#include "sn/string/detail/small_string_capacity.h"
 
 #include "tester.h"
 
@@ -236,6 +238,9 @@ static void run_integer_tests() {
     auto run_base_tests = [&](int base, auto tag) {
         std::string positive_100 = base_strings_for_100[base];
         t.expect_valid_fromto(positive_100, 100, tag);
+
+        // Longest strings that to_string can produce for T in this base.
+        t.expect_valid_roundtrip({std::numeric_limits<T>::max(), std::numeric_limits<T>::min()}, tag);
         t.expect_valid_from(prepend_zeros(100, positive_100), 100, tag);
 
         t.expect_throwing_from(always_throwing, tag);
@@ -340,6 +345,35 @@ static void run_float_tests() {
         {"-inf", -std::numeric_limits<T>::infinity()},
     });
 
+    // Longest strings that to_string can produce for T.
+    if constexpr (std::is_same_v<T, float>) {
+        t.expect_valid_fromto({
+            {"-3.4028235e+38", std::numeric_limits<float>::lowest()},
+            {"-1.1754944e-38", -std::numeric_limits<float>::min()},
+            {"-1.00000075e-36", -1.00000075e-36f},
+            {"1e-45", std::numeric_limits<float>::denorm_min()},
+        });
+    } else {
+        t.expect_valid_fromto({
+            {"-1.7976931348623157e+308", std::numeric_limits<double>::lowest()},
+            {"-2.2250738585072014e-308", -std::numeric_limits<double>::min()},
+            {"5e-324", std::numeric_limits<double>::denorm_min()},
+        });
+    }
+
+    t.expect_valid_roundtrip({
+        std::numeric_limits<T>::max(),
+        std::numeric_limits<T>::lowest(),
+        std::numeric_limits<T>::min(),
+        -std::numeric_limits<T>::min(),
+        std::numeric_limits<T>::denorm_min(),
+        -std::numeric_limits<T>::denorm_min(),
+        std::numeric_limits<T>::epsilon(),
+        static_cast<T>(0.1),
+        static_cast<T>(1.0 / 3.0),
+        static_cast<T>(-1.0 / 3.0),
+    });
+
     // TODO(elric): test NANs.
 }
 
@@ -380,4 +414,30 @@ SN_DECLARE_STRING_FUNCTIONS(Base)
 TEST(string, slicing) {
     check_supported<Base>();
     check_unsupported<Derived>();
+}
+
+TEST(string, small_string_capacity) {
+    // to_string relies on this to decide whether it can format numbers right into the output string.
+    EXPECT_EQ(std::string().capacity(), sn::detail::small_string_capacity);
+}
+
+template<class T, class... Tags>
+static void check_no_reallocation(T value, Tags... tags) {
+    std::string s;
+    std::size_t capacity = s.capacity();
+    sn::to_string(value, &s, tags...);
+    EXPECT_EQ(s.capacity(), capacity) << "with value = " << value << " and result = " << s;
+}
+
+TEST(string, short_numbers_dont_allocate) {
+    // Short results should stay in the small string buffer, regardless of how long the longest result for the type is.
+    check_no_reallocation(0.5f);
+    check_no_reallocation(0.5);
+    check_no_reallocation(-1.5);
+    check_no_reallocation(42);
+    check_no_reallocation(42ll);
+    check_no_reallocation(42ull);
+    check_no_reallocation(5, tn::bin);
+    check_no_reallocation(5ll, tn::bin);
+    check_no_reallocation(5ll, tn::dynamic_base(3));
 }
