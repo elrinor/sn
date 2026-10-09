@@ -7,6 +7,7 @@
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
 #include "sn/string/string.h"
+#include "sn/string/detail/small_string_capacity.h"
 
 #include "tester.h"
 

@@ -7,6 +7,7 @@ set(SN_STRING_SOURCES
     string_fwd.h
     string_tags.h
     detail/frozen_enum_table.h
+    detail/small_string_capacity.h
     detail/string_builtins.cpp
     detail/string_builtins.h
     detail/string_dispatch.h
