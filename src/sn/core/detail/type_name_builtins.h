@@ -69,10 +69,11 @@ private:
     // What the output currently ends with.
     enum class ending {
         punctuation,    // E.g. "<" or "*", or nothing at all.
-        name,           // A word that's part of a type name, e.g. "int" or "ns".
+        type_name,      // A word that's part of a type name, e.g. "int" or "ns".
         qualifier,      // A "const" or "volatile" that applies to what follows, e.g. in "const int".
         template_args,  // A closing ">".
     };
+    using enum ending;
 
     consteval type_name_normalizer(std::string_view name, char *out) : _name(name), _out(out) {}
 
@@ -97,15 +98,15 @@ private:
         // A qualifier right after a type applies to that type, e.g. in "int const" or "X<int> const". A qualifier
         // after "*" applies to the pointer, and a qualifier after ")" applies to the function, so these stay in place.
         bool is_qualifier = (first == 'c' || first == 'v') && (word == "const" || word == "volatile");
-        if (is_qualifier && (_ending == ending::name || _ending == ending::template_args)) {
+        if (is_qualifier && (_ending == type_name || _ending == template_args)) {
             move_to_type_start(word);
             return; // The output still ends with the same type.
         }
 
-        if (_ending == ending::name || _ending == ending::qualifier)
+        if (_ending == type_name || _ending == qualifier)
             append(" ");
         append(word);
-        _ending = is_qualifier ? ending::qualifier : ending::name;
+        _ending = is_qualifier ? qualifier : type_name;
     }
 
     consteval void process_punctuation(char c) {
@@ -118,18 +119,18 @@ private:
         }
 
         append({&c, 1});
-        _ending = c == '>' ? ending::template_args : ending::punctuation;
+        _ending = c == '>' ? template_args : punctuation;
     }
 
-    consteval void move_to_type_start(std::string_view qualifier) {
+    consteval void move_to_type_start(std::string_view word) {
         std::size_t pos = _type_starts.empty() ? 0 : _type_starts.back();
 
         // Keep "const volatile" in this order, like clang and GCC.
-        if (qualifier == "volatile" && std::string_view(_out + pos, _size - pos).starts_with("const "))
+        if (word == "volatile" && std::string_view(_out + pos, _size - pos).starts_with("const "))
             pos += 6;
 
         insert(pos, " ");
-        insert(pos, qualifier);
+        insert(pos, word);
     }
 
     consteval void append(std::string_view chars) {
@@ -178,7 +179,7 @@ private:
     std::size_t _pos = 0;
     char *_out = nullptr;
     std::size_t _size = 0;
-    ending _ending = ending::punctuation;
+    ending _ending = punctuation;
     std::vector<std::size_t> _type_starts; // Where the innermost types inside the open "<" and "(" start in the output.
 };
 
