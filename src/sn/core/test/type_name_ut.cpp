@@ -5,9 +5,6 @@
 
 #include "sn/core/type_name.h"
 
-// Tests are only for the funcsig implementation. With typeid all bets are off.
-#if SN_USE_FUNCSIG_TYPE_NAME
-
 TEST(core, type_name_builtin) {
     EXPECT_EQ(sn::type_name<bool>(), "bool");
 
@@ -74,4 +71,8 @@ TEST(core, type_name_string) {
     EXPECT_EQ(sn::type_name<std::wstring_view>(), "std::wstring_view");
 }
 
-#endif
+TEST(core, type_name_constexpr) {
+    static_assert(sn::type_name<int>() == "int");
+    static_assert(sn::type_name<std::string>() == "std::string");
+    static_assert(sn::type_name<Nothing<Something>>() == "Nothing<Something>");
+}

@@ -5,7 +5,7 @@
 namespace sn::detail {
 
 template<class T>
-[[nodiscard]] std::string_view do_type_name() noexcept {
+[[nodiscard]] constexpr std::string_view do_type_name() noexcept {
     using sn::detail::builtins::type_name;
     return type_name(std::type_identity<T>());
 }
@@ -15,7 +15,7 @@ template<class T>
 namespace sn {
 
 template<class T>
-[[nodiscard]] std::string_view type_name() noexcept {
+[[nodiscard]] constexpr std::string_view type_name() noexcept {
     return sn::detail::do_type_name<T>();
 }
 

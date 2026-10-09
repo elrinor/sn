@@ -19,14 +19,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(sn_core INTERFACE "/Zc:preprocessor")
 endif()
 
-if(SN_TYPE_NAME_IMPL STREQUAL "typeid")
-    target_compile_definitions(sn_core INTERFACE SN_USE_TYPEID_TYPE_NAME=1)
-elseif(SN_TYPE_NAME_IMPL STREQUAL "funcsig")
-    target_compile_definitions(sn_core INTERFACE SN_USE_FUNCSIG_TYPE_NAME=1)
-else()
-    message(FATAL_ERROR "Unsupported value '${SN_TYPE_NAME_IMPL}' for SN_TYPE_NAME_IMPL")
-endif()
-
 if(SN_BUILD_TESTS)
     set(TEST_SN_CORE_SOURCES
         test/preprocessor_ut.cpp

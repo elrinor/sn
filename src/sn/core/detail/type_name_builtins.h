@@ -1,34 +1,22 @@
 #pragma once
 
+#include <array>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
-#if SN_USE_TYPEID_TYPE_NAME
-#   include <typeinfo>
-#elif SN_USE_FUNCSIG_TYPE_NAME
-#   if defined(_MSC_VER)
-#       define SN_USE_MSVC_TYPE_NAME 1
-#   elif defined(__clang__)
-#       define SN_USE_CLANG_TYPE_NAME 1
-#   elif defined(__GNUC__)
-#       define SN_USE_GCC_TYPE_NAME 1
-#   else
-#       define SN_USE_TYPEID_TYPE_NAME 1
-#   endif
-#   include <array>
-#   include <type_traits>
+#if defined(_MSC_VER)
+#   define SN_USE_MSVC_TYPE_NAME 1
+#elif defined(__clang__)
+#   define SN_USE_CLANG_TYPE_NAME 1
+#elif defined(__GNUC__)
+#   define SN_USE_GCC_TYPE_NAME 1
 #else
-#   error "Type name implementation is not configured"
+#   error "Unsupported compiler, sn::type_name needs __PRETTY_FUNCTION__ or __FUNCSIG__"
 #endif
 
 namespace sn::detail {
 
-#if SN_USE_TYPEID_TYPE_NAME
-template<class T>
-std::string_view type_name_impl() noexcept {
-    return typeid(T).name();
-}
-#elif SN_USE_FUNCSIG_TYPE_NAME
 template<std::size_t N>
 struct static_string {
     std::array<char, N> data = {{}};
@@ -37,21 +25,19 @@ struct static_string {
 
 template <class T>
 consteval auto type_name_static_string() noexcept {
-#   if SN_USE_CLANG_TYPE_NAME
+#if SN_USE_CLANG_TYPE_NAME
     constexpr std::string_view prefix   = "[T = ";
     constexpr std::string_view suffix   = "]";
     constexpr std::string_view function = __PRETTY_FUNCTION__;
-#   elif SN_USE_GCC_TYPE_NAME
+#elif SN_USE_GCC_TYPE_NAME
     constexpr std::string_view prefix   = "with T = ";
     constexpr std::string_view suffix   = "]";
     constexpr std::string_view function = __PRETTY_FUNCTION__;
-#   elif SN_USE_MSVC_TYPE_NAME
+#elif SN_USE_MSVC_TYPE_NAME
     constexpr std::string_view prefix   = "type_name_static_string<";
     constexpr std::string_view suffix   = ">(void)";
     constexpr std::string_view function = __FUNCSIG__;
-#   else
-#       error Unsupported compiler
-#   endif
+#endif
 
     constexpr std::size_t start_pos = function.find(prefix);
     static_assert(start_pos != std::string_view::npos);
@@ -100,7 +86,6 @@ template <class T>
 constexpr std::string_view type_name_impl() noexcept {
     return {type_name_holder<T>::value.data.data(), type_name_holder<T>::value.size};
 }
-#endif
 
 } // namespace sn::detail
 
@@ -108,7 +93,7 @@ constexpr std::string_view type_name_impl() noexcept {
 namespace sn::detail::builtins {
 
 template<class T>
-[[nodiscard]] std::string_view type_name(std::type_identity<T>) noexcept {
+[[nodiscard]] constexpr std::string_view type_name(std::type_identity<T>) noexcept {
     return sn::detail::type_name_impl<T>();
 }
 

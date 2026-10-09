@@ -22,13 +22,8 @@ namespace sn::detail {
 template<class Base>
 struct universal_enum_table {
 public:
-    // sn::type_name is not constexpr b/c it has typeid() as one of its backends. Thus, we cannot use type name as an
-    // argument to a constexpr constructor. We can, however, use a pointer to a function doing what we need. This
-    // won't be a performance problem b/c it's on the cold (exception-throwing) path.
-    using type_name_function = std::string_view (*)();
-
     template<class... Args>
-    constexpr universal_enum_table(case_sensitivity mode, type_name_function type_name, bool is_signed, Args &&... args):
+    constexpr universal_enum_table(case_sensitivity mode, std::string_view type_name, bool is_signed, Args &&... args):
         _mode(mode),
         _type_name(type_name),
         _is_signed(is_signed),
@@ -51,9 +46,9 @@ public:
             if (_is_signed) {
                 // This static_cast relies on implementation-defined behavior, but it's symmetric to what we have in
                 // type_erase_enum_reflection(), so it's OK.
-                throw_enum_to_string_error(_type_name(), sn::to_string(static_cast<std::int64_t>(src)));
+                throw_enum_to_string_error(_type_name, sn::to_string(static_cast<std::int64_t>(src)));
             } else {
-                throw_enum_to_string_error(_type_name(), sn::to_string(src));
+                throw_enum_to_string_error(_type_name, sn::to_string(src));
             }
         }
     }
@@ -65,7 +60,7 @@ public:
         auto run = [&] (std::string_view src) {
             auto pos = _base.from_string_map.find(src);
             if (pos == _base.from_string_map.end())
-                throw_enum_from_string_error(_type_name(), src);
+                throw_enum_from_string_error(_type_name, src);
             return pos->second;
         };
 
@@ -109,7 +104,7 @@ public:
 private:
     Base _base;
     case_sensitivity _mode;
-    type_name_function _type_name;
+    std::string_view _type_name;
     bool _is_signed;
 };
 
