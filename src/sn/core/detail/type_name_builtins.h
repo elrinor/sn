@@ -117,10 +117,11 @@ consteval std::size_t normalize_type_name(std::string_view name, char *out) {
             }
         }
 
-        // Clang, GCC and MSVC spellings, in this order. We use clang's.
+        // Clang, GCC and MSVC spellings, in this order. We use clang's. MSVC uses both of its spellings in __FUNCSIG__,
+        // the dash at the top level and the space inside template arguments.
         if (c == '(' || c == '{' || c == '`') {
             std::size_t anonymous_size = 0;
-            for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous-namespace'"})
+            for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous-namespace'", "`anonymous namespace'"})
                 if (name.substr(i).starts_with(anonymous))
                     anonymous_size = anonymous.size();
             if (anonymous_size != 0) {

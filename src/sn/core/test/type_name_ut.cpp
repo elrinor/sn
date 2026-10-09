@@ -138,6 +138,8 @@ TEST(core, type_name_normalize) {
     static_assert(normalizes_to("std::pair<int const,Nothing<int> const >", "std::pair<const int,const Nothing<int>>"));
     static_assert(normalizes_to("Nothing<`anonymous-namespace'::X const >", "Nothing<const (anonymous namespace)::X>"));
     static_assert(normalizes_to("Nothing<{anonymous}::X>", "Nothing<(anonymous namespace)::X>"));
+    static_assert(normalizes_to("`anonymous-namespace'::X", "(anonymous namespace)::X"));
+    static_assert(normalizes_to("Nothing<`anonymous namespace'::X>", "Nothing<(anonymous namespace)::X>"));
     static_assert(normalizes_to("Nothing<const_iterator>", "Nothing<const_iterator>"));
     static_assert(normalizes_to("void (int) const", "void(int)const"));
 }
