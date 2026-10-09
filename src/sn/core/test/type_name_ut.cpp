@@ -118,9 +118,7 @@ TEST(core, type_name_qualifiers) {
 
 // Checks normalize_type_name on spellings that only some compilers produce, e.g. MSVC's "int const".
 consteval bool normalizes_to(std::string_view name, std::string_view expected) {
-    std::array<char, 128> buffer = {};
-    std::size_t size = sn::detail::normalize_type_name(name, buffer.data());
-    return size == sn::detail::normalize_type_name(name, nullptr) && std::string_view(buffer.data(), size) == expected;
+    return sn::detail::type_name_normalizer::normalize<128>(name).view() == expected;
 }
 
 TEST(core, type_name_normalize) {
@@ -142,6 +140,11 @@ TEST(core, type_name_normalize) {
     static_assert(normalizes_to("Nothing<`anonymous namespace'::X>", "Nothing<(anonymous namespace)::X>"));
     static_assert(normalizes_to("Nothing<const_iterator>", "Nothing<const_iterator>"));
     static_assert(normalizes_to("void (int) const", "void(int)const"));
+    static_assert(normalizes_to("class ns::X", "ns::X"));
+    static_assert(normalizes_to("Nothing<struct A,enum B,union C>", "Nothing<A,B,C>"));
+    static_assert(normalizes_to("class Nothing<class `anonymous namespace'::X const >", "Nothing<const (anonymous namespace)::X>"));
+    static_assert(normalizes_to("some_class * *", "some_class**"));
+    static_assert(normalizes_to("std::pair<long long, unsigned char>", "std::pair<long long,unsigned char>"));
 }
 
 TEST(core, type_name_string) {

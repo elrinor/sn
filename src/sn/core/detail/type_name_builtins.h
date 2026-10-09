@@ -1,10 +1,12 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <initializer_list>
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <vector>
 
 #include "sn/core/type_name_fwd.h"
 
@@ -22,144 +24,163 @@
 
 namespace sn::detail {
 
-/**
- * Normalizes a type name as printed by the compiler, so that it's the same on all compilers:
- * - Drops spaces that don't separate words.
- * - Spells the anonymous namespace as `(anonymous namespace)`.
- * - Moves `const` and `volatile` in front of the type they apply to, e.g. `int const` becomes `const int`.
- * - On MSVC, drops `class`, `struct`, `enum` and `union` in front of type names.
- *
- * @param name                          Type name as printed by the compiler.
- * @param out                           Output buffer, or `nullptr` to only compute the size.
- * @return                              Size of the normalized type name.
- */
-consteval std::size_t normalize_type_name(std::string_view name, char *out) {
-    // Bytes >= 0x80 are parts of UTF-8 identifiers.
-    auto is_identifier = [](char c) {
-        return (c >= '0' && c <= '9') || c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || static_cast<unsigned char>(c) >= 0x80;
-    };
-
+template<std::size_t capacity>
+struct type_name_buffer {
+    std::array<char, capacity> data = {{}};
     std::size_t size = 0;
-    char last = '\0';
-    bool last_is_qualifier = false; // Whether the last word is a qualifier that stays in place, e.g. in "const int".
-    auto append_char = [&](char c) {
-        if (out)
-            out[size] = c;
-        size++;
-        last = c;
-        last_is_qualifier = false;
-    };
-    auto append = [&](std::string_view chars) {
-        for (char c : chars)
-            append_char(c);
-    };
 
-    // Returns the qualifier that starts at pos, if it's a whole word.
-    auto qualifier_at = [&](std::size_t pos) -> std::string_view {
-        if (pos >= name.size() || (name[pos] != 'c' && name[pos] != 'v') || (pos > 0 && is_identifier(name[pos - 1])))
-            return {};
-        for (std::string_view qualifier : {"const", "volatile"})
-            if (name.substr(pos).starts_with(qualifier) && (pos + qualifier.size() == name.size() || !is_identifier(name[pos + qualifier.size()])))
-                return qualifier;
-        return {};
-    };
+    [[nodiscard]] constexpr std::string_view view() const {
+        return {data.data(), size};
+    }
+};
 
-    // A qualifier that comes right after a type name or a template argument list applies to that type, e.g. in
-    // "int const" or "X<int> const". A qualifier after "*" applies to the pointer and stays where it is.
-    auto is_after_type = [&] {
-        return (is_identifier(last) && !last_is_qualifier) || last == '>';
-    };
-
-    // Note that this runs at compile time, and long type names can hit the constexpr step limit. So we only look for
-    // longer patterns at characters that can start them.
-    for (std::size_t i = 0; i < name.size(); i++) {
-        char c = name[i];
-
-        if (c == 'c' || c == 'v') {
-            std::string_view qualifier = qualifier_at(i);
-            if (!qualifier.empty() && !is_after_type()) {
-                append(qualifier);
-                last_is_qualifier = true;
-                i += qualifier.size() - 1;
-                continue;
-            }
-
-            if (!qualifier.empty()) {
-                // Insert the qualifier before the type, which starts after the closest unmatched '<' or '(', or ','.
-                std::size_t insert_size = qualifier.size() + 1;
-                if (out) {
-                    std::size_t start = size;
-                    for (std::size_t depth = 0; start > 0; start--) {
-                        char prev = out[start - 1];
-                        if (prev == '>' || prev == ')') {
-                            depth++;
-                        } else if (prev == '<' || prev == '(' || prev == ',') {
-                            if (depth == 0)
-                                break;
-                            if (prev != ',')
-                                depth--;
-                        }
-                    }
-
-                    // Keep "const volatile" in this order, like clang and GCC.
-                    if (std::string_view(out + start, size - start).starts_with("const "))
-                        start += 6;
-
-                    for (std::size_t pos = size; pos > start; pos--)
-                        out[pos - 1 + insert_size] = out[pos - 1];
-                    for (std::size_t pos = 0; pos < qualifier.size(); pos++)
-                        out[start + pos] = qualifier[pos];
-                    out[start + qualifier.size()] = ' ';
-                }
-                size += insert_size;
-                i += qualifier.size() - 1;
-                continue;
-            }
-        }
-
-        // Clang, GCC and MSVC spellings, in this order. We use clang's. MSVC uses both of its spellings in __FUNCSIG__,
-        // the dash at the top level and the space inside template arguments.
-        if (c == '(' || c == '{' || c == '`') {
-            std::size_t anonymous_size = 0;
-            for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous-namespace'", "`anonymous namespace'"})
-                if (name.substr(i).starts_with(anonymous))
-                    anonymous_size = anonymous.size();
-            if (anonymous_size != 0) {
-                if (is_identifier(last))
-                    append(" "); // The space before it was dropped below, e.g. in "const (anonymous namespace)::X".
-                append("(anonymous namespace)");
-                i += anonymous_size - 1;
-                continue;
-            }
-        }
-
-#if SN_USE_MSVC_TYPE_NAME
-        // MSVC writes "class ns::X", "enum ns::Y", etc. Drop the keywords.
-        if (is_identifier(c) && (i == 0 || !is_identifier(name[i - 1]))) {
-            std::size_t keyword_size = 0;
-            for (std::string_view keyword : {"class ", "struct ", "enum ", "union "})
-                if (name.substr(i).starts_with(keyword))
-                    keyword_size = keyword.size();
-            if (keyword_size != 0) {
-                i += keyword_size - 1;
-                continue;
-            }
-        }
-#endif
-
-        // Keep spaces between words, e.g. in "unsigned char", and drop the rest, e.g. in "some_class *". Also drop the
-        // space before a qualifier that we're going to move.
-        if (c == ' ') {
-            bool between_words = is_identifier(last) && i + 1 < name.size() && is_identifier(name[i + 1]);
-            if (!between_words || (is_after_type() && !qualifier_at(i + 1).empty()))
-                continue;
-        }
-
-        append_char(c);
+/**
+ * Normalizes type names as printed by the compiler, so that they're the same on all compilers:
+ * - Drops `class`, `struct`, `enum` and `union` in front of type names. MSVC writes these.
+ * - Spells the anonymous namespace as `(anonymous namespace)`. GCC and MSVC spell it differently.
+ * - Moves `const` and `volatile` in front of the type they apply to. MSVC writes `int const`.
+ * - Drops spaces that don't separate words, e.g. `some_class *` becomes `some_class*`.
+ *
+ * The input is read as a sequence of words and punctuation characters. Words are identifiers, keywords, numbers, and
+ * the anonymous namespace. Spaces are dropped, and a single space is put back between consecutive words.
+ *
+ * Note that this runs at compile time for every type name, and long type names can hit the compiler's constexpr step
+ * limit. This is why the output is a plain buffer and not a `std::string`.
+ */
+class type_name_normalizer {
+public:
+    /**
+     * @tparam capacity                 Capacity of the output buffer. A normalized name is at most twice as long as
+     *                                  the original, the worst case being GCC's `{anonymous}`.
+     * @param name                      Type name as printed by the compiler.
+     * @return                          Normalized type name.
+     */
+    template<std::size_t capacity>
+    static consteval type_name_buffer<capacity> normalize(std::string_view name) {
+        type_name_buffer<capacity> result;
+        type_name_normalizer normalizer(name, result.data.data());
+        while (normalizer._pos < name.size())
+            normalizer.process_next();
+        result.size = normalizer._size;
+        return result;
     }
 
-    return size;
-}
+private:
+    // What the output currently ends with.
+    enum class ending {
+        punctuation,    // E.g. "<" or "*", or nothing at all.
+        name,           // A word that's part of a type name, e.g. "int" or "ns".
+        qualifier,      // A "const" or "volatile" that applies to what follows, e.g. in "const int".
+        template_args,  // A closing ">".
+    };
+
+    consteval type_name_normalizer(std::string_view name, char *out) : _name(name), _out(out) {}
+
+    consteval void process_next() {
+        char c = _name[_pos];
+        if (c == ' ') {
+            _pos++;
+        } else if (std::string_view word = read_word(); !word.empty()) {
+            process_word(word);
+        } else {
+            process_punctuation(c);
+            _pos++;
+        }
+    }
+
+    consteval void process_word(std::string_view word) {
+        // Most words are type names or numbers, so we check the first character before comparing strings.
+        char first = word[0];
+        if ((first == 'c' || first == 's' || first == 'e' || first == 'u') && (word == "class" || word == "struct" || word == "enum" || word == "union"))
+            return;
+
+        // A qualifier right after a type applies to that type, e.g. in "int const" or "X<int> const". A qualifier
+        // after "*" applies to the pointer, and a qualifier after ")" applies to the function, so these stay in place.
+        bool is_qualifier = (first == 'c' || first == 'v') && (word == "const" || word == "volatile");
+        if (is_qualifier && (_ending == ending::name || _ending == ending::template_args)) {
+            move_to_type_start(word);
+            return; // The output still ends with the same type.
+        }
+
+        if (_ending == ending::name || _ending == ending::qualifier)
+            append(" ");
+        append(word);
+        _ending = is_qualifier ? ending::qualifier : ending::name;
+    }
+
+    consteval void process_punctuation(char c) {
+        if (c == '<' || c == '(') {
+            _type_starts.push_back(_size + 1);
+        } else if ((c == '>' || c == ')') && !_type_starts.empty()) {
+            _type_starts.pop_back();
+        } else if (c == ',' && !_type_starts.empty()) {
+            _type_starts.back() = _size + 1;
+        }
+
+        append({&c, 1});
+        _ending = c == '>' ? ending::template_args : ending::punctuation;
+    }
+
+    consteval void move_to_type_start(std::string_view qualifier) {
+        std::size_t pos = _type_starts.empty() ? 0 : _type_starts.back();
+
+        // Keep "const volatile" in this order, like clang and GCC.
+        if (qualifier == "volatile" && std::string_view(_out + pos, _size - pos).starts_with("const "))
+            pos += 6;
+
+        insert(pos, " ");
+        insert(pos, qualifier);
+    }
+
+    consteval void append(std::string_view chars) {
+        for (char c : chars)
+            _out[_size++] = c;
+    }
+
+    consteval void insert(std::size_t pos, std::string_view chars) {
+        for (std::size_t i = _size; i > pos; i--)
+            _out[i - 1 + chars.size()] = _out[i - 1];
+        for (std::size_t i = 0; i < chars.size(); i++)
+            _out[pos + i] = chars[i];
+        _size += chars.size();
+    }
+
+    // Reads the word at the current position, returns an empty string if there is none. The anonymous namespace is
+    // returned in clang's spelling.
+    consteval std::string_view read_word() {
+        std::string_view rest = _name.substr(_pos);
+
+        if (rest[0] == '(' || rest[0] == '{' || rest[0] == '`') {
+            // Clang, GCC and MSVC spellings, in this order. MSVC uses both of its spellings, the one with a dash at the
+            // top level, and the one with a space inside template arguments.
+            for (std::string_view anonymous : {"(anonymous namespace)", "{anonymous}", "`anonymous-namespace'", "`anonymous namespace'"}) {
+                if (rest.starts_with(anonymous)) {
+                    _pos += anonymous.size();
+                    return "(anonymous namespace)";
+                }
+            }
+            return {};
+        }
+
+        std::size_t size = 0;
+        while (size < rest.size() && is_identifier(rest[size]))
+            size++;
+        _pos += size;
+        return rest.substr(0, size);
+    }
+
+    static consteval bool is_identifier(char c) {
+        // Bytes >= 0x80 are parts of UTF-8 identifiers.
+        return (c >= '0' && c <= '9') || c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || static_cast<unsigned char>(c) >= 0x80;
+    }
+
+    std::string_view _name;
+    std::size_t _pos = 0;
+    char *_out = nullptr;
+    std::size_t _size = 0;
+    ending _ending = ending::punctuation;
+    std::vector<std::size_t> _type_starts; // Where the innermost types inside the open "<" and "(" start in the output.
+};
 
 template <class T>
 consteval auto type_name_static_string() noexcept {
@@ -186,8 +207,11 @@ consteval auto type_name_static_string() noexcept {
 
     constexpr std::string_view type_name = function.substr(start_pos + prefix.size(), end_pos - start_pos - prefix.size());
 
-    std::array<char, normalize_type_name(type_name, nullptr)> result = {{}};
-    normalize_type_name(type_name, result.data());
+    constexpr auto normalized = type_name_normalizer::normalize<type_name.size() * 2>(type_name);
+
+    std::array<char, normalized.size> result = {{}};
+    for (std::size_t i = 0; i < normalized.size; i++)
+        result[i] = normalized.data[i];
     return result;
 }
 
@@ -244,5 +268,3 @@ SN_DEFINE_TYPE_NAME(std::u32string, "std::u32string")
 SN_DEFINE_TYPE_NAME(std::u32string_view, "std::u32string_view")
 
 } // namespace sn::detail::builtins
-
-
