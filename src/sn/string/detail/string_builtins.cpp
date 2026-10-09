@@ -66,9 +66,11 @@ constexpr std::size_t max_float_length_v<double> = 24;
 //
 
 template<class T>
-constexpr std::size_t max_arithmetic_length_v = max_float_length_v<T>;
+static constexpr std::nullptr_t max_arithmetic_length_v = nullptr;
 template<std::integral T>
 constexpr std::size_t max_arithmetic_length_v<T> = max_integer_lengths_v<std::is_signed_v<T>, sizeof(T)>[0];
+template<std::floating_point T>
+constexpr std::size_t max_arithmetic_length_v<T> = max_float_length_v<T>;
 
 
 //
