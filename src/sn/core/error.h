@@ -4,7 +4,7 @@
 #include <expected>
 #include <string>
 #include <string_view>
-#include <utility> // For std::move.
+#include <utility> // For std::move, std::forward_like.
 #include <variant>
 #include <vector>
 
@@ -121,20 +121,9 @@ public:
         return _what.c_str();
     }
 
-    [[nodiscard]] sn::errors::error &error() & noexcept {
-        return _error;
-    }
-
-    [[nodiscard]] const sn::errors::error &error() const & noexcept {
-        return _error;
-    }
-
-    [[nodiscard]] sn::errors::error &&error() && noexcept {
-        return std::move(_error);
-    }
-
-    [[nodiscard]] const sn::errors::error &&error() const && noexcept {
-        return std::move(_error);
+    template<class Self>
+    [[nodiscard]] auto &&error(this Self &&self) noexcept {
+        return std::forward_like<Self>(self._error);
     }
 
 private:

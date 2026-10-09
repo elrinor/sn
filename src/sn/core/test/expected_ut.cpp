@@ -56,6 +56,10 @@ TEST(expected, exception) {
     }
 
     sn::bad_expected_access e(sn::error("'zz' is not a number"));
+    static_assert(std::is_same_v<decltype(e.error()), sn::error &>);
+    static_assert(std::is_same_v<decltype(std::as_const(e).error()), const sn::error &>);
+    static_assert(std::is_same_v<decltype(std::move(e).error()), sn::error &&>);
+    static_assert(std::is_same_v<decltype(std::move(std::as_const(e)).error()), const sn::error &&>);
     EXPECT_EQ(e.error().message(), "'zz' is not a number");
     EXPECT_EQ(std::as_const(e).error().message(), "'zz' is not a number");
     sn::error moved = std::move(e).error();
