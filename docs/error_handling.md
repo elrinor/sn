@@ -50,11 +50,6 @@ e.g. `points[2].y: 'zz' is not a number`.
 Going through a `std::expected` reference, or copying into a `std::expected`, brings back the standard `value()` and
 its generic message. Use `auto` or `sn::expected` for the results of `sn` calls.
 
-When comparing with a `std::expected` that has a different value or error type, put `sn::expected` on the left. With
-`std::expected` on the left, its own `operator==` takes `sn::expected` as a plain value, so two errors never compare
-equal.
-
-
 ## Writing extension points
 
 Extension points have the same signature as the `bool` form above:

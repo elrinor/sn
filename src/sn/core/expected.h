@@ -162,8 +162,8 @@ public:
     }
 
     // With std::expected on the left, std::expected's operator==(const expected &, const T2 &) takes sn::expected as a
-    // plain value, and is an exact match. Only a non-template beats it, so the base type gets its own overload. Other
-    // std::expected types on the left still go to std::expected's operator, see docs/error_handling.md.
+    // plain value, and is an exact match. Only a non-template beats it, so the base type gets its own overload. See
+    // below for other std::expected types on the left.
     friend constexpr bool operator==(const base_type &l, const expected &r) {
         return l == static_cast<const base_type &>(r);
     }
@@ -175,5 +175,21 @@ private:
         return std::forward_like<Self>(static_cast<base_ref>(self));
     }
 };
+
+namespace detail {
+template<class U, class E, class T>
+concept poisoned_expected_comparison = !std::is_void_v<U> && !std::is_same_v<std::expected<U, E>, std::expected<T, sn::error>>;
+} // namespace detail
+
+// std::expected<U, E> == sn::expected<T> for other U and E would go to std::expected's operator==(const expected &,
+// const T2 &), which can't be outranked by a template. It would take sn::expected as a plain value and say that equal
+// errors are not equal. These make such comparisons fail to compile instead. Put sn::expected on the left.
+//
+// operator!= is declared so that this operator== isn't used with reversed operands.
+template<class U, class E, class T> requires detail::poisoned_expected_comparison<U, E, T>
+bool operator==(const std::expected<U, E> &l, const expected<T> &r) = delete;
+
+template<class U, class E, class T> requires detail::poisoned_expected_comparison<U, E, T>
+bool operator!=(const std::expected<U, E> &l, const expected<T> &r) = delete;
 
 } // namespace sn
