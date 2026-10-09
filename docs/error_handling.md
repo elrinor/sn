@@ -34,9 +34,8 @@ if (sn::expected<int> x = sn::from_string<int>(s)) {
 ```
 
 `sn::error` holds a message and, for errors in nested values, a path to the value that failed. `what()` returns both,
-e.g. `points[2].y: 'zz' is not a number`. Messages are formatted when the error happens. This is fine because when you
-ask for an error message you're going to output it somewhere, and that's more expensive than an allocation. If you
-don't want to allocate, use the `bool` form with `nullptr`.
+e.g. `points[2].y: 'zz' is not a number`. Messages are formatted when the error happens, which allocates. If you don't
+need the message, pass `nullptr` as the `sn::error *` argument, then nothing is allocated.
 
 There are no `try_` functions and no throwing out-parameter forms.
 
