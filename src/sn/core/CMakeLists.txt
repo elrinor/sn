@@ -6,6 +6,7 @@ set(SN_CORE_SOURCES
     preprocessor.h
     tag.h
     type_name.h
+    type_name_fwd.h
     detail/type_name_builtins.h)
 
 add_library(sn_core INTERFACE ${SN_CORE_SOURCES})

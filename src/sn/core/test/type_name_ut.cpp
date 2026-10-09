@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "sn/core/type_name.h"
+#include "sn/core/type_name_fwd.h"
 
 TEST(core, type_name_builtin) {
     EXPECT_EQ(sn::type_name<bool>(), "bool");
@@ -69,7 +70,15 @@ namespace ns {
 enum class scoped_enum { value };
 enum unscoped_enum { unscoped_value };
 union some_union {};
+
+class renamed {};
+SN_DEFINE_TYPE_NAME(renamed, "Renamed")
 } // namespace ns
+
+TEST(core, type_name_override) {
+    static_assert(sn::type_name<ns::renamed>() == "Renamed");
+    EXPECT_EQ(sn::type_name<ns::renamed>(), "Renamed");
+}
 
 namespace {
 class anonymous_class {};

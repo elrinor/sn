@@ -6,6 +6,7 @@
 #include <gtest/gtest.h> // NOLINT: not a C system header.
 
 #include "sn/core/type_name.h"
+#include "sn/core/type_name_fwd.h"
 #include "sn/core/tag.h"
 #include "sn/reflection/enum_reflection.h"
 #include "sn/string/enum_string.h"
@@ -216,6 +217,25 @@ TEST(string_enum, char) {
         {"CHAR_1", CHAR_VALUE_1},
         {"CHAR_2", CHAR_VALUE_2}
     });
+}
+
+
+//
+// Tests for an enum with an overridden type name.
+//
+
+enum class renamed_test_enum {
+    VALUE_1 = 1,
+    VALUE_UNK = 2
+};
+
+SN_DEFINE_TYPE_NAME(renamed_test_enum, "RenamedTestEnum")
+SN_DEFINE_ENUM_REFLECTION(renamed_test_enum, ({{renamed_test_enum::VALUE_1, "VALUE_1"}}))
+SN_DEFINE_ENUM_STRING_FUNCTIONS(renamed_test_enum, sn::case_sensitive)
+
+TEST(string_enum, renamed) {
+    tester<renamed_test_enum> t;
+    t.expect_throwing_to_with_message({{renamed_test_enum::VALUE_UNK, "of type 'RenamedTestEnum'"}});
 }
 
 
