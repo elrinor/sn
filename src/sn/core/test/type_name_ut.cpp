@@ -30,6 +30,7 @@ TEST(core, type_name_builtin) {
 
     EXPECT_EQ(sn::type_name<float>(), "float");
     EXPECT_EQ(sn::type_name<double>(), "double");
+    EXPECT_EQ(sn::type_name<long double>(), "long double");
 
     EXPECT_EQ(sn::type_name<char8_t>(), "char8_t");
     EXPECT_EQ(sn::type_name<char16_t>(), "char16_t");

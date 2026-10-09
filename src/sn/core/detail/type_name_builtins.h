@@ -149,6 +149,7 @@ SN_DEFINE_TYPE_NAME(long long, "long long")
 SN_DEFINE_TYPE_NAME(unsigned long long, "unsigned long long")
 SN_DEFINE_TYPE_NAME(float, "float")
 SN_DEFINE_TYPE_NAME(double, "double")
+SN_DEFINE_TYPE_NAME(long double, "long double")
 
 SN_DEFINE_TYPE_NAME(char, "char")
 SN_DEFINE_TYPE_NAME(unsigned char, "unsigned char")
